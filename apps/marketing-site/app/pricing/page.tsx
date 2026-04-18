@@ -4,11 +4,12 @@ import Link from "next/link";
 import { brand } from "@tradara/shared-config";
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@tradara/ui";
 
+import { TrackedCtaLink } from "../components/marketing/tracked-cta-link";
 import { SectionHeading } from "../components/marketing/section-heading";
 import { SiteFooter } from "../components/marketing/site-footer";
 import { SiteHeader } from "../components/marketing/site-header";
 import { marketingFaqs, marketingPricingTiers } from "../lib/marketing-content";
-import { siteUrl } from "../lib/site";
+import { siteUrl, telegramLaunchLinks } from "../lib/site";
 
 export const metadata: Metadata = {
   title: "Crypto Signal Pricing | Free, Pro, and VIP Telegram Guidance Plans",
@@ -62,7 +63,15 @@ const pricingStructuredData = {
   ]
 };
 
-const pricingFaqIds = new Set(["auto-trading", "premium-access", "guarantees"]);
+const pricingFaqIds = new Set([
+  "auto-trading",
+  "premium-access",
+  "guarantees",
+  "free-vs-pro",
+  "billing-failures",
+  "payment-access-time",
+  "refund-policy"
+]);
 
 export default function PricingPage(): React.JSX.Element {
   return (
@@ -105,12 +114,108 @@ export default function PricingPage(): React.JSX.Element {
                 </ul>
                 <div className="mt-auto pt-2">
                   <Button asChild size="lg" variant={plan.buttonVariant} className="w-full">
-                    <Link href={plan.ctaHref}>{plan.ctaLabel}</Link>
+                    <TrackedCtaLink
+                      href={plan.ctaHref}
+                      eventName="launch_cta_click"
+                      eventMeta={{ location: "pricing_cards", cta: plan.id }}
+                    >
+                      {plan.ctaLabel}
+                    </TrackedCtaLink>
                   </Button>
                 </div>
               </CardContent>
             </Card>
           ))}
+        </section>
+
+        <section className="mt-12 rounded-2xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading
+            eyebrow="Free vs Pro clarity"
+            title="Know exactly what changes when you upgrade"
+            description="Free is for starter guidance. Pro is for full reviewed setup depth and premium cadence."
+          />
+          <div className="mt-6 overflow-x-auto">
+            <table className="min-w-full border-separate border-spacing-0 text-sm text-slate-300">
+              <thead>
+                <tr>
+                  <th className="border-b border-slate-800 px-4 py-3 text-left text-slate-200">Capability</th>
+                  <th className="border-b border-slate-800 px-4 py-3 text-left text-slate-200">Free</th>
+                  <th className="border-b border-slate-800 px-4 py-3 text-left text-slate-200">Pro</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["Signal flow", "Selected educational highlights", "Full reviewed setup flow"],
+                  ["Market context", "Snapshot-level context", "Deeper rationale and context blocks"],
+                  ["Setup structure", "Intro examples", "Structured entry, invalidation, and targets"],
+                  ["Support priority", "Standard guidance updates", "Priority recap and review workflow"]
+                ].map((row) => (
+                  <tr key={row[0]}>
+                    <td className="border-b border-slate-900 px-4 py-3 text-slate-200">{row[0]}</td>
+                    <td className="border-b border-slate-900 px-4 py-3">{row[1]}</td>
+                    <td className="border-b border-slate-900 px-4 py-3">{row[2]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="mt-12 rounded-2xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading
+            eyebrow="Access policy"
+            title="How premium access is decided"
+            description="Billing state is the source of truth for entitlement. Telegram is a revocable delivery channel."
+          />
+          <ul className="mt-6 grid gap-4 text-sm text-slate-300 md:grid-cols-2">
+            <li className="rounded-xl border border-slate-800 bg-slate-900/55 p-4">
+              Premium access activates after billing confirms an eligible plan.
+            </li>
+            <li className="rounded-xl border border-slate-800 bg-slate-900/55 p-4">
+              Telegram membership status reflects delivery and can be corrected by reconciliation.
+            </li>
+            <li className="rounded-xl border border-slate-800 bg-slate-900/55 p-4">
+              Grace handling is explicit and time-bounded by access policy.
+            </li>
+            <li className="rounded-xl border border-slate-800 bg-slate-900/55 p-4">
+              If billing no longer qualifies, premium access can be revoked.
+            </li>
+          </ul>
+        </section>
+
+        <section className="mt-12 rounded-2xl border border-cyan-500/35 bg-gradient-to-r from-slate-950 via-blue-950/60 to-slate-950 p-8">
+          <SectionHeading
+            eyebrow="Founding member beta"
+            title="Founding Member Pro Beta — Limited Seats"
+            description="Join Tradara’s paid beta for structured, expert-reviewed guidance with priority onboarding support."
+          />
+          <p className="mt-4 text-sm leading-7 text-slate-300">
+            This is a beta program: features and workflows may evolve as we improve quality.
+          </p>
+          <p className="mt-2 text-xs text-slate-400">
+            Guidance only. Not auto-trading. Trading involves risk and losses are possible. Premium access follows
+            active billing status.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <TrackedCtaLink
+                href={telegramLaunchLinks.pricingPro}
+                eventName="launch_cta_click"
+                eventMeta={{ location: "pricing_founding_offer", cta: "start_pro_beta" }}
+              >
+                Start Pro Beta
+              </TrackedCtaLink>
+            </Button>
+            <Button asChild size="lg" variant="secondary">
+              <TrackedCtaLink
+                href={telegramLaunchLinks.pricingVip}
+                eventName="launch_cta_click"
+                eventMeta={{ location: "pricing_founding_offer", cta: "join_vip_waitlist" }}
+              >
+                Join VIP Waitlist
+              </TrackedCtaLink>
+            </Button>
+          </div>
         </section>
 
         <section className="mt-14 rounded-2xl border border-slate-800 bg-slate-950/80 p-8">
@@ -132,6 +237,28 @@ export default function PricingPage(): React.JSX.Element {
           <div className="mt-8">
             <Button asChild variant="secondary">
               <Link href="/#faq">View full FAQ on homepage</Link>
+            </Button>
+          </div>
+        </section>
+
+        <section className="mt-12 rounded-2xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading
+            eyebrow="Legal and trust"
+            title="Review policies before upgrading"
+            description="Launch access and billing behavior follow these policy pages."
+          />
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button asChild variant="ghost">
+              <Link href="/terms">Terms</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href="/privacy">Privacy</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href="/risk-disclosure">Risk Disclosure</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href="/contact">Contact</Link>
             </Button>
           </div>
         </section>

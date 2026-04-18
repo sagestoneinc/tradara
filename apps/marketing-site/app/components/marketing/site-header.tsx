@@ -2,7 +2,8 @@ import type * as React from "react";
 import Link from "next/link";
 import { Button } from "@tradara/ui";
 
-import { site } from "../../lib/site";
+import { telegramLaunchLinks } from "../../lib/site";
+import { TrackedCtaLink } from "./tracked-cta-link";
 
 const navItems = [
   { label: "Why Tradara", href: "/#why-tradara" },
@@ -31,7 +32,13 @@ export function SiteHeader(): React.JSX.Element {
             <Link href="/pricing">View plans</Link>
           </Button>
           <Button asChild size="sm">
-            <Link href={site.social.telegram}>Join Telegram</Link>
+            <TrackedCtaLink
+              href={telegramLaunchLinks.headerPrimary}
+              eventName="launch_cta_click"
+              eventMeta={{ location: "header", cta: "start_free_telegram" }}
+            >
+              Start Free in Telegram
+            </TrackedCtaLink>
           </Button>
         </div>
       </div>

@@ -25,4 +25,13 @@ export const site = {
   }
 } as const;
 
+export const telegramLaunchLinks = {
+  homepagePrimary: "https://t.me/tradara_bot?start=launch_home_primary",
+  homepageSecondary: "/pricing",
+  pricingFree: "https://t.me/tradara_bot?start=launch_pricing_free",
+  pricingPro: "https://t.me/tradara_bot?start=launch_pricing_pro_beta",
+  pricingVip: "https://t.me/tradara_bot?start=launch_pricing_vip_waitlist",
+  headerPrimary: "https://t.me/tradara_bot?start=launch_header_join"
+} as const;
+
 export const siteUrl = site.baseUrl.toString().replace(/\/$/, "");

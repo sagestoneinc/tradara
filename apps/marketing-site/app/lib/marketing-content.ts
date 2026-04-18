@@ -1,4 +1,5 @@
 import type { ButtonProps } from "@tradara/ui";
+import { telegramLaunchLinks } from "./site";
 
 type MarketingPricingTier = {
   id: "free" | "pro" | "vip";
@@ -27,9 +28,9 @@ export const marketingPricingTiers = [
       "Educational signal highlights",
       "Introductory risk framing and disclaimers"
     ],
-    ctaLabel: "Start with Free",
-    ctaHref: "https://t.me/tradara_bot",
-    homeCtaHref: "https://t.me/tradara_bot",
+    ctaLabel: "Join Free on Telegram",
+    ctaHref: telegramLaunchLinks.pricingFree,
+    homeCtaHref: telegramLaunchLinks.homepagePrimary,
     buttonVariant: "secondary"
   },
   {
@@ -45,8 +46,8 @@ export const marketingPricingTiers = [
       "AI-assisted market context and rationale notes",
       "Priority recap and review workflow"
     ],
-    ctaLabel: "Upgrade to Pro",
-    ctaHref: "https://t.me/tradara_bot",
+    ctaLabel: "Start Pro Beta",
+    ctaHref: telegramLaunchLinks.pricingPro,
     homeCtaHref: "/pricing",
     buttonVariant: "primary"
   },
@@ -62,9 +63,9 @@ export const marketingPricingTiers = [
       "Priority support windows",
       "Extended context and execution discipline reviews"
     ],
-    ctaLabel: "Join VIP waitlist",
-    ctaHref: "https://t.me/tradara_bot",
-    homeCtaHref: "https://t.me/tradara_bot",
+    ctaLabel: "Join VIP Waitlist",
+    ctaHref: telegramLaunchLinks.pricingVip,
+    homeCtaHref: telegramLaunchLinks.pricingVip,
     buttonVariant: "secondary"
   }
 ] satisfies MarketingPricingTier[];
@@ -111,5 +112,35 @@ export const marketingFaqs = [
     question: "How do billing and cancellation work?",
     answer:
       "Plans are billed by tier, and users can cancel according to plan terms. Entitlements are tied to active billing state."
+  },
+  {
+    id: "free-vs-pro",
+    question: "What is the difference between Free and Pro?",
+    answer:
+      "Free provides selected educational guidance updates. Pro unlocks the full reviewed setup flow, deeper context notes, and higher-priority recap support."
+  },
+  {
+    id: "billing-failures",
+    question: "What happens if billing fails or I cancel?",
+    answer:
+      "Premium access follows active billing status. If billing no longer qualifies, access moves through policy-based grace handling and can be revoked."
+  },
+  {
+    id: "payment-access-time",
+    question: "How quickly does premium access activate after payment?",
+    answer:
+      "Activation is processed after billing confirmation. Telegram is the delivery layer, and access status follows verified entitlement records."
+  },
+  {
+    id: "who-not-for",
+    question: "Who is Tradara not for?",
+    answer:
+      "Tradara is not for users seeking guaranteed outcomes, fully automated execution, or custody-based trading services."
+  },
+  {
+    id: "refund-policy",
+    question: "How do refunds and support requests work?",
+    answer:
+      "Refund and cancellation handling follows policy terms. Contact support for billing or access questions, and review legal pages for full details."
   }
 ] as const;
