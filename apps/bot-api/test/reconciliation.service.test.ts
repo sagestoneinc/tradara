@@ -21,7 +21,8 @@ const env = loadBotApiEnv({
 describe("channel access reconciliation", () => {
   it("stages revoke when billing no longer grants access", async () => {
     const adapterCalls: string[] = [];
-    const app = createContainer(env, undefined, {
+    const app = createContainer(env, {
+      persistence: "memory",
       async createInviteLink() {
         adapterCalls.push("grant");
         return {
@@ -37,7 +38,8 @@ describe("channel access reconciliation", () => {
           note: "revoked"
         };
       }
-    } satisfies TelegramAccessAdapter);
+    } satisfies TelegramAccessAdapter
+    });
     const actions = await app.jobs.channelAccessReconciliation.runOnce("Nightly access reconciliation");
 
     const revokeAction = actions.find((item) => item.userId === "user_expired");
@@ -74,7 +76,9 @@ describe("channel access reconciliation", () => {
         }
       ]
     };
-    const app = createContainer(env, seed, {
+    const app = createContainer(env, {
+      persistence: "memory",
+      seed,
       async createInviteLink() {
         adapterCalls.push("grant");
         return {
@@ -90,7 +94,8 @@ describe("channel access reconciliation", () => {
           note: "revoked"
         };
       }
-    } satisfies TelegramAccessAdapter);
+    } satisfies TelegramAccessAdapter
+    });
     const actions = await app.jobs.channelAccessReconciliation.runOnce("Nightly access reconciliation");
 
     const grantAction = actions.find((item) => item.userId === "user_grace");

@@ -28,7 +28,7 @@ const env = loadBotApiEnv({
 
 describe("admin routes", () => {
   it("returns typed overview, users, subscriptions, channel access, webhook events, diagnostics, and audit logs", async () => {
-    const app = buildApp(createContainer(env));
+    const app = buildApp(createContainer(env, { persistence: "memory" }));
 
     const webhookResponse = await app.inject({
       method: "POST",

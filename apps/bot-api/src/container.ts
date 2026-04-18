@@ -8,8 +8,10 @@ import type {
   WebhookEvent
 } from "@tradara/shared-types";
 import { addHours, isoNow } from "@tradara/shared-utils";
+import type { PrismaClient } from "../../../generated/prisma";
 
 import { StubTelegramBotAdapter } from "./bot/telegram-bot.adapter";
+import { getPrismaClient } from "./lib/prisma";
 import {
   InMemoryAuditLogRepository,
   InMemoryChannelAccessRepository,
@@ -18,6 +20,13 @@ import {
   InMemoryWebhookEventRepository,
   type RepositorySeed
 } from "./repositories/in-memory-repositories";
+import {
+  PrismaAuditLogRepository,
+  PrismaChannelAccessRepository,
+  PrismaSubscriptionRepository,
+  PrismaTelegramInviteRepository,
+  PrismaWebhookEventRepository
+} from "./repositories/prisma-repositories";
 import { ChannelAccessReconciliationJob } from "./jobs/channel-access-reconciliation.job";
 import { AdminController } from "./modules/admin/admin.controller";
 import { AdminService } from "./modules/admin/admin.service";
@@ -48,20 +57,33 @@ export interface AppContainer {
   };
 }
 
+export interface CreateContainerOptions {
+  persistence?: "memory" | "prisma";
+  prisma?: PrismaClient;
+  seed?: RepositorySeed;
+  telegramAccessAdapter?: TelegramAccessAdapter;
+}
+
 export function createContainer(
   env: BotApiEnv,
-  seed?: RepositorySeed,
-  telegramAccessAdapter: TelegramAccessAdapter = new TelegramBotApiAccessAdapter(env)
+  options: CreateContainerOptions = {}
 ): AppContainer {
+  const persistence = options.persistence ?? "prisma";
+  const telegramAccessAdapter =
+    options.telegramAccessAdapter ?? new TelegramBotApiAccessAdapter(env);
   const now = new Date("2026-04-18T12:00:00.000Z");
-  const repositorySeed = seed ?? createDefaultSeed(env, now);
+  const clock = persistence === "memory" ? () => new Date(now.getTime()) : () => new Date();
 
-  const subscriptionRepository = new InMemorySubscriptionRepository(repositorySeed.subscriptions);
-  const channelAccessRepository = new InMemoryChannelAccessRepository(repositorySeed.channelAccess);
-  const inviteRepository = new InMemoryTelegramInviteRepository(repositorySeed.telegramInvites);
-  const auditLogRepository = new InMemoryAuditLogRepository(repositorySeed.auditLogs);
-  const webhookEventRepository = new InMemoryWebhookEventRepository(repositorySeed.webhookEvents);
-  const clock = () => new Date(now.getTime());
+  const {
+    subscriptionRepository,
+    channelAccessRepository,
+    inviteRepository,
+    auditLogRepository,
+    webhookEventRepository
+  } =
+    persistence === "memory"
+      ? createInMemoryRepositories(options.seed ?? createDefaultSeed(env, now))
+      : createPrismaRepositories(options.prisma ?? getPrismaClient());
 
   const entitlementService = new EntitlementService(clock);
   const channelAccessService = new ChannelAccessService(
@@ -109,6 +131,26 @@ export function createContainer(
     jobs: {
       channelAccessReconciliation: reconciliationJob
     }
+  };
+}
+
+function createInMemoryRepositories(seed: RepositorySeed) {
+  return {
+    subscriptionRepository: new InMemorySubscriptionRepository(seed.subscriptions),
+    channelAccessRepository: new InMemoryChannelAccessRepository(seed.channelAccess),
+    inviteRepository: new InMemoryTelegramInviteRepository(seed.telegramInvites),
+    auditLogRepository: new InMemoryAuditLogRepository(seed.auditLogs),
+    webhookEventRepository: new InMemoryWebhookEventRepository(seed.webhookEvents)
+  };
+}
+
+function createPrismaRepositories(prisma: PrismaClient) {
+  return {
+    subscriptionRepository: new PrismaSubscriptionRepository(prisma),
+    channelAccessRepository: new PrismaChannelAccessRepository(prisma),
+    inviteRepository: new PrismaTelegramInviteRepository(prisma),
+    auditLogRepository: new PrismaAuditLogRepository(prisma),
+    webhookEventRepository: new PrismaWebhookEventRepository(prisma)
   };
 }
 

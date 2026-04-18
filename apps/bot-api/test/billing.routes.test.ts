@@ -27,7 +27,7 @@ function createPaymongoSignature(rawBody: string, timestamp = CURRENT_BILLING_TI
 
 describe("billing routes", () => {
   it("returns honest checkout scaffolding without claiming a live provider session", async () => {
-    const app = buildApp(createContainer(env));
+    const app = buildApp(createContainer(env, { persistence: "memory" }));
     const response = await app.inject({
       method: "POST",
       url: "/v1/billing/checkout-sessions",
@@ -45,7 +45,7 @@ describe("billing routes", () => {
   });
 
   it("rejects PayMongo webhooks with an invalid signature", async () => {
-    const app = buildApp(createContainer(env));
+    const app = buildApp(createContainer(env, { persistence: "memory" }));
     const rawBody = JSON.stringify({
       data: {
         id: "evt_invalid",
@@ -83,7 +83,7 @@ describe("billing routes", () => {
   });
 
   it("processes a successful payment idempotently and updates entitlement from billing state", async () => {
-    const app = buildApp(createContainer(env));
+    const app = buildApp(createContainer(env, { persistence: "memory" }));
     const rawBody = JSON.stringify({
       data: {
         id: "evt_paid_001",
@@ -144,7 +144,7 @@ describe("billing routes", () => {
   });
 
   it("moves a subscriber into billing recovery on payment failure while preserving grace-based entitlement", async () => {
-    const app = buildApp(createContainer(env));
+    const app = buildApp(createContainer(env, { persistence: "memory" }));
     const rawBody = JSON.stringify({
       data: {
         id: "evt_failed_001",

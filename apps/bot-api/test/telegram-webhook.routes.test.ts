@@ -19,7 +19,7 @@ const env = loadBotApiEnv({
 
 describe("telegram webhook route", () => {
   it("rejects requests with an invalid secret", async () => {
-    const app = buildApp(createContainer(env));
+    const app = buildApp(createContainer(env, { persistence: "memory" }));
 
     const response = await app.inject({
       method: "POST",
@@ -41,7 +41,7 @@ describe("telegram webhook route", () => {
   });
 
   it("processes a valid membership update idempotently", async () => {
-    const app = buildApp(createContainer(env));
+    const app = buildApp(createContainer(env, { persistence: "memory" }));
 
     const payload = {
       update_id: 1002,
