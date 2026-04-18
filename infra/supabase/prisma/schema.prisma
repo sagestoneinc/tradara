@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubscriptionPlanId {
+  tradara_pro_monthly
+  tradara_pro_quarterly
+  tradara_pro_annual
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  grace_period
+  canceled
+  expired
+}
+
+enum ChannelAccessStatus {
+  pending_grant
+  granted
+  pending_revoke
+  revoked
+  error
+}
+
+enum AccessDesiredState {
+  grant
+  revoke
+}
+
+enum TelegramInviteStatus {
+  pending
+  issued
+  consumed
+  expired
+  failed
+}
+
+enum WebhookProvider {
+  telegram
+  paymongo
+  tradingview
+}
+
+enum AuditActorType {
+  system
+  admin
+  job
+  webhook
+}
+
+model User {
+  id             String          @id
+  email          String?         @unique
+  telegramUserId String?         @unique
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  subscriptions  Subscription[]
+  channelAccess  ChannelAccess[]
+  auditLogs      AuditLog[]
+  invites        TelegramInvite[]
+}
+
+model Subscription {
+  id                     String             @id
+  userId                 String
+  planId                 SubscriptionPlanId
+  status                 SubscriptionStatus
+  providerCustomerId     String?
+  providerSubscriptionId String?
+  currentPeriodEndsAt    DateTime
+  gracePeriodEndsAt      DateTime?
+  canceledAt             DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channelAccessRecords   ChannelAccess[]
+}
+
+model ChannelAccess {
+  id             String              @id
+  userId         String
+  subscriptionId String?
+  channelId      String
+  telegramUserId String?
+  status         ChannelAccessStatus
+  desiredState   AccessDesiredState
+  lastSyncedAt   DateTime?
+  lastError      String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription   Subscription?       @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  invites        TelegramInvite[]
+}
+
+model TelegramInvite {
+  id         String               @id
+  accessId   String?
+  userId     String
+  channelId  String
+  inviteUrl  String?
+  status     TelegramInviteStatus
+  expiresAt  DateTime?
+  note       String
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  access     ChannelAccess?       @relation(fields: [accessId], references: [id], onDelete: SetNull)
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WebhookEvent {
+  id              String          @id
+  provider        WebhookProvider
+  providerEventId String
+  payloadHash     String
+  signatureValid  Boolean
+  processedAt     DateTime?
+  receivedAt      DateTime        @default(now())
+
+  @@unique([provider, providerEventId])
+}
+
+model AuditLog {
+  id         String         @id
+  userId     String?
+  actorType  AuditActorType
+  actorId    String
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json
+  createdAt  DateTime       @default(now())
+  user       User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+

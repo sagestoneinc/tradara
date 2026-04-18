@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "allowJs": false,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@tradara/shared-config": ["packages/shared-config/src/index.ts"],
+      "@tradara/shared-config/*": ["packages/shared-config/src/*"],
+      "@tradara/shared-types": ["packages/shared-types/src/index.ts"],
+      "@tradara/shared-types/*": ["packages/shared-types/src/*"],
+      "@tradara/shared-utils": ["packages/shared-utils/src/index.ts"],
+      "@tradara/shared-utils/*": ["packages/shared-utils/src/*"],
+      "@tradara/ui": ["packages/ui/src/index.ts"],
+      "@tradara/ui/*": ["packages/ui/src/*"],
+      "@tradara/prompts": ["packages/prompts/src/index.ts"],
+      "@tradara/prompts/*": ["packages/prompts/src/*"]
+    }
+  }
+}
+
