@@ -27,12 +27,14 @@ const buttonVariants = cva(
   }
 );
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-  children?: React.ReactNode;
-}
+type ButtonNativeProps = React.ComponentPropsWithoutRef<"button">;
+
+export type ButtonProps = ButtonNativeProps &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+    children?: React.ReactNode;
+    className?: string;
+  };
 
 export function Button({
   className,
