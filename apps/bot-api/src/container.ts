@@ -8,7 +8,7 @@ import type {
   WebhookEvent
 } from "@tradara/shared-types";
 import { addHours, isoNow } from "@tradara/shared-utils";
-import type { PrismaClient } from "../../../generated/prisma";
+import type { PrismaClient } from "@prisma/client";
 
 import { StubTelegramBotAdapter } from "./bot/telegram-bot.adapter";
 import { getPrismaClient } from "./lib/prisma";

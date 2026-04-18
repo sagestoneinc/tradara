@@ -23,7 +23,7 @@ import {
   type TelegramExecutionStatus as PrismaTelegramExecutionStatus,
   type TelegramInviteStatus as PrismaTelegramInviteStatus,
   type WebhookProvider as PrismaWebhookProvider
-} from "../../../../generated/prisma";
+} from "@prisma/client";
 
 import type {
   AuditLogRepository,
@@ -61,6 +61,8 @@ function fromPrismaPlanId(value: PrismaSubscriptionPlanId): SubscriptionPlanId {
     case "tradara_pro_annual":
       return "tradara-pro-annual";
   }
+
+  throw new Error(`Unsupported Prisma subscription plan ID: ${String(value)}`);
 }
 
 function toPrismaSubscriptionStatus(value: SubscriptionStatus): PrismaSubscriptionStatus {
@@ -270,7 +272,11 @@ function resolveAuditUserId(metadata: Record<string, unknown>): string | null {
 }
 
 function isUniqueViolation(error: unknown): boolean {
-  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return error.code === "P2002";
+  }
+
+  return false;
 }
 
 export class PrismaSubscriptionRepository implements SubscriptionRepository {
