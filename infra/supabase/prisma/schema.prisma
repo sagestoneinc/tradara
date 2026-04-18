@@ -50,6 +50,20 @@ enum WebhookProvider {
   tradingview
 }
 
+enum TelegramExecutionStatus {
+  idle
+  attempting
+  retrying
+  succeeded
+  failed_retryable
+  failed_non_retryable
+}
+
+enum TelegramFailureKind {
+  retryable
+  non_retryable
+}
+
 enum AuditActorType {
   system
   admin
@@ -74,6 +88,7 @@ model Subscription {
   userId                 String
   planId                 SubscriptionPlanId
   status                 SubscriptionStatus
+  providerName           WebhookProvider?
   providerCustomerId     String?
   providerSubscriptionId String?
   currentPeriodEndsAt    DateTime
@@ -86,20 +101,28 @@ model Subscription {
 }
 
 model ChannelAccess {
-  id             String              @id
-  userId         String
-  subscriptionId String?
-  channelId      String
-  telegramUserId String?
-  status         ChannelAccessStatus
-  desiredState   AccessDesiredState
-  lastSyncedAt   DateTime?
-  lastError      String?
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
-  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subscription   Subscription?       @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
-  invites        TelegramInvite[]
+  id                    String                  @id
+  userId                String
+  subscriptionId        String?
+  channelId             String
+  telegramUserId        String?
+  status                ChannelAccessStatus
+  desiredState          AccessDesiredState
+  inviteId              String?
+  lastSyncedAt          DateTime?
+  lastError             String?
+  lastErrorCode         String?
+  lastFailureKind       TelegramFailureKind?
+  executionStatus       TelegramExecutionStatus?
+  executionAttempts     Int?
+  lastExecutionAttemptAt DateTime?
+  lastExecutionOutcomeAt DateTime?
+  lastCorrelationId     String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription          Subscription?           @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  invites               TelegramInvite[]
 }
 
 model TelegramInvite {
@@ -141,4 +164,3 @@ model AuditLog {
   createdAt  DateTime       @default(now())
   user       User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
-

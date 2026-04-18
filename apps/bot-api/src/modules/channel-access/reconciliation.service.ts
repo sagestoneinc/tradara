@@ -34,6 +34,10 @@ export class ChannelAccessReconciliationService {
           telegramUserId: accessRecord?.telegramUserId,
           reason
         });
+        await this.channelAccessService.executePendingGrant(
+          userId,
+          "channel-access-reconciliation"
+        );
         actions.push({
           type: "grant",
           userId,
@@ -50,6 +54,10 @@ export class ChannelAccessReconciliationService {
           telegramUserId: accessRecord.telegramUserId,
           reason
         });
+        await this.channelAccessService.executePendingRevoke(
+          userId,
+          "channel-access-reconciliation"
+        );
         actions.push({
           type: "revoke",
           userId,

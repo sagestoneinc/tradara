@@ -15,17 +15,15 @@ import {
   TableRow
 } from "@tradara/ui";
 
-import { channelAccessRows, recentAuditEntries } from "../lib/mock-channel-access";
-import { lifecycleBadgeVariant } from "../lib/admin-status";
+import { formatAdminDate, lifecycleBadgeVariant } from "../lib/admin-status";
+import { getAdminChannelAccessData, getAdminOverviewData } from "../lib/admin-api";
+import { getPriorityAccessRows } from "../lib/admin-view-models";
 
 export const metadata: Metadata = {
   title: "Dashboard Overview",
   description:
     "Review Tradara billing-backed access health, delivery state, and reconciliation activity from the internal dashboard."
 };
-
-const weeklyDeliveryTrend = [68, 71, 70, 74, 77, 79, 81] as const;
-const weeklyHealthTrend = [84, 83, 85, 86, 88, 89, 91] as const;
 
 function metricCard(label: string, value: string, delta: string, helper: string): React.JSX.Element {
   return (
@@ -44,77 +42,68 @@ function metricCard(label: string, value: string, delta: string, helper: string)
   );
 }
 
-function miniTrend(values: readonly number[], colorClassName: string): React.JSX.Element {
-  const maxValue = Math.max(...values, 1);
-
-  return (
-    <div className="mt-4 flex items-end gap-2" aria-hidden="true">
-      {values.map((value, index) => (
-        <span
-          key={`${value}-${index}`}
-          className={`inline-block w-4 rounded-t-sm ${colorClassName}`}
-          style={{ height: `${Math.max(10, Math.round((value / maxValue) * 56))}px` }}
-        />
-      ))}
-    </div>
-  );
-}
-
-export default function DashboardPage(): React.JSX.Element {
-  const granted = channelAccessRows.filter((item) => item.accessState === "granted").length;
-  const pending = channelAccessRows.filter((item) => item.accessState.startsWith("pending")).length;
-  const atRisk = channelAccessRows.filter((item) => item.entitlementState !== "active").length;
-  const total = channelAccessRows.length;
+export default async function DashboardPage(): Promise<React.JSX.Element> {
+  const [overview, channelAccess] = await Promise.all([
+    getAdminOverviewData(),
+    getAdminChannelAccessData()
+  ]);
+  const total = channelAccess.rows.length;
 
   return (
     <div className="space-y-6">
       <section className="grid gap-4 xl:grid-cols-4">
         {metricCard(
           "Granted access",
-          String(granted),
-          "+4.8%",
+          String(overview.metrics.grantedAccess),
+          overview.telegramAutomationState,
           "Observed Telegram memberships with billing-backed entitlement."
         )}
         {metricCard(
           "Pending actions",
-          String(pending),
-          "-1.2%",
+          String(overview.metrics.pendingActions),
+          overview.telegramAutomationState,
           "Queued grants or revokes waiting on a Telegram delivery step."
         )}
         {metricCard(
           "At-risk accounts",
-          String(atRisk),
-          "+0.9%",
+          String(overview.metrics.atRiskAccounts),
+          overview.billingExecutionState,
           "Subscribers in grace period or expired state that need close monitoring."
         )}
         {metricCard(
           "Tracked records",
           String(total),
-          "+2.1%",
-          "Current subscriber rows actively monitored by reconciliation snapshots."
+          "live",
+          "Current subscriber rows actively loaded from the admin API."
         )}
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.3fr_1fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Delivery success and entitlement health</CardTitle>
+            <CardTitle>Operational integration states</CardTitle>
             <CardDescription>
-              Weekly operations pulse for grant consistency and eligibility quality.
+              Read-only status surfaces stay explicit about what is live, pending, or still stubbed.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Delivery success rate</p>
-              <p className="mt-2 text-2xl font-semibold text-white">81%</p>
-              {miniTrend(weeklyDeliveryTrend, "bg-cyan-400/75")}
-              <p className="mt-3 text-xs text-slate-500">7-day trend based on observed grants and invites.</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Telegram automation</p>
+              <div className="mt-2 flex items-center gap-3">
+                <p className="text-2xl font-semibold text-white">{overview.telegramAutomationState}</p>
+                <Badge variant="active">provider execution live</Badge>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-400">
+                Membership observations and invite or revoke execution now run through the live Bot API, with failures surfaced in diagnostics.
+              </p>
             </div>
             <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Entitlement health</p>
-              <p className="mt-2 text-2xl font-semibold text-white">91%</p>
-              {miniTrend(weeklyHealthTrend, "bg-emerald-400/70")}
-              <p className="mt-3 text-xs text-slate-500">Billing-backed eligibility confidence across active records.</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Billing ingestion</p>
+              <div className="mt-2 flex items-center gap-3">
+                <p className="text-2xl font-semibold text-white">{overview.billingExecutionState}</p>
+                <Badge variant="outline">no live PayMongo writes</Badge>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-400">{overview.paymentsSummary.note}</p>
             </div>
           </CardContent>
         </Card>
@@ -151,9 +140,7 @@ export default function DashboardPage(): React.JSX.Element {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {channelAccessRows
-                  .filter((row) => row.accessState !== "granted" || row.entitlementState !== "active")
-                  .slice(0, 4)
+                {getPriorityAccessRows(channelAccess.rows)
                   .map((row) => (
                     <TableRow key={row.userId}>
                       <TableCell>
@@ -162,13 +149,19 @@ export default function DashboardPage(): React.JSX.Element {
                       </TableCell>
                       <TableCell>{row.planLabel}</TableCell>
                       <TableCell>
-                        <Badge variant={lifecycleBadgeVariant(row.subscriptionState)}>{row.subscriptionState}</Badge>
+                        <Badge variant={lifecycleBadgeVariant(row.subscriptionState ?? "expired")}>
+                          {row.subscriptionState ?? "none"}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant={lifecycleBadgeVariant(row.entitlementState)}>{row.entitlementState}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={lifecycleBadgeVariant(row.accessState)}>{row.accessState}</Badge>
+                        {row.accessState ? (
+                          <Badge variant={lifecycleBadgeVariant(row.accessState)}>{row.accessState}</Badge>
+                        ) : (
+                          <Badge variant="outline">no_record</Badge>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -183,13 +176,14 @@ export default function DashboardPage(): React.JSX.Element {
             <CardDescription>Key events tied to access-control decisions.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentAuditEntries.map((entry) => (
+            {overview.recentAuditEntries.map((entry) => (
               <div key={entry.id} className="rounded-2xl border border-slate-800 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-white">{entry.action}</p>
                   <Badge variant="outline">{entry.actor}</Badge>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-slate-400">{entry.summary}</p>
+                <p className="mt-3 text-xs text-slate-500">{formatAdminDate(entry.createdAt)}</p>
               </div>
             ))}
           </CardContent>

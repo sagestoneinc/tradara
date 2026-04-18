@@ -44,8 +44,28 @@ export type AuditActorType = z.infer<typeof auditActorTypeSchema>;
 export const providerNameSchema = z.enum(["telegram", "paymongo", "tradingview"]);
 export type ProviderName = z.infer<typeof providerNameSchema>;
 
+export const paymongoEventTypeSchema = z.enum([
+  "checkout_session.payment.paid",
+  "payment.paid",
+  "payment.failed"
+]);
+export type PaymongoEventType = z.infer<typeof paymongoEventTypeSchema>;
+
 export const integrationExecutionStateSchema = z.enum(["live", "pending", "stubbed"]);
 export type IntegrationExecutionState = z.infer<typeof integrationExecutionStateSchema>;
+
+export const telegramExecutionStatusSchema = z.enum([
+  "idle",
+  "attempting",
+  "retrying",
+  "succeeded",
+  "failed_retryable",
+  "failed_non_retryable"
+]);
+export type TelegramExecutionStatus = z.infer<typeof telegramExecutionStatusSchema>;
+
+export const telegramFailureKindSchema = z.enum(["retryable", "non_retryable"]);
+export type TelegramFailureKind = z.infer<typeof telegramFailureKindSchema>;
 
 export const adminTelegramConnectionStatusSchema = z.enum(["connected", "invited", "missing"]);
 export type AdminTelegramConnectionStatus = z.infer<typeof adminTelegramConnectionStatusSchema>;
@@ -66,9 +86,12 @@ export const subscriptionSnapshotSchema = z.object({
   userId: z.string(),
   planId: subscriptionPlanIdSchema,
   status: subscriptionStatusSchema,
+  providerName: providerNameSchema.optional(),
   currentPeriodEndsAt: z.string().datetime(),
   gracePeriodEndsAt: z.string().datetime().nullable(),
-  canceledAt: z.string().datetime().nullable().optional()
+  canceledAt: z.string().datetime().nullable().optional(),
+  providerCustomerId: z.string().nullable().optional(),
+  providerSubscriptionId: z.string().nullable().optional()
 });
 export type SubscriptionSnapshot = z.infer<typeof subscriptionSnapshotSchema>;
 
@@ -111,6 +134,13 @@ export const channelAccessRecordSchema = z.object({
   inviteId: z.string().nullable().optional(),
   lastSyncedAt: z.string().datetime().nullable(),
   lastError: z.string().nullable(),
+  lastErrorCode: z.string().nullable().optional(),
+  lastFailureKind: telegramFailureKindSchema.nullable().optional(),
+  executionStatus: telegramExecutionStatusSchema.nullable().optional(),
+  executionAttempts: z.number().int().nonnegative().optional(),
+  lastExecutionAttemptAt: z.string().datetime().nullable().optional(),
+  lastExecutionOutcomeAt: z.string().datetime().nullable().optional(),
+  lastCorrelationId: z.string().nullable().optional(),
   updatedAt: z.string().datetime()
 });
 export type ChannelAccessRecord = z.infer<typeof channelAccessRecordSchema>;
@@ -159,6 +189,11 @@ export const adminSubscriberSnapshotSchema = z.object({
   subscriptionState: subscriptionStatusSchema.nullable(),
   entitlementState: entitlementStatusSchema,
   accessState: channelAccessStatusSchema.nullable(),
+  executionStatus: telegramExecutionStatusSchema.nullable().optional(),
+  lastError: z.string().nullable().optional(),
+  lastErrorCode: z.string().nullable().optional(),
+  lastFailureKind: telegramFailureKindSchema.nullable().optional(),
+  lastCorrelationId: z.string().nullable().optional(),
   currentPeriodEndsAt: z.string().datetime().nullable(),
   gracePeriodEndsAt: z.string().datetime().nullable(),
   updatedAt: z.string().datetime(),
@@ -183,6 +218,7 @@ export const adminPaymentsSummarySchema = z.object({
   activeSubscriptions: z.number().int().nonnegative(),
   recoverySubscriptions: z.number().int().nonnegative(),
   expiredSubscriptions: z.number().int().nonnegative(),
+  lastEventType: paymongoEventTypeSchema.nullable().optional(),
   note: z.string(),
   lastEvaluatedAt: z.string().datetime()
 });
@@ -195,6 +231,7 @@ export const adminAuditEntrySchema = z.object({
   action: z.string(),
   entityType: z.string(),
   entityId: z.string(),
+  correlationId: z.string().nullable().optional(),
   createdAt: z.string().datetime(),
   summary: z.string()
 });
@@ -251,3 +288,79 @@ export const adminAuditLogListDataSchema = z.object({
   rows: z.array(adminAuditEntrySchema)
 });
 export type AdminAuditLogListData = z.infer<typeof adminAuditLogListDataSchema>;
+
+export const adminWebhookEventSnapshotSchema = z.object({
+  id: z.string(),
+  provider: providerNameSchema,
+  providerEventId: z.string(),
+  signatureValid: z.boolean(),
+  processedAt: z.string().datetime().nullable(),
+  receivedAt: z.string().datetime(),
+  payloadHash: z.string()
+});
+export type AdminWebhookEventSnapshot = z.infer<typeof adminWebhookEventSnapshotSchema>;
+
+export const adminWebhookEventsDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  metrics: z.object({
+    totalEvents: z.number().int().nonnegative(),
+    processedEvents: z.number().int().nonnegative(),
+    pendingEvents: z.number().int().nonnegative()
+  }),
+  rows: z.array(adminWebhookEventSnapshotSchema)
+});
+export type AdminWebhookEventsData = z.infer<typeof adminWebhookEventsDataSchema>;
+
+export const adminDeliveryFailureSnapshotSchema = z.object({
+  userId: z.string(),
+  displayName: z.string(),
+  accessState: channelAccessStatusSchema.nullable(),
+  executionStatus: telegramExecutionStatusSchema.nullable(),
+  lastError: z.string().nullable(),
+  lastErrorCode: z.string().nullable(),
+  lastFailureKind: telegramFailureKindSchema.nullable(),
+  lastCorrelationId: z.string().nullable(),
+  updatedAt: z.string().datetime()
+});
+export type AdminDeliveryFailureSnapshot = z.infer<typeof adminDeliveryFailureSnapshotSchema>;
+
+export const adminDiagnosticsDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  telegramAutomationState: integrationExecutionStateSchema,
+  metrics: z.object({
+    recentWebhookEvents: z.number().int().nonnegative(),
+    deliveryFailures: z.number().int().nonnegative(),
+    retryableFailures: z.number().int().nonnegative()
+  }),
+  recentWebhookEvents: z.array(adminWebhookEventSnapshotSchema),
+  recentDeliveryActivity: z.array(adminAuditEntrySchema),
+  deliveryFailures: z.array(adminDeliveryFailureSnapshotSchema)
+});
+export type AdminDiagnosticsData = z.infer<typeof adminDiagnosticsDataSchema>;
+
+export const createBillingCheckoutSessionRequestSchema = z.object({
+  userId: z.string().min(1),
+  planId: subscriptionPlanIdSchema,
+  email: z.string().email().nullable().optional(),
+  successUrl: z.string().url().nullable().optional(),
+  cancelUrl: z.string().url().nullable().optional()
+});
+export type CreateBillingCheckoutSessionRequest = z.infer<
+  typeof createBillingCheckoutSessionRequestSchema
+>;
+
+export const billingCheckoutSessionScaffoldSchema = z.object({
+  executionState: integrationExecutionStateSchema,
+  provider: z.literal("paymongo"),
+  userId: z.string(),
+  planId: subscriptionPlanIdSchema,
+  checkoutUrl: z.string().url().nullable(),
+  providerCheckoutSessionId: z.string().nullable(),
+  metadata: z.object({
+    tradaraUserId: z.string(),
+    tradaraPlanId: subscriptionPlanIdSchema,
+    tradaraSubscriptionId: z.string()
+  }),
+  note: z.string()
+});
+export type BillingCheckoutSessionScaffold = z.infer<typeof billingCheckoutSessionScaffoldSchema>;

@@ -62,6 +62,7 @@ const botApiEnvSchema = z.object({
 const adminWebEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   ADMIN_WEB_BASE_URL: z.string().url(),
+  BOT_API_BASE_URL: z.string().url(),
   NEXT_PUBLIC_BRAND_NAME: z.string().default(brand.name),
   NEXT_PUBLIC_TAGLINE: z.string().default(brand.tagline)
 });

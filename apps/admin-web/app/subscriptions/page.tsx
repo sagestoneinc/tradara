@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@tradara/ui";
 
 import { formatAdminDate, lifecycleBadgeVariant } from "../../lib/admin-status";
-import { adminSubscriberRecords, subscriptionPlanSnapshots } from "../../lib/mock-channel-access";
+import { getAdminSubscriptionsData } from "../../lib/admin-api";
 
 export const metadata: Metadata = {
   title: "Subscriptions",
@@ -25,17 +25,11 @@ function metric(label: string, value: string, helper: string): React.JSX.Element
   );
 }
 
-export default function SubscriptionsPage(): React.JSX.Element {
-  const activeEntitlements = adminSubscriberRecords.filter(
-    (record) => record.entitlementState === "active"
-  ).length;
-  const recoveryQueue = adminSubscriberRecords.filter(
-    (record) => record.subscriptionState === "grace_period" || record.subscriptionState === "past_due"
-  ).length;
-  const endingSoon = adminSubscriberRecords.filter((record) => {
-    const msUntilPeriodEnd = new Date(record.currentPeriodEndsAt).getTime() - Date.now();
-    return msUntilPeriodEnd >= 0 && msUntilPeriodEnd <= 14 * 24 * 60 * 60 * 1000;
-  }).length;
+export default async function SubscriptionsPage(): Promise<React.JSX.Element> {
+  const data = await getAdminSubscriptionsData();
+  const activeEntitlements = data.metrics.activeEntitlements;
+  const recoveryQueue = data.metrics.recoveryQueue;
+  const endingSoon = data.metrics.endingWithin14Days;
 
   return (
     <div className="space-y-6">
@@ -58,7 +52,7 @@ export default function SubscriptionsPage(): React.JSX.Element {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-3">
-        {subscriptionPlanSnapshots.map((plan) => (
+        {data.plans.map((plan) => (
           <Card key={plan.id} className="bg-slate-950/86">
             <CardHeader>
               <CardDescription>{plan.billingInterval} plan</CardDescription>
@@ -87,8 +81,8 @@ export default function SubscriptionsPage(): React.JSX.Element {
         <CardHeader>
           <CardTitle>Billing-backed subscription visibility</CardTitle>
           <CardDescription>
-            Mock data for now, but the shape matches the intended handoff from billing into entitlement
-            and Telegram delivery.
+            Live read-only subscription data from the admin API. Billing execution state remains honest
+            about stubbed integrations.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -121,19 +115,23 @@ export default function SubscriptionsPage(): React.JSX.Element {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {adminSubscriberRecords.map((record) => (
-                <TableRow key={record.subscriptionId}>
+              {data.rows.map((record) => (
+                <TableRow key={record.subscriptionId ?? record.userId}>
                   <TableCell>
                     <div className="space-y-1">
                       <p className="font-medium text-white">{record.displayName}</p>
                       <p className="text-xs text-slate-500">{record.email}</p>
                     </div>
                   </TableCell>
-                  <TableCell>{subscriptionPlanSnapshots.find((plan) => plan.id === record.planId)?.label}</TableCell>
+                  <TableCell>{record.planLabel}</TableCell>
                   <TableCell>
-                    <Badge variant={lifecycleBadgeVariant(record.subscriptionState)}>
-                      {record.subscriptionState}
-                    </Badge>
+                    {record.subscriptionState ? (
+                      <Badge variant={lifecycleBadgeVariant(record.subscriptionState)}>
+                        {record.subscriptionState}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">none</Badge>
+                    )}
                   </TableCell>
                   <TableCell>{formatAdminDate(record.currentPeriodEndsAt)}</TableCell>
                   <TableCell>{formatAdminDate(record.gracePeriodEndsAt)}</TableCell>
@@ -142,7 +140,11 @@ export default function SubscriptionsPage(): React.JSX.Element {
                       <Badge variant={lifecycleBadgeVariant(record.entitlementState)}>
                         {record.entitlementState}
                       </Badge>
-                      <Badge variant={lifecycleBadgeVariant(record.accessState)}>{record.accessState}</Badge>
+                      {record.accessState ? (
+                        <Badge variant={lifecycleBadgeVariant(record.accessState)}>{record.accessState}</Badge>
+                      ) : (
+                        <Badge variant="outline">no_record</Badge>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="max-w-sm leading-6 text-slate-400">{record.note}</TableCell>

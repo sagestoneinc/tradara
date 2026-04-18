@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@tradara/ui";
 
 import { lifecycleBadgeVariant } from "../../lib/admin-status";
-import { channelAccessRows } from "../../lib/mock-channel-access";
+import { getAdminChannelAccessData } from "../../lib/admin-api";
 
 export const metadata: Metadata = {
   title: "Channel Access",
@@ -11,16 +11,26 @@ export const metadata: Metadata = {
     "Inspect Telegram premium access records, entitlement states, and access notes from the Tradara admin console."
 };
 
-export default function ChannelAccessPage(): React.JSX.Element {
-  const granted = channelAccessRows.filter((row) => row.accessState === "granted").length;
-  const pending = channelAccessRows.filter((row) => row.accessState.startsWith("pending")).length;
-  const mismatched = channelAccessRows.filter(
+export default async function ChannelAccessPage(): Promise<React.JSX.Element> {
+  const data = await getAdminChannelAccessData();
+  const granted = data.rows.filter((row) => row.accessState === "granted").length;
+  const pending = data.rows.filter(
+    (row) => row.accessState === "pending_grant" || row.accessState === "pending_revoke"
+  ).length;
+  const failures = data.rows.filter(
+    (row) =>
+      row.accessState === "error" ||
+      row.executionStatus === "retrying" ||
+      row.executionStatus === "failed_retryable" ||
+      row.executionStatus === "failed_non_retryable"
+  ).length;
+  const mismatched = data.rows.filter(
     (row) => row.subscriptionState === "active" && row.accessState !== "granted"
   ).length;
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader>
             <CardDescription>Granted</CardDescription>
@@ -41,6 +51,15 @@ export default function ChannelAccessPage(): React.JSX.Element {
         </Card>
         <Card>
           <CardHeader>
+            <CardDescription>Delivery failures</CardDescription>
+            <CardTitle className="text-3xl">{failures}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-6 text-slate-400">Retrying or failed Bot API executions needing visibility.</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
             <CardDescription>State mismatch</CardDescription>
             <CardTitle className="text-3xl">{mismatched}</CardTitle>
           </CardHeader>
@@ -54,8 +73,7 @@ export default function ChannelAccessPage(): React.JSX.Element {
         <CardHeader>
           <CardTitle>Premium channel access visibility</CardTitle>
           <CardDescription>
-            This view is wired to the Telegram-access foundation and intentionally honest about pending
-            execution states.
+            This view is sourced from the admin API and stays explicit about pending execution states.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -87,7 +105,7 @@ export default function ChannelAccessPage(): React.JSX.Element {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {channelAccessRows.map((row) => (
+              {data.rows.map((row) => (
                 <TableRow key={row.userId}>
                   <TableCell>
                     <div className="space-y-1">
@@ -97,13 +115,21 @@ export default function ChannelAccessPage(): React.JSX.Element {
                   </TableCell>
                   <TableCell>{row.planLabel}</TableCell>
                   <TableCell>
-                    <Badge variant={lifecycleBadgeVariant(row.subscriptionState)}>{row.subscriptionState}</Badge>
+                    {row.subscriptionState ? (
+                      <Badge variant={lifecycleBadgeVariant(row.subscriptionState)}>{row.subscriptionState}</Badge>
+                    ) : (
+                      <Badge variant="outline">none</Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={lifecycleBadgeVariant(row.entitlementState)}>{row.entitlementState}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={lifecycleBadgeVariant(row.accessState)}>{row.accessState}</Badge>
+                    {row.accessState ? (
+                      <Badge variant={lifecycleBadgeVariant(row.accessState)}>{row.accessState}</Badge>
+                    ) : (
+                      <Badge variant="outline">no_record</Badge>
+                    )}
                   </TableCell>
                   <TableCell className="max-w-sm leading-6 text-slate-400">{row.note}</TableCell>
                 </TableRow>

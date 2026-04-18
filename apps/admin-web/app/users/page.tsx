@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@tradara/ui";
 
 import { formatAdminDate, lifecycleBadgeVariant, telegramBadgeVariant } from "../../lib/admin-status";
-import { adminSubscriberRecords } from "../../lib/mock-channel-access";
+import { getAdminUsersData } from "../../lib/admin-api";
+import { getConnectedRatio } from "../../lib/admin-view-models";
 
 export const metadata: Metadata = {
   title: "Users",
@@ -25,19 +26,11 @@ function metric(label: string, value: string, helper: string): React.JSX.Element
   );
 }
 
-export default function UsersPage(): React.JSX.Element {
-  const connectedUsers = adminSubscriberRecords.filter(
-    (record) => record.telegramConnectionStatus === "connected"
-  ).length;
-  const pendingLinking = adminSubscriberRecords.filter(
-    (record) => record.telegramConnectionStatus !== "connected"
-  ).length;
-  const supportWatchlist = adminSubscriberRecords.filter(
-    (record) =>
-      record.entitlementState !== "active" ||
-      record.accessState !== "granted" ||
-      record.telegramConnectionStatus !== "connected"
-  ).length;
+export default async function UsersPage(): Promise<React.JSX.Element> {
+  const data = await getAdminUsersData();
+  const connectedUsers = data.metrics.telegramConnected;
+  const pendingLinking = data.metrics.pendingLinking;
+  const supportWatchlist = data.metrics.supportWatchlist;
 
   return (
     <div className="space-y-6">
@@ -97,7 +90,7 @@ export default function UsersPage(): React.JSX.Element {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {adminSubscriberRecords.map((record) => (
+                {data.rows.map((record) => (
                   <TableRow key={record.userId}>
                     <TableCell>
                       <div className="space-y-1">
@@ -107,7 +100,7 @@ export default function UsersPage(): React.JSX.Element {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <p>{record.email}</p>
+                        <p>{record.email ?? "No email on file"}</p>
                         <p className="text-xs text-slate-500">
                           {record.telegramUserId ?? "Telegram ID not linked yet"}
                         </p>
@@ -123,12 +116,14 @@ export default function UsersPage(): React.JSX.Element {
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell>{record.planId}</TableCell>
+                    <TableCell>{record.planLabel}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
-                        <Badge variant={lifecycleBadgeVariant(record.subscriptionState)}>
-                          {record.subscriptionState}
-                        </Badge>
+                        {record.subscriptionState ? (
+                          <Badge variant={lifecycleBadgeVariant(record.subscriptionState)}>
+                            {record.subscriptionState}
+                          </Badge>
+                        ) : null}
                         <Badge variant={lifecycleBadgeVariant(record.entitlementState)}>
                           {record.entitlementState}
                         </Badge>
@@ -152,7 +147,7 @@ export default function UsersPage(): React.JSX.Element {
             <div className="rounded-xl border border-slate-800 bg-slate-900/65 p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Connected ratio</p>
               <p className="mt-2 text-2xl font-semibold text-white">
-                {Math.round((connectedUsers / Math.max(adminSubscriberRecords.length, 1)) * 100)}%
+                {getConnectedRatio(data.rows)}%
               </p>
             </div>
             <div className="rounded-xl border border-slate-800 bg-slate-900/65 p-4">

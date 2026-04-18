@@ -8,6 +8,7 @@ import { Badge, BrandMark, Button, cn } from "@tradara/ui";
 const navItems = [
   { href: "/", label: "Dashboard", helper: "Overview", count: "04" },
   { href: "/channel-access", label: "Channel Access", helper: "Delivery layer", count: "12" },
+  { href: "/diagnostics", label: "Diagnostics", helper: "Ops health", count: "07" },
   { href: "/users", label: "Users", helper: "Identity map", count: "36" },
   { href: "/subscriptions", label: "Subscriptions", helper: "Billing truth", count: "09" },
   { href: "/settings", label: "Settings", helper: "Config", count: "02" }
@@ -64,9 +65,9 @@ export function AdminShell({ children }: { children: React.ReactNode }): React.J
 
           <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-500">System state</p>
-            <p className="mt-2 text-sm font-medium text-white">All webhook checks healthy</p>
+            <p className="mt-2 text-sm font-medium text-white">Webhook and delivery diagnostics live</p>
             <p className="mt-1 text-xs text-slate-400">
-              No idempotency collisions in the last 24h snapshot.
+              Correlation IDs and Telegram execution failures are visible from the diagnostics view.
             </p>
           </div>
         </aside>

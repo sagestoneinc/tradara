@@ -19,12 +19,17 @@ import {
   type RepositorySeed
 } from "./repositories/in-memory-repositories";
 import { ChannelAccessReconciliationJob } from "./jobs/channel-access-reconciliation.job";
+import { AdminController } from "./modules/admin/admin.controller";
+import { AdminService } from "./modules/admin/admin.service";
+import { BillingController } from "./modules/billing/billing.controller";
+import { BillingService } from "./modules/billing/billing.service";
 import { ChannelAccessController } from "./modules/channel-access/channel-access.controller";
 import { ChannelAccessService } from "./modules/channel-access/channel-access.service";
 import { EntitlementService } from "./modules/channel-access/entitlement.service";
 import { ChannelAccessReconciliationService } from "./modules/channel-access/reconciliation.service";
 import {
   StubTelegramAccessAdapter,
+  TelegramBotApiAccessAdapter,
   type TelegramAccessAdapter
 } from "./modules/channel-access/telegram-access.adapter";
 import { TelegramWebhookController } from "./modules/webhooks/telegram/telegram-webhook.controller";
@@ -33,6 +38,8 @@ import { TelegramWebhookService } from "./modules/webhooks/telegram/telegram-web
 export interface AppContainer {
   env: BotApiEnv;
   controllers: {
+    admin: AdminController;
+    billing: BillingController;
     channelAccess: ChannelAccessController;
     telegramWebhook: TelegramWebhookController;
   };
@@ -44,7 +51,7 @@ export interface AppContainer {
 export function createContainer(
   env: BotApiEnv,
   seed?: RepositorySeed,
-  telegramAccessAdapter: TelegramAccessAdapter = new StubTelegramAccessAdapter()
+  telegramAccessAdapter: TelegramAccessAdapter = new TelegramBotApiAccessAdapter(env)
 ): AppContainer {
   const now = new Date("2026-04-18T12:00:00.000Z");
   const repositorySeed = seed ?? createDefaultSeed(env, now);
@@ -82,10 +89,20 @@ export function createContainer(
     telegramBot,
     clock
   );
+  const billingService = new BillingService(
+    env,
+    subscriptionRepository,
+    webhookEventRepository,
+    auditLogRepository,
+    clock
+  );
+  const adminService = new AdminService(channelAccessService, webhookEventRepository, clock);
 
   return {
     env,
     controllers: {
+      admin: new AdminController(adminService),
+      billing: new BillingController(billingService),
       channelAccess: new ChannelAccessController(channelAccessService, reconciliationJob),
       telegramWebhook: new TelegramWebhookController(telegramWebhookService)
     },
