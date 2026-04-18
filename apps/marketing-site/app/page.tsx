@@ -1,6 +1,5 @@
 import type * as React from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { brand } from "@tradara/shared-config";
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@tradara/ui";
 
