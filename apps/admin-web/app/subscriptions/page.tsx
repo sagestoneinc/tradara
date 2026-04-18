@@ -59,7 +59,7 @@ export default function SubscriptionsPage(): React.JSX.Element {
 
       <section className="grid gap-4 xl:grid-cols-3">
         {subscriptionPlanSnapshots.map((plan) => (
-          <Card key={plan.id}>
+          <Card key={plan.id} className="bg-slate-950/86">
             <CardHeader>
               <CardDescription>{plan.billingInterval} plan</CardDescription>
               <CardTitle>{plan.label}</CardTitle>
@@ -71,6 +71,12 @@ export default function SubscriptionsPage(): React.JSX.Element {
               </p>
               <p>Healthy: {plan.healthySubscribers}</p>
               <p>Watchlist: {plan.watchlistSubscribers}</p>
+              <div className="mt-3 h-2 rounded-full bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400"
+                  style={{ width: `${Math.max(8, Math.round((plan.healthySubscribers / Math.max(plan.subscriberCount, 1)) * 100))}%` }}
+                />
+              </div>
               <p className="text-slate-400">PHP {plan.amountPhp.toLocaleString("en-PH")} billed per cycle.</p>
             </CardContent>
           </Card>
@@ -85,7 +91,23 @@ export default function SubscriptionsPage(): React.JSX.Element {
             and Telegram delivery.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex w-full max-w-md items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2">
+              <span className="text-xs uppercase tracking-[0.14em] text-slate-500">Search</span>
+              <input
+                aria-label="Search subscription"
+                placeholder="Subscriber name or billing state"
+                className="w-full bg-transparent text-sm text-slate-200 outline-none placeholder:text-slate-500"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs text-slate-300">
+              <span className="rounded-full border border-emerald-400/35 bg-emerald-500/10 px-3 py-1">Active</span>
+              <span className="rounded-full border border-amber-300/35 bg-amber-500/10 px-3 py-1">Grace / Past due</span>
+              <span className="rounded-full border border-rose-400/35 bg-rose-500/10 px-3 py-1">Expired</span>
+            </div>
+          </div>
+
           <Table>
             <TableHeader>
               <TableRow>

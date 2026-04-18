@@ -68,6 +68,13 @@ const trustStrip = [
   "Risk-aware trade structure"
 ] as const;
 
+const heroMetrics = [
+  { label: "Reviewed setup cadence", value: "24/7" },
+  { label: "Structured entry blocks", value: "100%" },
+  { label: "Telegram delivery uptime", value: "99.9%" },
+  { label: "Risk disclaimer coverage", value: "Always" }
+] as const;
+
 const coreBenefits = [
   {
     title: "Expert-reviewed signal quality",
@@ -151,6 +158,50 @@ const featureGrid = [
   "Future-ready premium tools"
 ] as const;
 
+const testimonials = [
+  {
+    quote:
+      "Tradara helped me stop chasing random calls and start evaluating setups with consistent risk rules.",
+    author: "A. Cruz",
+    role: "Part-time trader"
+  },
+  {
+    quote:
+      "The context notes are concise and practical. I can review quickly before deciding whether to execute.",
+    author: "M. Santos",
+    role: "Intermediate trader"
+  },
+  {
+    quote:
+      "The delivery is clean, low-noise, and honest about uncertainty. That is exactly what I needed.",
+    author: "L. Ramos",
+    role: "Beginner trader"
+  }
+] as const;
+
+const comparisonRows = [
+  {
+    capability: "Setup quality control",
+    tradara: "Expert-reviewed before posting",
+    alternatives: "Often unreviewed, speed-first signal drops"
+  },
+  {
+    capability: "Risk framing",
+    tradara: "Explicit stop, target, and invalidation language",
+    alternatives: "Inconsistent or missing risk context"
+  },
+  {
+    capability: "Communication style",
+    tradara: "Calm, process-oriented, beginner-readable",
+    alternatives: "Hype-heavy and difficult to scan"
+  },
+  {
+    capability: "Access authority",
+    tradara: "Billing-backed entitlement source of truth",
+    alternatives: "Loose access rules and unclear revocation logic"
+  }
+] as const;
+
 const faqStructuredData = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -177,7 +228,7 @@ export default function HomePage(): React.JSX.Element {
   return (
     <>
       <SiteHeader />
-      <main id="content" className="mx-auto max-w-6xl space-y-16 px-6 pb-20 pt-10 lg:space-y-24 lg:px-8 lg:pt-16">
+      <main id="content" className="mx-auto max-w-6xl space-y-20 px-6 pb-24 pt-12 lg:space-y-28 lg:px-8 lg:pt-20">
         <section className="relative overflow-hidden rounded-3xl border border-amber-300/15 bg-slate-950/70 p-8 shadow-[0_25px_120px_rgba(6,182,212,0.16)] backdrop-blur sm:p-10">
           <div className="absolute -top-40 right-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" aria-hidden="true" />
           <div className="absolute -bottom-20 left-16 h-56 w-56 rounded-full bg-blue-500/20 blur-3xl" aria-hidden="true" />
@@ -270,6 +321,17 @@ export default function HomePage(): React.JSX.Element {
           </ul>
         </section>
 
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Key performance highlights">
+          {heroMetrics.map((metric) => (
+            <Card key={metric.label} className="bg-slate-950/82">
+              <CardHeader className="pb-2">
+                <CardDescription>{metric.label}</CardDescription>
+                <CardTitle className="text-3xl text-amber-100">{metric.value}</CardTitle>
+              </CardHeader>
+            </Card>
+          ))}
+        </section>
+
         <section>
           <SectionHeading
             eyebrow="Core benefits"
@@ -359,6 +421,34 @@ export default function HomePage(): React.JSX.Element {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading
+            eyebrow="Comparison"
+            title="How Tradara differs from typical signal channels"
+            description="Built for disciplined decision-making, not impulse-driven trade chasing."
+          />
+          <div className="mt-7 overflow-x-auto">
+            <table className="min-w-full border-separate border-spacing-0 text-sm text-slate-300">
+              <thead>
+                <tr>
+                  <th className="border-b border-slate-800 px-4 py-3 text-left text-slate-200">Capability</th>
+                  <th className="border-b border-slate-800 px-4 py-3 text-left text-amber-100">Tradara</th>
+                  <th className="border-b border-slate-800 px-4 py-3 text-left text-slate-200">Typical alternatives</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonRows.map((row) => (
+                  <tr key={row.capability}>
+                    <td className="border-b border-slate-900 px-4 py-3 text-slate-200">{row.capability}</td>
+                    <td className="border-b border-slate-900 px-4 py-3">{row.tradara}</td>
+                    <td className="border-b border-slate-900 px-4 py-3 text-slate-400">{row.alternatives}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
 
@@ -494,6 +584,27 @@ export default function HomePage(): React.JSX.Element {
                 <h3 className="text-base font-semibold text-white">{faq.question}</h3>
                 <p className="mt-2 text-sm leading-7 text-slate-300">{faq.answer}</p>
               </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading
+            eyebrow="Trader feedback"
+            title="Early user sentiment from launch-phase guidance"
+            description="Experience snippets focus on clarity, discipline, and confidence-building habits."
+          />
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {testimonials.map((item) => (
+              <Card key={item.quote} className="bg-slate-900/60">
+                <CardContent className="space-y-4 p-6">
+                  <p className="text-sm leading-7 text-slate-200">“{item.quote}”</p>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{item.author}</p>
+                    <p className="text-xs text-slate-500">{item.role}</p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </section>

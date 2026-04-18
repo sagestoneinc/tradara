@@ -29,7 +29,7 @@ export function TableRow({
 }: React.HTMLAttributes<HTMLTableRowElement>): React.JSX.Element {
   return (
     <tr
-      className={cn("border-b border-slate-900 transition-colors hover:bg-slate-900/60", className)}
+      className={cn("border-b border-slate-900/90 transition-colors hover:bg-slate-900/65", className)}
       {...props}
     />
   );
@@ -40,7 +40,13 @@ export function TableHead({
   ...props
 }: React.ThHTMLAttributes<HTMLTableCellElement>): React.JSX.Element {
   return (
-    <th className={cn("h-10 px-4 text-left text-xs font-medium uppercase tracking-[0.12em]", className)} {...props} />
+    <th
+      className={cn(
+        "h-11 px-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-400",
+        className
+      )}
+      {...props}
+    />
   );
 }
 
@@ -48,6 +54,6 @@ export function TableCell({
   className,
   ...props
 }: React.TdHTMLAttributes<HTMLTableCellElement>): React.JSX.Element {
-  return <td className={cn("px-4 py-3 align-middle text-slate-200", className)} {...props} />;
+  return <td className={cn("px-4 py-3.5 align-middle text-slate-200", className)} {...props} />;
 }
 
