@@ -7,6 +7,7 @@ import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitl
 import { SectionHeading } from "../components/marketing/section-heading";
 import { SiteFooter } from "../components/marketing/site-footer";
 import { SiteHeader } from "../components/marketing/site-header";
+import { marketingFaqs, marketingPricingTiers } from "../lib/marketing-content";
 import { siteUrl } from "../lib/site";
 
 export const metadata: Metadata = {
@@ -54,79 +55,14 @@ const pricingStructuredData = {
       name: "Tradara VIP",
       priceSpecification: {
         "@type": "PriceSpecification",
-        priceCurrency: "PHP",
-        price: "Custom"
+        priceCurrency: "PHP"
       },
-      availability: "https://schema.org/PreOrder"
+      availability: "https://schema.org/LimitedAvailability"
     }
   ]
 };
 
-const plans = [
-  {
-    id: "free",
-    label: "Free",
-    subtitle: "Starter access",
-    price: "₱0",
-    cadence: "Always available",
-    benefits: [
-      "Selected market context snapshots",
-      "Educational signal highlights",
-      "Introductory risk framing and disclaimers"
-    ],
-    ctaLabel: "Start with Free",
-    ctaHref: "https://t.me/tradara",
-    buttonVariant: "secondary" as const
-  },
-  {
-    id: "pro",
-    label: "Pro",
-    subtitle: "Most popular",
-    price: "From ₱1,499",
-    cadence: "Monthly, quarterly, or annual options",
-    benefits: [
-      "Expert-reviewed trade setups",
-      "Structured entry, stop loss, and target ladders",
-      "AI-assisted market context and rationale notes",
-      "Priority recap and review workflow"
-    ],
-    ctaLabel: "Upgrade to Pro",
-    ctaHref: "https://t.me/tradara",
-    buttonVariant: "primary" as const
-  },
-  {
-    id: "vip",
-    label: "VIP",
-    subtitle: "High-touch guidance",
-    price: "Custom",
-    cadence: "Limited onboarding",
-    benefits: [
-      "Enhanced signal cadence and review depth",
-      "Priority support windows",
-      "Extended context and execution discipline reviews"
-    ],
-    ctaLabel: "Join VIP waitlist",
-    ctaHref: "https://t.me/tradara",
-    buttonVariant: "secondary" as const
-  }
-] as const;
-
-const faqs = [
-  {
-    question: "Does Tradara execute trades automatically?",
-    answer:
-      "No. Tradara provides commentary, educational guidance, and trade ideas only. Execution decisions remain with the user."
-  },
-  {
-    question: "What determines premium access?",
-    answer:
-      "Billing status is the source of truth for premium entitlement. Telegram is used only as the delivery layer."
-  },
-  {
-    question: "Is trading performance guaranteed?",
-    answer: "No. Market risk always exists, and losses are possible. Tradara does not guarantee outcomes."
-  }
-] as const;
+const pricingFaqIds = new Set(["auto-trading", "premium-access", "guarantees"]);
 
 export default function PricingPage(): React.JSX.Element {
   return (
@@ -148,7 +84,7 @@ export default function PricingPage(): React.JSX.Element {
         </header>
 
         <section className="mt-10 grid gap-6 md:grid-cols-3" aria-label="Subscription plans">
-          {plans.map((plan) => (
+          {marketingPricingTiers.map((plan) => (
             <Card key={plan.id} className={`flex h-full flex-col ${plan.id === "pro" ? "border-cyan-500/40" : ""}`}>
               <CardHeader>
                 <CardDescription className="uppercase tracking-[0.16em]">{plan.subtitle}</CardDescription>
@@ -184,12 +120,14 @@ export default function PricingPage(): React.JSX.Element {
             description="Clear answers for new and intermediate traders evaluating Tradara plans."
           />
           <div className="mt-6 space-y-5">
-            {faqs.map((faq) => (
-              <article key={faq.question} className="border-b border-slate-800 pb-5 last:border-none last:pb-0">
+            {marketingFaqs
+              .filter((faq) => pricingFaqIds.has(faq.id))
+              .map((faq) => (
+                <article key={faq.id} className="border-b border-slate-800 pb-5 last:border-none last:pb-0">
                 <h3 className="text-base font-medium text-white">{faq.question}</h3>
                 <p className="mt-2 text-sm leading-7 text-slate-300">{faq.answer}</p>
-              </article>
-            ))}
+                </article>
+              ))}
           </div>
           <div className="mt-8">
             <Button asChild variant="secondary">

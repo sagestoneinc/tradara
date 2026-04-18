@@ -5,6 +5,7 @@ import { brand } from "@tradara/shared-config";
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@tradara/ui";
 
 import { site, siteUrl } from "./lib/site";
+import { marketingFaqs, marketingPricingTiers } from "./lib/marketing-content";
 import { SectionHeading } from "./components/marketing/section-heading";
 import { SiteFooter } from "./components/marketing/site-footer";
 import { SiteHeader } from "./components/marketing/site-header";
@@ -149,48 +150,10 @@ const featureGrid = [
   "Future-ready premium tools"
 ] as const;
 
-const faqs = [
-  {
-    question: "How does Tradara work?",
-    answer:
-      "Tradara publishes educational market commentary and structured trade ideas in Telegram, including setup context, entry zones, stop loss, target levels, and risk notes."
-  },
-  {
-    question: "Does Tradara auto-trade my account?",
-    answer:
-      "No. Tradara is not an execution product. It does not place trades for you, hold custody, or connect to exchange accounts."
-  },
-  {
-    question: "Who is Tradara for?",
-    answer:
-      "Tradara is designed for beginners and intermediate traders who want cleaner signal flow, stronger structure, and guidance they can review quickly."
-  },
-  {
-    question: "What do users receive in Telegram?",
-    answer:
-      "Users receive reviewed trade alerts, market context summaries, rationale notes, and discipline-focused communication designed to reduce noise."
-  },
-  {
-    question: "How does Telegram access work?",
-    answer:
-      "Telegram is the delivery channel. Premium eligibility follows billing state, and access can be revoked when billing no longer qualifies."
-  },
-  {
-    question: "Are results guaranteed?",
-    answer:
-      "No. Trading involves risk, losses are possible, and Tradara does not guarantee outcomes or profitability."
-  },
-  {
-    question: "How do billing and cancellation work?",
-    answer:
-      "Plans are billed by tier, and users can cancel according to plan terms. Entitlements are tied to active billing state."
-  }
-] as const;
-
 const faqStructuredData = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: faqs.map((faq) => ({
+  mainEntity: marketingFaqs.map((faq) => ({
     "@type": "Question",
     name: faq.question,
     acceptedAnswer: {
@@ -412,43 +375,21 @@ export default function HomePage(): React.JSX.Element {
             description="Compare Free, Pro, and VIP options built around discipline, context depth, and support level."
           />
           <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {[
-              {
-                name: "Free",
-                price: "₱0",
-                detail: "Intro signal highlights",
-                bullets: ["Core market updates", "Basic setup summaries", "Community-grade delivery"],
-                cta: "Start free"
-              },
-              {
-                name: "Pro",
-                price: "From ₱1,499",
-                detail: "Primary premium tier",
-                bullets: ["Expert-reviewed setups", "Full entry/stop/target plans", "Recap-driven learning flow"],
-                cta: "View Pro plans"
-              },
-              {
-                name: "VIP",
-                price: "Custom",
-                detail: "Advanced support tier",
-                bullets: ["Higher-touch guidance cadence", "Priority Q&A sessions", "Expanded review context"],
-                cta: "Join VIP waitlist"
-              }
-            ].map((tier) => (
-              <Card key={tier.name} className={tier.name === "Pro" ? "border-cyan-500/45" : ""}>
+            {marketingPricingTiers.map((tier) => (
+              <Card key={tier.id} className={tier.id === "pro" ? "border-cyan-500/45" : ""}>
                 <CardHeader>
                   <CardDescription>{tier.detail}</CardDescription>
-                  <CardTitle>{tier.name}</CardTitle>
+                  <CardTitle>{tier.label}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-3xl font-semibold text-white">{tier.price}</p>
                   <ul className="space-y-2 text-sm text-slate-300">
-                    {tier.bullets.map((bullet) => (
+                    {tier.benefits.map((bullet) => (
                       <li key={bullet}>• {bullet}</li>
                     ))}
                   </ul>
-                  <Button asChild className="w-full" variant={tier.name === "Pro" ? "primary" : "secondary"}>
-                    <Link href={tier.name === "Pro" ? "/pricing" : site.social.telegram}>{tier.cta}</Link>
+                  <Button asChild className="w-full" variant={tier.buttonVariant}>
+                    <Link href={tier.homeCtaHref}>{tier.ctaLabel}</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -459,8 +400,8 @@ export default function HomePage(): React.JSX.Element {
         <section id="faq" className="rounded-3xl border border-slate-800 bg-slate-950/80 p-8">
           <SectionHeading eyebrow="FAQ" title="Questions traders ask before subscribing" />
           <div className="mt-8 space-y-4">
-            {faqs.map((faq) => (
-              <article key={faq.question} className="rounded-2xl border border-slate-800 bg-slate-900/55 p-5">
+            {marketingFaqs.map((faq) => (
+              <article key={faq.id} className="rounded-2xl border border-slate-800 bg-slate-900/55 p-5">
                 <h3 className="text-base font-semibold text-white">{faq.question}</h3>
                 <p className="mt-2 text-sm leading-7 text-slate-300">{faq.answer}</p>
               </article>
