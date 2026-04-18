@@ -19,6 +19,7 @@
     "db:migrate:deploy": "prisma migrate deploy --schema infra/supabase/prisma/schema.prisma"
   },
   "devDependencies": {
+    "@prisma/client": "^7.7.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
@@ -33,4 +34,3 @@
     "vitest": "^4.1.4"
   }
 }
-
