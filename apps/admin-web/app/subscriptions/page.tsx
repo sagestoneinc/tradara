@@ -1,8 +1,15 @@
 import type * as React from "react";
+import type { Metadata } from "next";
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@tradara/ui";
 
 import { formatAdminDate, lifecycleBadgeVariant } from "../../lib/admin-status";
 import { adminSubscriberRecords, subscriptionPlanSnapshots } from "../../lib/mock-channel-access";
+
+export const metadata: Metadata = {
+  title: "Subscriptions",
+  description:
+    "Track Tradara subscriber billing state, renewal timing, entitlement health, and premium access delivery from one dashboard."
+};
 
 function metric(label: string, value: string, helper: string): React.JSX.Element {
   return (

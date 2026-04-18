@@ -1,6 +1,7 @@
 import type * as React from "react";
 import Link from "next/link";
 import { brand } from "@tradara/shared-config";
+import { BrandMark } from "@tradara/ui";
 
 const productLinks = [
   { label: "Homepage", href: "/" },
@@ -21,13 +22,13 @@ const legalLinks = [
 
 export function SiteFooter(): React.JSX.Element {
   return (
-    <footer className="border-t border-slate-800/80 bg-slate-950/85">
+    <footer className="border-t border-amber-300/15 bg-slate-950/88">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div className="space-y-3">
-          <p className="text-sm uppercase tracking-[0.26em] text-cyan-200">Tradara by SageStone Lab</p>
+          <BrandMark />
           <p className="max-w-xl text-sm leading-7 text-slate-300">
-            Guided strategy for smarter trading with AI-assisted context, expert-reviewed signals, and risk-aware
-            Telegram delivery.
+            SEO-friendly crypto guidance for traders who want clearer structure, cleaner signal presentation, and
+            Telegram delivery anchored to verified billing state.
           </p>
           <p id="disclaimer" className="text-xs leading-6 text-slate-400">
             {brand.disclaimer}

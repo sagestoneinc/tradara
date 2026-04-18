@@ -1,7 +1,14 @@
 import type * as React from "react";
+import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Badge } from "@tradara/ui";
 
 import { channelAccessRows, recentAuditEntries } from "../lib/mock-channel-access";
+
+export const metadata: Metadata = {
+  title: "Dashboard Overview",
+  description:
+    "Review Tradara billing-backed access health, delivery state, and reconciliation activity from the internal dashboard."
+};
 
 function metric(label: string, value: string, helper: string): React.JSX.Element {
   return (

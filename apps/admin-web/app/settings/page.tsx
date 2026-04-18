@@ -1,5 +1,12 @@
 import type * as React from "react";
+import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@tradara/ui";
+
+export const metadata: Metadata = {
+  title: "Settings",
+  description:
+    "Review the internal configuration boundaries for Tradara secrets, provider mappings, and secure channel controls."
+};
 
 export default function SettingsPage(): React.JSX.Element {
   return (

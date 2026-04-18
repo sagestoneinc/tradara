@@ -14,7 +14,7 @@ import { siteUrl, telegramLaunchLinks } from "../lib/site";
 export const metadata: Metadata = {
   title: "Crypto Signal Pricing | Free, Pro, and VIP Telegram Guidance Plans",
   description:
-    "Compare Tradara Free, Pro, and VIP plans for crypto trading guidance on Telegram with expert-reviewed signals and risk-aware structure.",
+    "Compare Tradara Free, Pro, and VIP plans for crypto trading guidance on Telegram with expert-reviewed signals, risk-aware structure, and clear pricing for new traders.",
   alternates: {
     canonical: "/pricing"
   },
@@ -94,7 +94,7 @@ export default function PricingPage(): React.JSX.Element {
 
         <section className="mt-10 grid gap-6 md:grid-cols-3" aria-label="Subscription plans">
           {marketingPricingTiers.map((plan) => (
-            <Card key={plan.id} className={`flex h-full flex-col ${plan.id === "pro" ? "border-cyan-500/40" : ""}`}>
+            <Card key={plan.id} className={`flex h-full flex-col ${plan.id === "pro" ? "border-amber-300/45" : ""}`}>
               <CardHeader>
                 <CardDescription className="uppercase tracking-[0.16em]">{plan.subtitle}</CardDescription>
                 <CardTitle>{plan.label}</CardTitle>

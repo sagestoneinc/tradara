@@ -16,11 +16,12 @@ body {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at top, rgba(34, 211, 238, 0.12), transparent 38%),
+    radial-gradient(circle at top, rgba(250, 204, 21, 0.1), transparent 38%),
+    radial-gradient(circle at 85% 8%, rgba(34, 211, 238, 0.12), transparent 34%),
     linear-gradient(180deg, #020617 0%, #020617 38%, #0f172a 100%);
   color: #e2e8f0;
   font-family:
-    "Inter",
+    "Avenir Next",
     "SF Pro Display",
     system-ui,
     -apple-system,

@@ -5,7 +5,9 @@ import { LegalPageShell } from "../components/marketing/legal-page-shell";
 import { telegramLaunchLinks } from "../lib/site";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "Contact Tradara Support",
+  description:
+    "Contact Tradara support for onboarding, billing, and Telegram access questions through the official bot.",
   alternates: {
     canonical: "/contact"
   }

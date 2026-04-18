@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { LegalPageShell } from "../components/marketing/legal-page-shell";
 
 export const metadata: Metadata = {
-  title: "Terms",
+  title: "Terms of Use for Tradara",
+  description:
+    "Read the Tradara terms covering guidance-only service scope, user responsibilities, billing-backed access, and beta conditions.",
   alternates: {
     canonical: "/terms"
   }

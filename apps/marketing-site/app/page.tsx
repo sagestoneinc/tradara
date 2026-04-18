@@ -11,20 +11,20 @@ import { SiteFooter } from "./components/marketing/site-footer";
 import { SiteHeader } from "./components/marketing/site-header";
 
 export const metadata: Metadata = {
-  title: "Crypto Signals Telegram Guidance for Beginners and Disciplined Traders",
+  title: "Premium Crypto Signals Telegram Guidance for Beginners and Disciplined Traders",
   description:
-    "Tradara delivers AI-assisted market context, expert-reviewed crypto signals, and risk-aware Telegram trade alerts for beginners and intermediate traders.",
+    "Tradara delivers AI-assisted market context, expert-reviewed crypto signals, and risk-aware Telegram trade alerts for beginners, intermediate traders, and disciplined crypto investors.",
   alternates: {
     canonical: "/"
   },
   openGraph: {
-    title: "Tradara | Expert-Reviewed Crypto Signals on Telegram",
+    title: "Tradara | Premium Crypto Signals on Telegram",
     description:
       "Trade with more structure using AI-assisted market context, expert-reviewed setups, and clear risk framing inside Telegram.",
     url: siteUrl
   },
   twitter: {
-    title: "Tradara | Expert-Reviewed Crypto Signals on Telegram",
+    title: "Tradara | Premium Crypto Signals on Telegram",
     description:
       "AI-assisted context + expert-reviewed setups + clear risk notes in a premium Telegram guidance workflow."
   }
@@ -60,6 +60,7 @@ const serviceStructuredData = {
 };
 
 const trustStrip = [
+  "SEO-optimized crypto guidance pages",
   "Built for disciplined traders",
   "Expert-reviewed signals",
   "AI-assisted market context",
@@ -177,20 +178,21 @@ export default function HomePage(): React.JSX.Element {
     <>
       <SiteHeader />
       <main id="content" className="mx-auto max-w-6xl space-y-16 px-6 pb-20 pt-10 lg:space-y-24 lg:px-8 lg:pt-16">
-        <section className="relative overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/70 p-8 shadow-[0_25px_120px_rgba(6,182,212,0.16)] backdrop-blur sm:p-10">
+        <section className="relative overflow-hidden rounded-3xl border border-amber-300/15 bg-slate-950/70 p-8 shadow-[0_25px_120px_rgba(6,182,212,0.16)] backdrop-blur sm:p-10">
           <div className="absolute -top-40 right-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" aria-hidden="true" />
           <div className="absolute -bottom-20 left-16 h-56 w-56 rounded-full bg-blue-500/20 blur-3xl" aria-hidden="true" />
           <div className="relative grid gap-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
             <div className="space-y-6">
               <Badge variant="outline" className="border-cyan-500/45 text-cyan-200">
-                Guided strategy for smarter trading
+                Premium crypto guidance for smarter trading
               </Badge>
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Premium crypto signals on Telegram, built for structure over chaos.
+                Premium crypto signals on Telegram, built for structure, clarity, and SEO-ready discovery.
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-slate-300">
                 Tradara combines AI-assisted market context, expert-reviewed trade ideas, and risk-aware planning so
-                beginners and intermediate traders can make more disciplined decisions.
+                beginners and intermediate traders can make more disciplined decisions while finding the right page
+                content quickly.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild size="lg">
@@ -222,7 +224,7 @@ export default function HomePage(): React.JSX.Element {
                 <li>• Beginner-friendly risk framing</li>
               </ul>
             </div>
-            <Card className="border-cyan-500/20 bg-slate-950/85">
+            <Card className="border-amber-300/20 bg-slate-950/85">
               <CardHeader>
                 <CardDescription>Signal intelligence preview</CardDescription>
                 <CardTitle>BTCUSDT • Long bias • Reviewed</CardTitle>

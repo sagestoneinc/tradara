@@ -1,6 +1,6 @@
 import type * as React from "react";
 import Link from "next/link";
-import { Button } from "@tradara/ui";
+import { BrandMark, Button } from "@tradara/ui";
 
 import { telegramLaunchLinks } from "../../lib/site";
 import { TrackedCtaLink } from "./tracked-cta-link";
@@ -14,11 +14,10 @@ const navItems = [
 
 export function SiteHeader(): React.JSX.Element {
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-800/70 bg-slate-950/75 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-amber-300/15 bg-slate-950/78 backdrop-blur-2xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 lg:px-8">
-        <Link href="/" className="group inline-flex flex-col">
-          <span className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-200/90">Tradara</span>
-          <span className="text-xs text-slate-400 transition-colors group-hover:text-slate-300">by SageStone Lab</span>
+        <Link href="/" className="group inline-flex items-center">
+          <BrandMark className="transition-transform duration-300 group-hover:-translate-y-0.5" />
         </Link>
         <nav aria-label="Primary navigation" className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => (

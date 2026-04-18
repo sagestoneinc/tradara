@@ -1,8 +1,15 @@
 import type * as React from "react";
+import type { Metadata } from "next";
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@tradara/ui";
 
 import { lifecycleBadgeVariant } from "../../lib/admin-status";
 import { channelAccessRows } from "../../lib/mock-channel-access";
+
+export const metadata: Metadata = {
+  title: "Channel Access",
+  description:
+    "Inspect Telegram premium access records, entitlement states, and access notes from the Tradara admin console."
+};
 
 export default function ChannelAccessPage(): React.JSX.Element {
   return (

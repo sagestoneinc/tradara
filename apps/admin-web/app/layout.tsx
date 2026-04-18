@@ -6,8 +6,19 @@ import "./globals.css";
 import { AdminShell } from "../components/admin-shell";
 
 export const metadata: Metadata = {
-  title: `${brand.name} | Admin`,
-  description: "Internal operations dashboard for Tradara access control and subscriptions."
+  title: {
+    default: `${brand.name} | Admin Dashboard`,
+    template: `%s | ${brand.name} Admin`
+  },
+  description: "Internal operations dashboard for Tradara access control, subscriptions, and delivery oversight.",
+  icons: {
+    icon: "/icon.svg"
+  },
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true
+  }
 };
 
 export default function RootLayout({

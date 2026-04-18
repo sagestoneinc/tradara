@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { LegalPageShell } from "../components/marketing/legal-page-shell";
 
 export const metadata: Metadata = {
-  title: "Privacy",
+  title: "Privacy Notice for Tradara",
+  description:
+    "Review how Tradara handles account details, billing-linked entitlement data, Telegram delivery identifiers, and support communications.",
   alternates: {
     canonical: "/privacy"
   }

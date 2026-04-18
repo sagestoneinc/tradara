@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { LegalPageShell } from "../components/marketing/legal-page-shell";
 
 export const metadata: Metadata = {
-  title: "Risk Disclosure",
+  title: "Risk Disclosure for Tradara",
+  description:
+    "Review the Tradara risk disclosure for losses, non-guarantee language, and guidance-only trading boundaries.",
   alternates: {
     canonical: "/risk-disclosure"
   }
