@@ -7,7 +7,7 @@ import { site, siteUrl } from "./lib/site";
 export const metadata: Metadata = {
   metadataBase: site.baseUrl,
   title: {
-    default: `${site.name} | Telegram Trading Guidance`,
+    default: "Tradara | Crypto Signals Telegram Guidance",
     template: `%s | ${site.name}`
   },
   description: site.description,
@@ -16,10 +16,14 @@ export const metadata: Metadata = {
     canonical: "/"
   },
   keywords: [
-    "telegram trading guidance",
-    "crypto market commentary",
-    "premium trading insights",
-    "risk-aware trading education",
+    "crypto signals telegram",
+    "crypto trading signals",
+    "beginner crypto trading guidance",
+    "expert-reviewed crypto signals",
+    "ai-assisted crypto signals",
+    "telegram crypto alerts",
+    "crypto trade alerts",
+    "risk-managed crypto guidance",
     "tradara"
   ],
   category: "finance",
@@ -27,13 +31,13 @@ export const metadata: Metadata = {
     type: "website",
     url: siteUrl,
     siteName: site.name,
-    title: `${site.name} | Telegram Trading Guidance`,
+    title: "Tradara | Crypto Signals Telegram Guidance",
     description: site.description,
     locale: "en_US"
   },
   twitter: {
     card: "summary_large_image",
-    title: `${site.name} | Telegram Trading Guidance`,
+    title: "Tradara | Crypto Signals Telegram Guidance",
     description: site.description
   },
   robots: {

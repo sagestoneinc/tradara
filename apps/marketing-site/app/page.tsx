@@ -1,9 +1,34 @@
 import type * as React from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { brand } from "@tradara/shared-config";
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@tradara/ui";
 
 import { site, siteUrl } from "./lib/site";
+import { marketingFaqs, marketingPricingTiers } from "./lib/marketing-content";
+import { SectionHeading } from "./components/marketing/section-heading";
+import { SiteFooter } from "./components/marketing/site-footer";
+import { SiteHeader } from "./components/marketing/site-header";
+
+export const metadata: Metadata = {
+  title: "Crypto Signals Telegram Guidance for Beginners and Disciplined Traders",
+  description:
+    "Tradara delivers AI-assisted market context, expert-reviewed crypto signals, and risk-aware Telegram trade alerts for beginners and intermediate traders.",
+  alternates: {
+    canonical: "/"
+  },
+  openGraph: {
+    title: "Tradara | Expert-Reviewed Crypto Signals on Telegram",
+    description:
+      "Trade with more structure using AI-assisted market context, expert-reviewed setups, and clear risk framing inside Telegram.",
+    url: siteUrl
+  },
+  twitter: {
+    title: "Tradara | Expert-Reviewed Crypto Signals on Telegram",
+    description:
+      "AI-assisted context + expert-reviewed setups + clear risk notes in a premium Telegram guidance workflow."
+  }
+};
 
 const websiteStructuredData = {
   "@context": "https://schema.org",
@@ -34,121 +59,230 @@ const serviceStructuredData = {
   }
 };
 
-const highlights = [
+const trustStrip = [
+  "Built for disciplined traders",
+  "Expert-reviewed signals",
+  "AI-assisted market context",
+  "Telegram-first delivery",
+  "Risk-aware trade structure"
+] as const;
+
+const coreBenefits = [
   {
-    title: "Telegram-first delivery",
+    title: "Expert-reviewed signal quality",
     description:
-      "Get market context and trade ideas where your workflow already lives, without implying auto-execution."
+      "Every setup is reviewed before posting so users can act on cleaner signal flow, not random channel noise."
   },
   {
-    title: "Billing-backed access control",
+    title: "AI-assisted market context",
     description:
-      "Premium entitlement follows billing state, while Telegram remains the revocable delivery layer."
+      "Context blocks summarize trend posture, volatility bias, and key levels to support faster reading."
   },
   {
-    title: "Risk clarity by default",
+    title: "Beginner-friendly clarity",
     description:
-      "Every guidance flow keeps uncertainty and potential losses visible instead of relying on hype."
+      "Trade ideas are written in plain language without hiding risk, so new traders can build confidence."
+  },
+  {
+    title: "Structured entry, stop, and targets",
+    description:
+      "Setups include explicit ranges, stop loss levels, and target ladders to reduce impulsive decisions."
+  },
+  {
+    title: "Telegram convenience",
+    description:
+      "Receive guidance where you already monitor the market while keeping execution and custody in your control."
+  },
+  {
+    title: "Low-noise, high-signal flow",
+    description:
+      "Tradara prioritizes quality updates with rationale and risk notes rather than constant hype-driven calls."
   }
 ] as const;
 
 const steps = [
   {
-    title: "Choose a plan",
-    detail: "Pick the cadence that fits your review rhythm and unlock premium guidance delivery."
+    title: "Receive alerts",
+    detail: "Get Telegram updates with pair, direction, setup zone, and context summary."
   },
   {
-    title: "Receive structured insights",
-    detail: "Read directional context, setup framing, and risk-aware commentary in Telegram."
+    title: "Review the setup",
+    detail: "Read entry logic, key invalidation levels, and the review status before taking action."
   },
   {
-    title: "Stay in control",
-    detail: "Access is always tied to verified billing state with explicit revoke pathways when needed."
+    title: "Manage risk",
+    detail: "Use structured stop loss and target ladders with position sizing discipline."
+  },
+  {
+    title: "Act with structure",
+    detail: "Execute only when setup conditions align with your own rules and account exposure."
+  },
+  {
+    title: "Learn over time",
+    detail: "Recaps and rationale help you review outcomes and improve decision quality."
   }
 ] as const;
+
+const whyTradara = [
+  { title: "Less hype", value: "Calm, direct communication over flashy narratives." },
+  { title: "More structure", value: "Clear setup formatting with rationale and risk notes." },
+  { title: "No random calls", value: "Reviewed entries with transparent invalidation criteria." },
+  { title: "Guided setups", value: "Educational framing designed for consistent execution habits." },
+  { title: "Clearer risk framing", value: "Loss potential is stated upfront on every trade idea." },
+  { title: "Modern delivery", value: "Telegram-first workflow built for speed and readability." }
+] as const;
+
+const audiences = [
+  "Beginners who need clear guidance instead of jargon-heavy chatter",
+  "Part-time traders who cannot monitor charts all day",
+  "Signal seekers who want stricter structure and cleaner communication",
+  "Intermediate traders who want better discipline and less emotional noise"
+] as const;
+
+const featureGrid = [
+  "AI-assisted market context",
+  "Expert-reviewed alerts",
+  "Risk-aware planning blocks",
+  "Telegram-first delivery",
+  "Beginner guidance language",
+  "Setup recap workflow",
+  "Structured trade formatting",
+  "Future-ready premium tools"
+] as const;
+
+const faqStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: marketingFaqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer
+    }
+  }))
+};
+
+const organizationStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Tradara by SageStone Lab",
+  url: siteUrl,
+  description: site.description,
+  sameAs: [site.social.telegram]
+};
 
 export default function HomePage(): React.JSX.Element {
   return (
     <>
-      <main id="content" className="mx-auto max-w-6xl px-6 pb-16 pt-8 lg:px-8 lg:pt-10">
-        <header className="mb-16 flex items-center justify-between gap-6 border-b border-slate-800/80 pb-8">
-          <div>
-            <p className="text-sm uppercase tracking-[0.32em] text-cyan-300">Tradara by SageStone Lab</p>
-            <p className="mt-2 text-sm text-slate-400">Telegram-first crypto trading guidance platform</p>
-          </div>
-          <nav aria-label="Primary navigation" className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/pricing">Pricing</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href={site.social.telegram}>Telegram</Link>
-            </Button>
-          </nav>
-        </header>
-
-        <section className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-          <div className="space-y-6">
-            <Badge variant="outline" className="border-cyan-500/40 text-cyan-200">
-              Risk-aware market guidance
-            </Badge>
-            <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Strategic market commentary for disciplined crypto decision-making.
-            </h1>
-            <p className="max-w-2xl text-lg leading-8 text-slate-300">
-              Tradara provides educational market context, structured trade ideas, and premium-channel delivery
-              grounded in clear entitlement rules.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link href="/pricing">View plans</Link>
-              </Button>
-              <Button asChild size="lg" variant="secondary">
-                <Link href={site.social.telegram}>Follow on Telegram</Link>
-              </Button>
+      <SiteHeader />
+      <main id="content" className="mx-auto max-w-6xl space-y-16 px-6 pb-20 pt-10 lg:space-y-24 lg:px-8 lg:pt-16">
+        <section className="relative overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/70 p-8 shadow-[0_25px_120px_rgba(6,182,212,0.16)] backdrop-blur sm:p-10">
+          <div className="absolute -top-40 right-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" aria-hidden="true" />
+          <div className="absolute -bottom-20 left-16 h-56 w-56 rounded-full bg-blue-500/20 blur-3xl" aria-hidden="true" />
+          <div className="relative grid gap-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
+            <div className="space-y-6">
+              <Badge variant="outline" className="border-cyan-500/45 text-cyan-200">
+                Guided strategy for smarter trading
+              </Badge>
+              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                Premium crypto signals on Telegram, built for structure over chaos.
+              </h1>
+              <p className="max-w-2xl text-lg leading-8 text-slate-300">
+                Tradara combines AI-assisted market context, expert-reviewed trade ideas, and risk-aware planning so
+                beginners and intermediate traders can make more disciplined decisions.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button asChild size="lg">
+                  <Link href="/pricing">See plans</Link>
+                </Button>
+                <Button asChild size="lg" variant="secondary">
+                  <Link href={site.social.telegram}>View Telegram channel</Link>
+                </Button>
+              </div>
+              <p className="text-xs text-slate-400">
+                No auto-trading. Educational market commentary and trade ideas only.
+              </p>
+              <ul className="grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
+                <li>• Expert-reviewed setups</li>
+                <li>• AI-assisted market context</li>
+                <li>• Structured entry/stop/target format</li>
+                <li>• Beginner-friendly risk framing</li>
+              </ul>
             </div>
-            <p className="max-w-2xl text-sm leading-7 text-slate-400">{brand.disclaimer}</p>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardDescription>Platform posture</CardDescription>
-              <CardTitle>Designed for transparency and control</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm leading-6 text-slate-300">
-              <p>
-                Tradara is a guidance product, not an automated trading engine. It helps you interpret market
-                conditions with structured communication.
-              </p>
-              <p>
-                Billing state determines premium access eligibility. Telegram is the delivery channel and remains
-                operationally revocable.
-              </p>
-              <p>
-                Clear logs and lifecycle checks support accountable access decisions for premium channel membership.
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-
-        <section className="mt-16 grid gap-6 md:grid-cols-3" aria-label="Core value highlights">
-          {highlights.map((item) => (
-            <Card key={item.title} className="h-full">
+            <Card className="border-cyan-500/20 bg-slate-950/85">
               <CardHeader>
-                <CardTitle className="text-base">{item.title}</CardTitle>
+                <CardDescription>Signal intelligence preview</CardDescription>
+                <CardTitle>BTCUSDT • Long bias • Reviewed</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm leading-7 text-slate-300">{item.description}</p>
+              <CardContent className="space-y-5 text-sm text-slate-200">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Entry zone</p>
+                    <p className="mt-2 font-semibold text-white">64,100 - 64,480</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Stop loss</p>
+                    <p className="mt-2 font-semibold text-rose-300">63,550</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Targets</p>
+                    <p className="mt-2 font-semibold text-emerald-300">64,980 / 65,420 / 65,900</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Risk note</p>
+                    <p className="mt-2 font-semibold text-amber-200">Risk capped at 1% account exposure</p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-800 bg-slate-900/65 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Rationale</p>
+                  <p className="mt-2 leading-7 text-slate-300">
+                    Momentum reset near support with increasing spot demand. Setup invalidates on breakdown below
+                    63,550.
+                  </p>
+                </div>
               </CardContent>
             </Card>
-          ))}
+          </div>
         </section>
 
-        <section className="mt-16">
-          <div className="mb-6 max-w-2xl space-y-3">
-            <p className="text-sm uppercase tracking-[0.24em] text-cyan-300">How it works</p>
-            <h2 className="text-3xl font-semibold tracking-tight text-white">A clear path from subscription to delivery</h2>
+        <section aria-label="Trust strip" className="rounded-2xl border border-slate-800/80 bg-slate-950/55 p-6">
+          <ul className="grid gap-3 text-sm text-slate-200 sm:grid-cols-2 lg:grid-cols-5">
+            {trustStrip.map((item) => (
+              <li key={item} className="rounded-xl border border-slate-800/70 bg-slate-900/55 px-4 py-3 text-center">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section>
+          <SectionHeading
+            eyebrow="Core benefits"
+            title="Built for traders who want clarity, not channel chaos"
+            description="Tradara balances accessibility and structure so users can evaluate setups with discipline and confidence."
+          />
+          <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {coreBenefits.map((item) => (
+              <Card key={item.title} className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-base">{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm leading-7 text-slate-300">{item.description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          <ol className="grid gap-6 md:grid-cols-3">
+        </section>
+
+        <section id="how-it-works">
+          <SectionHeading
+            eyebrow="How it works"
+            title="From alert to execution discipline in five clear steps"
+            description="Tradara helps you read market context quickly, manage risk clearly, and improve consistency over time."
+          />
+          <ol className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
             {steps.map((step, index) => (
               <li key={step.title} className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">
@@ -161,31 +295,155 @@ export default function HomePage(): React.JSX.Element {
           </ol>
         </section>
 
-        <section className="mt-16 rounded-2xl border border-slate-800 bg-slate-950/80 p-8">
-          <div className="grid gap-6 md:grid-cols-[1.3fr_0.7fr] md:items-center">
-            <div className="space-y-3">
-              <h2 className="text-2xl font-semibold text-white">Ready to review the plans?</h2>
-              <p className="max-w-2xl text-sm leading-7 text-slate-300">
-                Compare monthly, quarterly, and annual options with the same guidance posture and explicit risk
-                language across all tiers.
-              </p>
-            </div>
-            <div className="md:justify-self-end">
-              <Button asChild size="lg">
-                <Link href="/pricing">Go to pricing</Link>
-              </Button>
-            </div>
+        <section id="why-tradara" className="grid gap-8 lg:grid-cols-[1fr_1fr]">
+          <div>
+            <SectionHeading
+              eyebrow="Why Tradara"
+              title="A modern guidance platform with lower noise and stronger process"
+              description="Tradara helps traders replace emotional impulse with structured decision frameworks."
+            />
           </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {whyTradara.map((item) => (
+              <Card key={item.title}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm leading-7 text-slate-300">{item.value}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <SectionHeading
+            eyebrow="Who it is for"
+            title="Designed for beginners and busy traders who want cleaner signal workflows"
+          />
+          <ul className="grid gap-4">
+            {audiences.map((audience) => (
+              <li key={audience} className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 text-sm text-slate-300">
+                {audience}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section id="features">
+          <SectionHeading
+            eyebrow="Feature grid"
+            title="Everything needed for structured crypto trade guidance"
+            description="Tradara blends educational context and tactical formatting into a premium, Telegram-first workflow."
+          />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {featureGrid.map((feature) => (
+              <Card key={feature}>
+                <CardContent className="p-5">
+                  <p className="text-sm font-medium text-slate-200">{feature}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading
+            eyebrow="Security, trust, and discipline"
+            title="Trust comes from process clarity, not hype"
+            description="Tradara is a guidance platform with transparent communication standards and explicit risk framing."
+          />
+          <div className="mt-7 grid gap-4 md:grid-cols-2">
+            {[
+              "Disciplined signal review process before delivery",
+              "Transparent setup communication and rationale blocks",
+              "Educational orientation that supports better trader habits",
+              "Explicit disclaimer posture with no guaranteed-outcome language"
+            ].map((item) => (
+              <div key={item} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300">
+                {item}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading
+            eyebrow="Pricing"
+            title="Choose the guidance tier that matches your trading rhythm"
+            description="Compare Free, Pro, and VIP options built around discipline, context depth, and support level."
+          />
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            {marketingPricingTiers.map((tier) => (
+              <Card key={tier.id} className={tier.id === "pro" ? "border-cyan-500/45" : ""}>
+                <CardHeader>
+                  <CardDescription>{tier.detail}</CardDescription>
+                  <CardTitle>{tier.label}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-3xl font-semibold text-white">{tier.price}</p>
+                  <ul className="space-y-2 text-sm text-slate-300">
+                    {tier.benefits.map((bullet) => (
+                      <li key={bullet}>• {bullet}</li>
+                    ))}
+                  </ul>
+                  <Button asChild className="w-full" variant={tier.buttonVariant}>
+                    <Link href={tier.homeCtaHref}>{tier.ctaLabel}</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section id="faq" className="rounded-3xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading eyebrow="FAQ" title="Questions traders ask before subscribing" />
+          <div className="mt-8 space-y-4">
+            {marketingFaqs.map((faq) => (
+              <article key={faq.id} className="rounded-2xl border border-slate-800 bg-slate-900/55 p-5">
+                <h3 className="text-base font-semibold text-white">{faq.question}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-300">{faq.answer}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-cyan-500/35 bg-gradient-to-r from-slate-950 via-blue-950/60 to-slate-950 p-8 text-center sm:p-10">
+          <p className="text-sm uppercase tracking-[0.26em] text-cyan-200">Final CTA</p>
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Trade with more structure, discipline, and clarity.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-300">
+            Join Tradara to receive AI-assisted context and expert-reviewed trade guidance in a premium Telegram
+            workflow.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button asChild size="lg">
+              <Link href="/pricing">Compare plans</Link>
+            </Button>
+            <Button asChild size="lg" variant="secondary">
+              <Link href={site.social.telegram}>Open Telegram</Link>
+            </Button>
+          </div>
+          <p className="mx-auto mt-4 max-w-2xl text-xs text-slate-400">{brand.disclaimer}</p>
         </section>
       </main>
 
-      <footer className="border-t border-slate-800/80 py-8">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 text-sm text-slate-400 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <p>© {new Date().getFullYear()} SageStone Lab. All rights reserved.</p>
-          <p>{brand.disclaimer}</p>
-        </div>
-      </footer>
+      <SiteFooter />
 
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationStructuredData)
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqStructuredData)
+        }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

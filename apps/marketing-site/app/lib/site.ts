@@ -18,7 +18,7 @@ export const site = {
   name: brand.name,
   tagline: brand.tagline,
   description:
-    "Telegram-first crypto trading guidance with premium access controls tied to billing state, structured risk communication, and revocable channel delivery.",
+    "Tradara by SageStone Lab is a Telegram-first crypto trading guidance platform with AI-assisted market context, expert-reviewed signals, and risk-aware setup planning.",
   baseUrl: normalizeBaseUrl(process.env.MARKETING_SITE_BASE_URL),
   social: {
     telegram: "https://t.me/tradara"
