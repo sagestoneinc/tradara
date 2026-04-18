@@ -9,7 +9,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-slate-800/80 bg-slate-950/74 shadow-[0_20px_64px_rgba(2,6,23,0.45)] backdrop-blur",
+        "rounded-[1.5rem] border border-white/8 bg-[linear-gradient(180deg,rgba(8,18,36,0.94),rgba(3,10,24,0.88))] shadow-[0_24px_70px_rgba(2,8,23,0.42)] backdrop-blur",
         className
       )}
       {...props}
@@ -44,4 +44,3 @@ export function CardContent({
 }: React.HTMLAttributes<HTMLDivElement>): React.JSX.Element {
   return <div className={cn("p-6 pt-0", className)} {...props} />;
 }
-

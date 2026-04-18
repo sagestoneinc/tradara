@@ -15,9 +15,9 @@ const navItems = [
 export function SiteHeader(): React.JSX.Element {
   return (
     <header className="sticky top-0 z-30 border-b border-amber-300/15 bg-slate-950/78 backdrop-blur-2xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 lg:px-8">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-3 lg:px-8">
         <Link href="/" className="group inline-flex items-center">
-          <BrandMark className="transition-transform duration-300 group-hover:-translate-y-0.5" />
+          <BrandMark className="transition-transform duration-300 group-hover:-translate-y-0.5 [&_svg]:w-[8.4rem] sm:[&_svg]:w-[9.2rem]" />
         </Link>
         <nav aria-label="Primary navigation" className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => (

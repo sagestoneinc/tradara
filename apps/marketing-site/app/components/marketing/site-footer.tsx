@@ -23,10 +23,10 @@ export function SiteFooter(): React.JSX.Element {
     <footer className="border-t border-amber-300/15 bg-slate-950/88">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div className="space-y-3">
-          <BrandMark />
+          <BrandMark className="[&_svg]:w-[10rem]" />
           <p className="max-w-xl text-sm leading-7 text-slate-300">
-            Premium Telegram-first crypto trading guidance for beginners and disciplined traders seeking cleaner
-            structure and calmer signal workflows.
+            Premium Telegram-first crypto trading guidance for beginners and disciplined traders
+            seeking cleaner structure and calmer signal workflows.
           </p>
           <p id="disclaimer" className="text-xs leading-6 text-slate-400">
             {brand.disclaimer}
@@ -50,7 +50,9 @@ export function SiteFooter(): React.JSX.Element {
           </ul>
         </div>
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white">Legal & trust</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white">
+            Legal & trust
+          </h2>
           <ul className="mt-4 space-y-2 text-sm text-slate-300">
             {legalLinks.map((item) => (
               <li key={item.label}>

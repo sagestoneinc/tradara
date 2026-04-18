@@ -21,7 +21,7 @@ export function AdminShell({ children }: { children: React.ReactNode }): React.J
       <div className="mx-auto flex min-h-screen max-w-7xl gap-6 px-4 py-6 lg:px-8">
         <aside className="hidden w-72 shrink-0 rounded-3xl border border-amber-300/15 bg-slate-950/82 p-6 shadow-[0_24px_80px_rgba(250,204,21,0.08)] backdrop-blur lg:block">
           <div className="space-y-3">
-            <BrandMark />
+            <BrandMark className="[&_svg]:w-[9.6rem]" />
             <p className="text-sm leading-6 text-slate-400">
               Premium operations for subscriptions, access control, and analyst oversight.
             </p>
@@ -43,9 +43,18 @@ export function AdminShell({ children }: { children: React.ReactNode }): React.J
                 >
                   <span>
                     <span className="block">{item.label}</span>
-                    <span className={cn("text-xs", active ? "text-slate-800/80" : "text-slate-500")}>{item.helper}</span>
+                    <span
+                      className={cn("text-xs", active ? "text-slate-800/80" : "text-slate-500")}
+                    >
+                      {item.helper}
+                    </span>
                   </span>
-                  <span className={cn("rounded-full px-2 py-0.5 text-xs", active ? "bg-slate-900/20" : "bg-slate-800 text-slate-400")}>
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs",
+                      active ? "bg-slate-900/20" : "bg-slate-800 text-slate-400"
+                    )}
+                  >
                     {item.count}
                   </span>
                 </Link>
@@ -56,7 +65,9 @@ export function AdminShell({ children }: { children: React.ReactNode }): React.J
           <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-500">System state</p>
             <p className="mt-2 text-sm font-medium text-white">All webhook checks healthy</p>
-            <p className="mt-1 text-xs text-slate-400">No idempotency collisions in the last 24h snapshot.</p>
+            <p className="mt-1 text-xs text-slate-400">
+              No idempotency collisions in the last 24h snapshot.
+            </p>
           </div>
         </aside>
 
@@ -66,11 +77,13 @@ export function AdminShell({ children }: { children: React.ReactNode }): React.J
               <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.3em] text-amber-200">Tradara admin</p>
-                  <h2 className="mt-2 text-3xl font-semibold text-white">Telegram premium access</h2>
+                  <h2 className="mt-2 text-3xl font-semibold text-white">
+                    Telegram premium access
+                  </h2>
                 </div>
                 <p className="max-w-xl text-sm leading-6 text-slate-400">
-                  Billing remains the source of truth. Telegram access is granted, observed, and revoked
-                  through a separate delivery layer with audit coverage.
+                  Billing remains the source of truth. Telegram access is granted, observed, and
+                  revoked through a separate delivery layer with audit coverage.
                 </p>
               </div>
 
@@ -85,7 +98,9 @@ export function AdminShell({ children }: { children: React.ReactNode }): React.J
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="grace">Live monitoring</Badge>
-                  <Button variant="secondary" size="sm">Export snapshot</Button>
+                  <Button variant="secondary" size="sm">
+                    Export snapshot
+                  </Button>
                   <Button size="sm">Open watchlist</Button>
                 </div>
               </div>

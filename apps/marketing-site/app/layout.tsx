@@ -1,8 +1,15 @@
 import type * as React from "react";
 import type { Metadata } from "next";
+import { DM_Sans } from "next/font/google";
 
 import "./globals.css";
 import { site, siteUrl } from "./lib/site";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  display: "swap"
+});
 
 export const metadata: Metadata = {
   metadataBase: site.baseUrl,
@@ -65,8 +72,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>): React.JSX.Element {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={dmSans.variable}>
+      <body className="font-[family:var(--font-dm-sans)]">
         <a
           href="#content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-cyan-300 focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-950"
