@@ -7,7 +7,7 @@ import type {
   TelegramInvite,
   WebhookEvent
 } from "@tradara/shared-types";
-import { addHours, createId, isoNow } from "@tradara/shared-utils";
+import { addHours, isoNow } from "@tradara/shared-utils";
 
 import {
   InMemoryAuditLogRepository,
@@ -157,4 +157,3 @@ function createDefaultSeed(env: BotApiEnv, now: Date): RepositorySeed {
     webhookEvents: [] satisfies WebhookEvent[]
   };
 }
-

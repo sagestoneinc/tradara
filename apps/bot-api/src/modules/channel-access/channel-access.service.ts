@@ -16,7 +16,7 @@ import type {
   SubscriptionRepository,
   TelegramInviteRepository
 } from "../../repositories/types";
-import { EntitlementService } from "./entitlement.service";
+import type { EntitlementService } from "./entitlement.service";
 import type { TelegramAccessAdapter } from "./telegram-access.adapter";
 
 export interface ChannelAccessOverview {

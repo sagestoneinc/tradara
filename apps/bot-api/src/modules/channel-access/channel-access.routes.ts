@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
-import { ChannelAccessController } from "./channel-access.controller";
+import type { ChannelAccessController } from "./channel-access.controller";
 
 export async function registerChannelAccessRoutes(
   app: FastifyInstance,
@@ -12,4 +12,3 @@ export async function registerChannelAccessRoutes(
   app.post("/v1/channel-access/reconcile", controller.reconcile);
   app.get("/v1/audit-logs", controller.listAuditLogs);
 }
-

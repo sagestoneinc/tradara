@@ -1,6 +1,6 @@
 import type { ReconciliationAction } from "@tradara/shared-types";
 
-import { ChannelAccessReconciliationService } from "../modules/channel-access/reconciliation.service";
+import type { ChannelAccessReconciliationService } from "../modules/channel-access/reconciliation.service";
 
 export class ChannelAccessReconciliationJob {
   constructor(private readonly reconciliationService: ChannelAccessReconciliationService) {}
@@ -9,4 +9,3 @@ export class ChannelAccessReconciliationJob {
     return this.reconciliationService.run(reason);
   }
 }
-

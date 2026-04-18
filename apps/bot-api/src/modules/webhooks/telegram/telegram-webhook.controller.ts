@@ -6,7 +6,7 @@ import {
   telegramWebhookHeadersSchema,
   telegramWebhookPayloadSchema
 } from "./telegram-webhook.schemas";
-import { TelegramWebhookService } from "./telegram-webhook.service";
+import type { TelegramWebhookService } from "./telegram-webhook.service";
 
 export class TelegramWebhookController {
   constructor(private readonly telegramWebhookService: TelegramWebhookService) {}

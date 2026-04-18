@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
-import { TelegramWebhookController } from "./telegram-webhook.controller";
+import type { TelegramWebhookController } from "./telegram-webhook.controller";
 
 export async function registerTelegramWebhookRoutes(
   app: FastifyInstance,
@@ -8,4 +8,3 @@ export async function registerTelegramWebhookRoutes(
 ): Promise<void> {
   app.post("/v1/webhooks/telegram", controller.handle);
 }
-

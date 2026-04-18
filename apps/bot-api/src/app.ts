@@ -19,7 +19,11 @@ export function buildApp(container: AppContainer): ReturnType<typeof Fastify> {
       return;
     }
 
-    reply.status(500).send(failure("internal_error", "Unexpected error.", { message: error.message }));
+    reply.status(500).send(
+      failure("internal_error", "Unexpected error.", {
+        message: error instanceof Error ? error.message : "Unknown error"
+      })
+    );
   });
 
   registerHealthRoutes(app);
@@ -32,4 +36,3 @@ export function buildApp(container: AppContainer): ReturnType<typeof Fastify> {
 export function createDefaultApp(env: BotApiEnv): ReturnType<typeof Fastify> {
   return buildApp(createContainer(env));
 }
-

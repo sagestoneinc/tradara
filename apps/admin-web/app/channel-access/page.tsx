@@ -1,19 +1,8 @@
 import type * as React from "react";
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@tradara/ui";
 
+import { lifecycleBadgeVariant } from "../../lib/admin-status";
 import { channelAccessRows } from "../../lib/mock-channel-access";
-
-function badgeVariant(
-  status: "active" | "grace_period" | "inactive" | "granted" | "pending_grant" | "pending_revoke" | "revoked"
-): "active" | "grace" | "inactive" | "outline" {
-  if (status === "active" || status === "granted") {
-    return "active";
-  }
-  if (status === "grace_period" || status === "pending_grant" || status === "pending_revoke") {
-    return "grace";
-  }
-  return "inactive";
-}
 
 export default function ChannelAccessPage(): React.JSX.Element {
   return (
@@ -40,16 +29,21 @@ export default function ChannelAccessPage(): React.JSX.Element {
           <TableBody>
             {channelAccessRows.map((row) => (
               <TableRow key={row.userId}>
-                <TableCell className="font-medium text-white">{row.userId}</TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <p className="font-medium text-white">{row.displayName}</p>
+                    <p className="font-mono text-xs text-slate-500">{row.userId}</p>
+                  </div>
+                </TableCell>
                 <TableCell>{row.planLabel}</TableCell>
                 <TableCell>
-                  <Badge variant={badgeVariant(row.subscriptionState)}>{row.subscriptionState}</Badge>
+                  <Badge variant={lifecycleBadgeVariant(row.subscriptionState)}>{row.subscriptionState}</Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={badgeVariant(row.entitlementState)}>{row.entitlementState}</Badge>
+                  <Badge variant={lifecycleBadgeVariant(row.entitlementState)}>{row.entitlementState}</Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={badgeVariant(row.accessState)}>{row.accessState}</Badge>
+                  <Badge variant={lifecycleBadgeVariant(row.accessState)}>{row.accessState}</Badge>
                 </TableCell>
                 <TableCell className="max-w-sm leading-6 text-slate-400">{row.note}</TableCell>
               </TableRow>

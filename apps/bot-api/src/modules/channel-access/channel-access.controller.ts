@@ -2,13 +2,13 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { ok } from "@tradara/shared-utils";
 
 import { parseInput } from "../../lib/zod";
-import { ChannelAccessReconciliationJob } from "../../jobs/channel-access-reconciliation.job";
+import type { ChannelAccessReconciliationJob } from "../../jobs/channel-access-reconciliation.job";
 import {
   inviteLinkBodySchema,
   reconcileRequestSchema,
   userIdParamsSchema
 } from "./channel-access.schemas";
-import { ChannelAccessService } from "./channel-access.service";
+import type { ChannelAccessService } from "./channel-access.service";
 
 export class ChannelAccessController {
   constructor(
@@ -44,4 +44,3 @@ export class ChannelAccessController {
     reply.send(ok(auditLogs));
   };
 }
-

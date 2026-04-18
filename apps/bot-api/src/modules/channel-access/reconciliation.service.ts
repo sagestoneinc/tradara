@@ -1,8 +1,8 @@
 import type { ReconciliationAction } from "@tradara/shared-types";
 
 import type { ChannelAccessRepository, SubscriptionRepository } from "../../repositories/types";
-import { ChannelAccessService } from "./channel-access.service";
-import { EntitlementService } from "./entitlement.service";
+import type { ChannelAccessService } from "./channel-access.service";
+import type { EntitlementService } from "./entitlement.service";
 
 export class ChannelAccessReconciliationService {
   constructor(
@@ -70,4 +70,3 @@ export class ChannelAccessReconciliationService {
     return actions;
   }
 }
-

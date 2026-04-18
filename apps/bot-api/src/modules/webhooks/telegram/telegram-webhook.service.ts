@@ -4,7 +4,7 @@ import { createId, isoNow } from "@tradara/shared-utils";
 import { DomainError } from "../../../lib/domain-error";
 import { compareSecret, hashPayload } from "../../../lib/security";
 import type { WebhookEventRepository } from "../../../repositories/types";
-import { ChannelAccessService } from "../../channel-access/channel-access.service";
+import type { ChannelAccessService } from "../../channel-access/channel-access.service";
 import type { TelegramWebhookPayload } from "./telegram-webhook.schemas";
 
 export class TelegramWebhookService {

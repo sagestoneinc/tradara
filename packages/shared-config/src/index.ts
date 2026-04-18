@@ -1,4 +1,4 @@
-import { subscriptionPlanIdSchema } from "@tradara/shared-types";
+import type { SubscriptionPlanId } from "@tradara/shared-types";
 import { z } from "zod";
 
 export const brand = {
@@ -32,9 +32,9 @@ export const subscriptionPlans = {
     premiumChannelEligible: true
   }
 } satisfies Record<
-  z.infer<typeof subscriptionPlanIdSchema>,
+  SubscriptionPlanId,
   {
-    id: z.infer<typeof subscriptionPlanIdSchema>;
+    id: SubscriptionPlanId;
     label: string;
     billingInterval: "month" | "quarter" | "year";
     amountPhp: number;
@@ -86,4 +86,3 @@ export function loadAdminWebEnv(env: NodeJS.ProcessEnv): AdminWebEnv {
 export function loadMarketingSiteEnv(env: NodeJS.ProcessEnv): MarketingSiteEnv {
   return marketingSiteEnvSchema.parse(env);
 }
-
