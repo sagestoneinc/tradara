@@ -14,16 +14,15 @@
     "@tradara/shared-config": "workspace:*",
     "@tradara/shared-types": "workspace:*",
     "@tradara/ui": "workspace:*",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "next": "^16.2.4",
     "react": "^19.2.5",
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.10",
     "tailwindcss": "^4.2.2"
   }
 }
-
