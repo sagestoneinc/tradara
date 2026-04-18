@@ -464,7 +464,7 @@ export class PrismaAuditLogRepository implements AuditLogRepository {
         action: log.action,
         entityType: log.entityType,
         entityId: log.entityId,
-        metadata: log.metadata,
+        metadata: log.metadata as Prisma.InputJsonValue,
         createdAt: new Date(log.createdAt)
       }
     });

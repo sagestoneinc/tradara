@@ -23,22 +23,23 @@ describe("channel access reconciliation", () => {
     const adapterCalls: string[] = [];
     const app = createContainer(env, {
       persistence: "memory",
-      async createInviteLink() {
-        adapterCalls.push("grant");
-        return {
-          status: "issued",
-          inviteUrl: "https://t.me/joinchat/example",
-          note: "issued"
-        };
-      },
-      async revokeAccess() {
-        adapterCalls.push("revoke");
-        return {
-          status: "revoked",
-          note: "revoked"
-        };
-      }
-    } satisfies TelegramAccessAdapter
+      telegramAccessAdapter: {
+        async createInviteLink() {
+          adapterCalls.push("grant");
+          return {
+            status: "issued",
+            inviteUrl: "https://t.me/joinchat/example",
+            note: "issued"
+          };
+        },
+        async revokeAccess() {
+          adapterCalls.push("revoke");
+          return {
+            status: "revoked",
+            note: "revoked"
+          };
+        }
+      } satisfies TelegramAccessAdapter
     });
     const actions = await app.jobs.channelAccessReconciliation.runOnce("Nightly access reconciliation");
 
@@ -79,22 +80,23 @@ describe("channel access reconciliation", () => {
     const app = createContainer(env, {
       persistence: "memory",
       seed,
-      async createInviteLink() {
-        adapterCalls.push("grant");
-        return {
-          status: "issued",
-          inviteUrl: "https://t.me/joinchat/example",
-          note: "issued"
-        };
-      },
-      async revokeAccess() {
-        adapterCalls.push("revoke");
-        return {
-          status: "revoked",
-          note: "revoked"
-        };
-      }
-    } satisfies TelegramAccessAdapter
+      telegramAccessAdapter: {
+        async createInviteLink() {
+          adapterCalls.push("grant");
+          return {
+            status: "issued",
+            inviteUrl: "https://t.me/joinchat/example",
+            note: "issued"
+          };
+        },
+        async revokeAccess() {
+          adapterCalls.push("revoke");
+          return {
+            status: "revoked",
+            note: "revoked"
+          };
+        }
+      } satisfies TelegramAccessAdapter
     });
     const actions = await app.jobs.channelAccessReconciliation.runOnce("Nightly access reconciliation");
 
