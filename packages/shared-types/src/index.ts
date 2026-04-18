@@ -44,6 +44,23 @@ export type AuditActorType = z.infer<typeof auditActorTypeSchema>;
 export const providerNameSchema = z.enum(["telegram", "paymongo", "tradingview"]);
 export type ProviderName = z.infer<typeof providerNameSchema>;
 
+export const integrationExecutionStateSchema = z.enum(["live", "pending", "stubbed"]);
+export type IntegrationExecutionState = z.infer<typeof integrationExecutionStateSchema>;
+
+export const adminTelegramConnectionStatusSchema = z.enum(["connected", "invited", "missing"]);
+export type AdminTelegramConnectionStatus = z.infer<typeof adminTelegramConnectionStatusSchema>;
+
+export const userSnapshotSchema = z.object({
+  id: z.string(),
+  displayName: z.string(),
+  email: z.string().email().nullable(),
+  telegramHandle: z.string().nullable(),
+  telegramUserId: z.string().nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+});
+export type UserSnapshot = z.infer<typeof userSnapshotSchema>;
+
 export const subscriptionSnapshotSchema = z.object({
   id: z.string(),
   userId: z.string(),
@@ -129,3 +146,108 @@ export const webhookEventSchema = z.object({
 });
 export type WebhookEvent = z.infer<typeof webhookEventSchema>;
 
+export const adminSubscriberSnapshotSchema = z.object({
+  userId: z.string(),
+  displayName: z.string(),
+  email: z.string().email().nullable(),
+  telegramHandle: z.string().nullable(),
+  telegramUserId: z.string().nullable(),
+  telegramConnectionStatus: adminTelegramConnectionStatusSchema,
+  subscriptionId: z.string().nullable(),
+  planId: subscriptionPlanIdSchema.nullable(),
+  planLabel: z.string(),
+  subscriptionState: subscriptionStatusSchema.nullable(),
+  entitlementState: entitlementStatusSchema,
+  accessState: channelAccessStatusSchema.nullable(),
+  currentPeriodEndsAt: z.string().datetime().nullable(),
+  gracePeriodEndsAt: z.string().datetime().nullable(),
+  updatedAt: z.string().datetime(),
+  note: z.string()
+});
+export type AdminSubscriberSnapshot = z.infer<typeof adminSubscriberSnapshotSchema>;
+
+export const adminPlanSnapshotSchema = z.object({
+  id: subscriptionPlanIdSchema,
+  label: z.string(),
+  billingInterval: z.enum(["month", "quarter", "year"]),
+  amountPhp: z.number().int().nonnegative(),
+  subscriberCount: z.number().int().nonnegative(),
+  healthySubscribers: z.number().int().nonnegative(),
+  watchlistSubscribers: z.number().int().nonnegative()
+});
+export type AdminPlanSnapshot = z.infer<typeof adminPlanSnapshotSchema>;
+
+export const adminPaymentsSummarySchema = z.object({
+  provider: z.literal("paymongo"),
+  executionState: integrationExecutionStateSchema,
+  activeSubscriptions: z.number().int().nonnegative(),
+  recoverySubscriptions: z.number().int().nonnegative(),
+  expiredSubscriptions: z.number().int().nonnegative(),
+  note: z.string(),
+  lastEvaluatedAt: z.string().datetime()
+});
+export type AdminPaymentsSummary = z.infer<typeof adminPaymentsSummarySchema>;
+
+export const adminAuditEntrySchema = z.object({
+  id: z.string(),
+  actor: z.string(),
+  actorType: auditActorTypeSchema,
+  action: z.string(),
+  entityType: z.string(),
+  entityId: z.string(),
+  createdAt: z.string().datetime(),
+  summary: z.string()
+});
+export type AdminAuditEntry = z.infer<typeof adminAuditEntrySchema>;
+
+export const adminOverviewDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  telegramAutomationState: integrationExecutionStateSchema,
+  billingExecutionState: integrationExecutionStateSchema,
+  metrics: z.object({
+    grantedAccess: z.number().int().nonnegative(),
+    pendingActions: z.number().int().nonnegative(),
+    atRiskAccounts: z.number().int().nonnegative()
+  }),
+  paymentsSummary: adminPaymentsSummarySchema,
+  recentAuditEntries: z.array(adminAuditEntrySchema)
+});
+export type AdminOverviewData = z.infer<typeof adminOverviewDataSchema>;
+
+export const adminUsersDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  metrics: z.object({
+    telegramConnected: z.number().int().nonnegative(),
+    pendingLinking: z.number().int().nonnegative(),
+    supportWatchlist: z.number().int().nonnegative()
+  }),
+  rows: z.array(adminSubscriberSnapshotSchema)
+});
+export type AdminUsersData = z.infer<typeof adminUsersDataSchema>;
+
+export const adminSubscriptionsDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  billingExecutionState: integrationExecutionStateSchema,
+  metrics: z.object({
+    activeEntitlements: z.number().int().nonnegative(),
+    recoveryQueue: z.number().int().nonnegative(),
+    endingWithin14Days: z.number().int().nonnegative()
+  }),
+  plans: z.array(adminPlanSnapshotSchema),
+  rows: z.array(adminSubscriberSnapshotSchema),
+  paymentsSummary: adminPaymentsSummarySchema
+});
+export type AdminSubscriptionsData = z.infer<typeof adminSubscriptionsDataSchema>;
+
+export const adminChannelAccessDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  telegramAutomationState: integrationExecutionStateSchema,
+  rows: z.array(adminSubscriberSnapshotSchema)
+});
+export type AdminChannelAccessData = z.infer<typeof adminChannelAccessDataSchema>;
+
+export const adminAuditLogListDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  rows: z.array(adminAuditEntrySchema)
+});
+export type AdminAuditLogListData = z.infer<typeof adminAuditLogListDataSchema>;
