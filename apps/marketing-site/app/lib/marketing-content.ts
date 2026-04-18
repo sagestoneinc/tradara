@@ -28,8 +28,8 @@ export const marketingPricingTiers = [
       "Introductory risk framing and disclaimers"
     ],
     ctaLabel: "Start with Free",
-    ctaHref: "https://t.me/tradara",
-    homeCtaHref: "https://t.me/tradara",
+    ctaHref: "https://t.me/tradara_bot",
+    homeCtaHref: "https://t.me/tradara_bot",
     buttonVariant: "secondary"
   },
   {
@@ -46,7 +46,7 @@ export const marketingPricingTiers = [
       "Priority recap and review workflow"
     ],
     ctaLabel: "Upgrade to Pro",
-    ctaHref: "https://t.me/tradara",
+    ctaHref: "https://t.me/tradara_bot",
     homeCtaHref: "/pricing",
     buttonVariant: "primary"
   },
@@ -63,8 +63,8 @@ export const marketingPricingTiers = [
       "Extended context and execution discipline reviews"
     ],
     ctaLabel: "Join VIP waitlist",
-    ctaHref: "https://t.me/tradara",
-    homeCtaHref: "https://t.me/tradara",
+    ctaHref: "https://t.me/tradara_bot",
+    homeCtaHref: "https://t.me/tradara_bot",
     buttonVariant: "secondary"
   }
 ] satisfies MarketingPricingTier[];
