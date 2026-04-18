@@ -21,15 +21,20 @@ const chatMemberUpdateSchema = z.object({
   new_chat_member: chatMemberStatusSchema
 });
 
+const inboundMessageSchema = z.object({
+  chat: chatSchema,
+  text: z.string()
+});
+
 export const telegramWebhookHeadersSchema = z.object({
   "x-telegram-bot-api-secret-token": z.string().min(1)
 });
 
 export const telegramWebhookPayloadSchema = z.object({
   update_id: z.union([z.number(), z.string()]).transform(String),
+  message: inboundMessageSchema.optional(),
   chat_member: chatMemberUpdateSchema.optional(),
   my_chat_member: chatMemberUpdateSchema.optional()
 });
 
 export type TelegramWebhookPayload = z.infer<typeof telegramWebhookPayloadSchema>;
-

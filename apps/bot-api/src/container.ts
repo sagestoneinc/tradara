@@ -9,6 +9,7 @@ import type {
 } from "@tradara/shared-types";
 import { addHours, isoNow } from "@tradara/shared-utils";
 
+import { StubTelegramBotAdapter } from "./bot/telegram-bot.adapter";
 import {
   InMemoryAuditLogRepository,
   InMemoryChannelAccessRepository,
@@ -73,10 +74,12 @@ export function createContainer(
     channelAccessService
   );
   const reconciliationJob = new ChannelAccessReconciliationJob(reconciliationService);
+  const telegramBot = new StubTelegramBotAdapter();
   const telegramWebhookService = new TelegramWebhookService(
     env,
     webhookEventRepository,
     channelAccessService,
+    telegramBot,
     clock
   );
 

@@ -8,7 +8,7 @@ import { TrackedCtaLink } from "./tracked-cta-link";
 const navItems = [
   { label: "Why Tradara", href: "/#why-tradara" },
   { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Pricing", href: "/#pricing" },
   { label: "FAQ", href: "/#faq" }
 ] as const;
 
@@ -28,7 +28,7 @@ export function SiteHeader(): React.JSX.Element {
         </nav>
         <div className="flex items-center gap-2">
           <Button asChild variant="secondary" size="sm" className="hidden sm:inline-flex">
-            <Link href="/pricing">View plans</Link>
+            <Link href="/#pricing">Compare Plans</Link>
           </Button>
           <Button asChild size="sm">
             <TrackedCtaLink
@@ -36,7 +36,7 @@ export function SiteHeader(): React.JSX.Element {
               eventName="launch_cta_click"
               eventMeta={{ location: "header", cta: "start_free_telegram" }}
             >
-              Start Free in Telegram
+              Join Free on Telegram
             </TrackedCtaLink>
           </Button>
         </div>

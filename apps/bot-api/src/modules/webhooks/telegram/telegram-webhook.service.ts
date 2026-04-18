@@ -1,6 +1,8 @@
 import type { BotApiEnv } from "@tradara/shared-config";
 import { createId, isoNow } from "@tradara/shared-utils";
 
+import { dispatchCommand } from "../../../bot/commands";
+import type { TelegramBotLike } from "../../../bot/types/bot";
 import { DomainError } from "../../../lib/domain-error";
 import { compareSecret, hashPayload } from "../../../lib/security";
 import type { WebhookEventRepository } from "../../../repositories/types";
@@ -12,6 +14,7 @@ export class TelegramWebhookService {
     private readonly env: BotApiEnv,
     private readonly webhookEventRepository: WebhookEventRepository,
     private readonly channelAccessService: ChannelAccessService,
+    private readonly telegramBot: TelegramBotLike,
     private readonly clock: () => Date = () => new Date()
   ) {}
 
@@ -59,6 +62,14 @@ export class TelegramWebhookService {
         providerEventId: payload.update_id
       });
       observedMembershipChange = true;
+    }
+
+    if (payload.message?.text) {
+      await dispatchCommand({
+        bot: this.telegramBot,
+        chatId: payload.message.chat.id,
+        text: payload.message.text
+      });
     }
 
     await this.webhookEventRepository.markProcessed(recorded.event.id, isoNow(this.clock()));
