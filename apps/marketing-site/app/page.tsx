@@ -1,10 +1,10 @@
 import type * as React from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { brand } from "@tradara/shared-config";
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@tradara/ui";
 
-import { site, siteUrl } from "./lib/site";
+import { TrackedCtaLink } from "./components/marketing/tracked-cta-link";
+import { site, siteUrl, telegramLaunchLinks } from "./lib/site";
 import { marketingFaqs, marketingPricingTiers } from "./lib/marketing-content";
 import { SectionHeading } from "./components/marketing/section-heading";
 import { SiteFooter } from "./components/marketing/site-footer";
@@ -194,14 +194,26 @@ export default function HomePage(): React.JSX.Element {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild size="lg">
-                  <Link href="/pricing">See plans</Link>
+                  <TrackedCtaLink
+                    href={telegramLaunchLinks.homepagePrimary}
+                    eventName="launch_cta_click"
+                    eventMeta={{ location: "hero", cta: "start_free_telegram" }}
+                  >
+                    Start Free in Telegram
+                  </TrackedCtaLink>
                 </Button>
                 <Button asChild size="lg" variant="secondary">
-                  <Link href={site.social.telegram}>View Telegram channel</Link>
+                  <TrackedCtaLink
+                    href={telegramLaunchLinks.homepageSecondary}
+                    eventName="launch_cta_click"
+                    eventMeta={{ location: "hero", cta: "see_pro_plans" }}
+                  >
+                    See Pro Plans
+                  </TrackedCtaLink>
                 </Button>
               </div>
               <p className="text-xs text-slate-400">
-                No auto-trading. Educational market commentary and trade ideas only.
+                Guidance only, not auto-trading. Trading involves risk. Premium access follows active billing status.
               </p>
               <ul className="grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
                 <li>• Expert-reviewed setups</li>
@@ -389,10 +401,85 @@ export default function HomePage(): React.JSX.Element {
                     ))}
                   </ul>
                   <Button asChild className="w-full" variant={tier.buttonVariant}>
-                    <Link href={tier.homeCtaHref}>{tier.ctaLabel}</Link>
+                    <TrackedCtaLink
+                      href={tier.homeCtaHref}
+                      eventName="launch_cta_click"
+                      eventMeta={{ location: "homepage_pricing", cta: tier.id }}
+                    >
+                      {tier.ctaLabel}
+                    </TrackedCtaLink>
                   </Button>
                 </CardContent>
               </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading
+            eyebrow="How access works"
+            title="Billing controls premium entitlement, Telegram handles delivery"
+            description="Tradara uses billing state as the source of truth for premium access. Telegram membership does not create entitlement on its own."
+          />
+          <ol className="mt-6 grid gap-4 md:grid-cols-2">
+            {[
+              "You start in Free and receive selected educational guidance updates.",
+              "When billing confirms a Pro plan, entitlement becomes premium-eligible.",
+              "Telegram invite and membership status are delivery states, not billing substitutes.",
+              "If billing no longer qualifies, access follows grace policy and can be revoked."
+            ].map((item, index) => (
+              <li key={item} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300">
+                <span className="mr-2 text-cyan-300">0{index + 1}</span>
+                {item}
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="rounded-3xl border border-cyan-500/35 bg-gradient-to-r from-slate-950 via-blue-950/60 to-slate-950 p-8 sm:p-10">
+          <SectionHeading
+            eyebrow="Founding Member Pro Beta"
+            title="Limited seats for Tradara’s first paid beta members"
+            description="Join the paid beta for structured, expert-reviewed guidance with priority onboarding support while workflows are refined."
+          />
+          <p className="mt-4 text-sm leading-7 text-slate-300">
+            This is a beta program. Features and workflows may evolve as product quality improves during launch.
+          </p>
+          <p className="mt-3 text-xs text-slate-400">
+            Guidance only. Not auto-trading. Trading involves risk and losses are possible. Premium access follows
+            active billing status.
+          </p>
+          <div className="mt-6">
+            <Button asChild size="lg">
+              <TrackedCtaLink
+                href={telegramLaunchLinks.pricingPro}
+                eventName="launch_cta_click"
+                eventMeta={{ location: "founding_offer", cta: "start_pro_beta" }}
+              >
+                Start Pro Beta
+              </TrackedCtaLink>
+            </Button>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-800 bg-slate-950/80 p-8">
+          <SectionHeading
+            eyebrow="Telegram onboarding"
+            title="Starter onboarding script for launch"
+            description="Use this sequence for bot welcome and pinned orientation copy."
+          />
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {[
+              "Welcome to Tradara by SageStone Lab. We provide educational market commentary and structured trade ideas — not automated trading.",
+              "Every setup includes context, entry zone, invalidation (stop), and target levels.",
+              "Trading involves risk. Use position sizing discipline and only take setups that fit your rules.",
+              "Free gives selected guidance updates. Pro unlocks full reviewed setup flow and deeper context.",
+              "Premium access is tied to billing status; Telegram is the delivery channel.",
+              "Start with Free updates now, then upgrade when you want full guidance depth."
+            ].map((item) => (
+              <div key={item} className="rounded-2xl border border-slate-800 bg-slate-900/55 p-5 text-sm leading-7 text-slate-300">
+                {item}
+              </div>
             ))}
           </div>
         </section>
@@ -420,10 +507,22 @@ export default function HomePage(): React.JSX.Element {
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
-              <Link href="/pricing">Compare plans</Link>
+              <TrackedCtaLink
+                href={telegramLaunchLinks.homepagePrimary}
+                eventName="launch_cta_click"
+                eventMeta={{ location: "final_cta", cta: "start_free_telegram" }}
+              >
+                Start Free in Telegram
+              </TrackedCtaLink>
             </Button>
             <Button asChild size="lg" variant="secondary">
-              <Link href={site.social.telegram}>Open Telegram</Link>
+              <TrackedCtaLink
+                href="/pricing"
+                eventName="launch_cta_click"
+                eventMeta={{ location: "final_cta", cta: "see_pro_plans" }}
+              >
+                See Pro Plans
+              </TrackedCtaLink>
             </Button>
           </div>
           <p className="mx-auto mt-4 max-w-2xl text-xs text-slate-400">{brand.disclaimer}</p>

@@ -10,7 +10,10 @@ const productLinks = [
 ] as const;
 
 const legalLinks = [
-  { label: "Risk disclosure", href: "/#disclaimer" },
+  { label: "Terms", href: "/terms" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "Risk disclosure", href: "/risk-disclosure" },
+  { label: "Contact", href: "/contact" },
   { label: "FAQ", href: "/#faq" },
   { label: "Sitemap", href: "/sitemap.xml" },
   { label: "Robots", href: "/robots.txt" }
