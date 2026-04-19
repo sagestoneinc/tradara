@@ -71,6 +71,37 @@ export type PaymongoEventType = z.infer<typeof paymongoEventTypeSchema>;
 export const integrationExecutionStateSchema = z.enum(["live", "pending", "stubbed"]);
 export type IntegrationExecutionState = z.infer<typeof integrationExecutionStateSchema>;
 
+export const signalStatusSchema = z.enum([
+  "draft",
+  "ai_scored",
+  "pending_review",
+  "approved",
+  "edited",
+  "rejected",
+  "published",
+  "canceled"
+]);
+export type SignalStatus = z.infer<typeof signalStatusSchema>;
+
+export const signalSourceTypeSchema = z.enum(["tradingview", "manual", "ai_assisted"]);
+export type SignalSourceType = z.infer<typeof signalSourceTypeSchema>;
+
+export const tradeDirectionSchema = z.enum(["long", "short", "neutral"]);
+export type TradeDirection = z.infer<typeof tradeDirectionSchema>;
+
+export const riskLabelSchema = z.enum(["low", "medium", "high"]);
+export type RiskLabel = z.infer<typeof riskLabelSchema>;
+
+export const marketInsightStatusSchema = z.enum([
+  "draft",
+  "pending_review",
+  "approved",
+  "published",
+  "rejected",
+  "canceled"
+]);
+export type MarketInsightStatus = z.infer<typeof marketInsightStatusSchema>;
+
 export const telegramExecutionStatusSchema = z.enum([
   "idle",
   "attempting",
@@ -192,6 +223,209 @@ export const webhookEventSchema = z.object({
   receivedAt: z.string().datetime()
 });
 export type WebhookEvent = z.infer<typeof webhookEventSchema>;
+
+export const signalInputSnapshotSchema = z.object({
+  id: z.string(),
+  sourceType: signalSourceTypeSchema,
+  sourceProvider: providerNameSchema.nullable(),
+  sourceEventId: z.string().nullable(),
+  symbol: z.string(),
+  timeframe: z.string().nullable(),
+  direction: tradeDirectionSchema.nullable(),
+  entryZoneLow: z.number().nullable(),
+  entryZoneHigh: z.number().nullable(),
+  stopLoss: z.number().nullable(),
+  takeProfit1: z.number().nullable(),
+  takeProfit2: z.number().nullable(),
+  takeProfit3: z.number().nullable(),
+  marketPrice: z.number().nullable(),
+  trendAlignment: z.number().int().min(0).max(100).nullable(),
+  structureQuality: z.number().int().min(0).max(100).nullable(),
+  volatilityQuality: z.number().int().min(0).max(100).nullable(),
+  liquidityQuality: z.number().int().min(0).max(100).nullable(),
+  riskRewardQuality: z.number().int().min(0).max(100).nullable(),
+  conflictPenalty: z.number().int().min(0).max(100).nullable(),
+  note: z.string().nullable(),
+  strategyName: z.string().nullable(),
+  detectedAt: z.string().datetime().nullable(),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+});
+export type SignalInputSnapshot = z.infer<typeof signalInputSnapshotSchema>;
+
+export const signalSnapshotSchema = z.object({
+  id: z.string(),
+  signalInputId: z.string(),
+  status: signalStatusSchema,
+  sourceType: signalSourceTypeSchema,
+  confidenceScore: z.number().int().min(0).max(100).nullable(),
+  setupQualityScore: z.number().int().min(0).max(100).nullable(),
+  riskLabel: riskLabelSchema.nullable(),
+  invalidationSummary: z.string().nullable(),
+  setupRationale: z.string().nullable(),
+  marketContext: z.string().nullable(),
+  warnings: z.array(z.string()),
+  confidenceBreakdown: z.object({
+    trendAlignment: z.number(),
+    structureQuality: z.number(),
+    volatilityQuality: z.number(),
+    liquidityQuality: z.number(),
+    riskRewardQuality: z.number(),
+    conflictPenalty: z.number(),
+    weightedPositiveScore: z.number(),
+    finalScore: z.number()
+  }),
+  telegramDraft: z.string().nullable(),
+  expertReviewNotes: z.string().nullable(),
+  editedTelegramDraft: z.string().nullable(),
+  publishedTelegramText: z.string().nullable(),
+  publishedTelegramChatId: z.string().nullable(),
+  publishedTelegramMessageId: z.string().nullable(),
+  approvedBy: z.string().nullable(),
+  approvedAt: z.string().datetime().nullable(),
+  rejectedBy: z.string().nullable(),
+  rejectedAt: z.string().datetime().nullable(),
+  publishedBy: z.string().nullable(),
+  publishedAt: z.string().datetime().nullable(),
+  canceledAt: z.string().datetime().nullable(),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+});
+export type SignalSnapshot = z.infer<typeof signalSnapshotSchema>;
+
+export const signalReviewSnapshotSchema = z.object({
+  id: z.string(),
+  signalId: z.string(),
+  reviewerId: z.string(),
+  resultingStatus: signalStatusSchema,
+  notes: z.string().nullable(),
+  editedTelegramDraft: z.string().nullable(),
+  createdAt: z.string().datetime()
+});
+export type SignalReviewSnapshot = z.infer<typeof signalReviewSnapshotSchema>;
+
+export const signalReviewActionSchema = z.enum(["approve", "edit", "reject", "cancel"]);
+export type SignalReviewAction = z.infer<typeof signalReviewActionSchema>;
+
+export const signalReviewRequestSchema = z.object({
+  reviewerId: z.string().min(1),
+  action: signalReviewActionSchema,
+  notes: z.string().min(1).optional(),
+  editedTelegramDraft: z.string().min(1).optional()
+});
+export type SignalReviewRequest = z.infer<typeof signalReviewRequestSchema>;
+
+export const signalPublishRequestSchema = z.object({
+  publisherId: z.string().min(1)
+});
+export type SignalPublishRequest = z.infer<typeof signalPublishRequestSchema>;
+
+export const marketInsightSnapshotSchema = z.object({
+  id: z.string(),
+  status: marketInsightStatusSchema,
+  symbol: z.string(),
+  timeframe: z.string().nullable(),
+  title: z.string(),
+  summary: z.string(),
+  body: z.string(),
+  telegramDraft: z.string().nullable(),
+  approvedBy: z.string().nullable(),
+  approvedAt: z.string().datetime().nullable(),
+  publishedBy: z.string().nullable(),
+  publishedAt: z.string().datetime().nullable(),
+  rejectedBy: z.string().nullable(),
+  rejectedAt: z.string().datetime().nullable(),
+  canceledAt: z.string().datetime().nullable(),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+});
+export type MarketInsightSnapshot = z.infer<typeof marketInsightSnapshotSchema>;
+
+export const signalPublishMetadataSchema = z.object({
+  chatId: z.string(),
+  messageId: z.string(),
+  publishedAt: z.string().datetime()
+});
+export type SignalPublishMetadata = z.infer<typeof signalPublishMetadataSchema>;
+
+export const createSignalInputRequestSchema = z.object({
+  sourceType: signalSourceTypeSchema,
+  sourceProvider: providerNameSchema.nullable().optional(),
+  sourceEventId: z.string().nullable().optional(),
+  symbol: z.string().min(1),
+  timeframe: z.string().nullable().optional(),
+  direction: tradeDirectionSchema.nullable().optional(),
+  entryZoneLow: z.number().nullable().optional(),
+  entryZoneHigh: z.number().nullable().optional(),
+  stopLoss: z.number().nullable().optional(),
+  takeProfit1: z.number().nullable().optional(),
+  takeProfit2: z.number().nullable().optional(),
+  takeProfit3: z.number().nullable().optional(),
+  marketPrice: z.number().nullable().optional(),
+  trendAlignment: z.number().int().min(0).max(100).nullable().optional(),
+  structureQuality: z.number().int().min(0).max(100).nullable().optional(),
+  volatilityQuality: z.number().int().min(0).max(100).nullable().optional(),
+  liquidityQuality: z.number().int().min(0).max(100).nullable().optional(),
+  riskRewardQuality: z.number().int().min(0).max(100).nullable().optional(),
+  conflictPenalty: z.number().int().min(0).max(100).nullable().optional(),
+  note: z.string().nullable().optional(),
+  strategyName: z.string().nullable().optional(),
+  detectedAt: z.string().datetime().nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional()
+});
+export type CreateSignalInputRequest = z.infer<typeof createSignalInputRequestSchema>;
+
+export const createMarketInsightRequestSchema = z.object({
+  symbol: z.string().min(1),
+  timeframe: z.string().nullable().optional(),
+  title: z.string().min(1),
+  summary: z.string().min(1),
+  body: z.string().min(1),
+  metadata: z.record(z.string(), z.unknown()).optional()
+});
+export type CreateMarketInsightRequest = z.infer<typeof createMarketInsightRequestSchema>;
+
+export const signalScoringInputSchema = z.object({
+  trendAlignment: z.number().int().min(0).max(100),
+  structureQuality: z.number().int().min(0).max(100),
+  volatilityQuality: z.number().int().min(0).max(100),
+  liquidityQuality: z.number().int().min(0).max(100),
+  riskRewardQuality: z.number().int().min(0).max(100),
+  conflictPenalty: z.number().int().min(0).max(100)
+});
+export type SignalScoringInput = z.infer<typeof signalScoringInputSchema>;
+
+export const signalScoringResultSchema = z.object({
+  weightedPositiveScore: z.number(),
+  finalScore: z.number(),
+  setupQualityScore: z.number().int().min(0).max(100),
+  confidenceScore: z.number().int().min(0).max(100),
+  riskLabel: riskLabelSchema,
+  breakdown: z.object({
+    trendAlignment: z.number(),
+    structureQuality: z.number(),
+    volatilityQuality: z.number(),
+    liquidityQuality: z.number(),
+    riskRewardQuality: z.number(),
+    conflictPenalty: z.number()
+  })
+});
+export type SignalScoringResult = z.infer<typeof signalScoringResultSchema>;
+
+export const signalAiEnrichmentSchema = z.object({
+  rationale: z.string(),
+  marketContext: z.string(),
+  warnings: z.array(z.string()),
+  confidenceBreakdown: signalScoringResultSchema,
+  confidenceScore: z.number().int().min(0).max(100),
+  riskLabel: riskLabelSchema,
+  invalidationSummary: z.string(),
+  telegramDraft: z.string()
+});
+export type SignalAiEnrichment = z.infer<typeof signalAiEnrichmentSchema>;
 
 export const adminSubscriberSnapshotSchema = z.object({
   userId: z.string(),
@@ -354,6 +588,37 @@ export const adminDiagnosticsDataSchema = z.object({
   deliveryFailures: z.array(adminDeliveryFailureSnapshotSchema)
 });
 export type AdminDiagnosticsData = z.infer<typeof adminDiagnosticsDataSchema>;
+
+export const adminSignalRowSchema = z.object({
+  id: z.string(),
+  contentType: z.enum(["signal", "market_insight"]),
+  state: z.union([signalStatusSchema, marketInsightStatusSchema]),
+  symbol: z.string(),
+  timeframe: z.string().nullable(),
+  direction: z.string().nullable(),
+  sourceProvider: providerNameSchema,
+  confidenceScore: z.number().int().min(0).max(100).nullable(),
+  setupQualityScore: z.number().int().min(0).max(100).nullable(),
+  riskLabel: riskLabelSchema.nullable(),
+  approvedBy: z.string().nullable(),
+  publishedAt: z.string().datetime().nullable(),
+  updatedAt: z.string().datetime(),
+  summary: z.string(),
+  telegramPreview: z.string().nullable()
+});
+export type AdminSignalRow = z.infer<typeof adminSignalRowSchema>;
+
+export const adminSignalsDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  metrics: z.object({
+    drafts: z.number().int().nonnegative(),
+    pendingReview: z.number().int().nonnegative(),
+    published: z.number().int().nonnegative(),
+    rejected: z.number().int().nonnegative()
+  }),
+  rows: z.array(adminSignalRowSchema)
+});
+export type AdminSignalsData = z.infer<typeof adminSignalsDataSchema>;
 
 export const createBillingCheckoutSessionRequestSchema = z.object({
   userId: z.string().min(1),

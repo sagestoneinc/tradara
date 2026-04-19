@@ -1,6 +1,10 @@
 import type {
   AuditLog,
   ChannelAccessRecord,
+  MarketInsightSnapshot,
+  SignalInputSnapshot,
+  SignalReviewSnapshot,
+  SignalSnapshot,
   SubscriptionSnapshot,
   TelegramInvite,
   WebhookEvent
@@ -35,3 +39,25 @@ export interface WebhookEventRepository {
   listAll(): Promise<WebhookEvent[]>;
 }
 
+export interface SignalRepository {
+  findById(id: string): Promise<SignalSnapshot | null>;
+  listAll(): Promise<SignalSnapshot[]>;
+  save(signal: SignalSnapshot): Promise<void>;
+}
+
+export interface SignalInputRepository {
+  findById(id: string): Promise<SignalInputSnapshot | null>;
+  listAll(): Promise<SignalInputSnapshot[]>;
+  save(input: SignalInputSnapshot): Promise<void>;
+}
+
+export interface SignalReviewRepository {
+  listBySignalId(signalId: string): Promise<SignalReviewSnapshot[]>;
+  save(review: SignalReviewSnapshot): Promise<void>;
+}
+
+export interface MarketInsightRepository {
+  findById(id: string): Promise<MarketInsightSnapshot | null>;
+  listAll(): Promise<MarketInsightSnapshot[]>;
+  save(insight: MarketInsightSnapshot): Promise<void>;
+}

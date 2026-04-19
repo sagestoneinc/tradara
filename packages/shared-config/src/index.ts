@@ -55,6 +55,7 @@ const botApiEnvSchema = z.object({
   TELEGRAM_WEBHOOK_SECRET: z.string().min(1),
   TELEGRAM_PREMIUM_CHANNEL_ID: z.string().min(1),
   TELEGRAM_BOT_USERNAME: z.string().min(1),
+  TRADINGVIEW_WEBHOOK_SECRET: z.string().default(""),
   ACCESS_GRACE_PERIOD_HOURS: z.coerce.number().default(accessPolicy.defaultGracePeriodHours),
   // Provider routing (A/B test weights)
   PAYMENT_PROVIDER_PAYPAL_WEIGHT: z.coerce.number().default(50),

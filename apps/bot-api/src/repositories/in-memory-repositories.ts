@@ -1,6 +1,10 @@
 import type {
   AuditLog,
   ChannelAccessRecord,
+  MarketInsightSnapshot,
+  SignalInputSnapshot,
+  SignalReviewSnapshot,
+  SignalSnapshot,
   SubscriptionSnapshot,
   TelegramInvite,
   WebhookEvent
@@ -9,6 +13,10 @@ import type {
 import type {
   AuditLogRepository,
   ChannelAccessRepository,
+  MarketInsightRepository,
+  SignalRepository,
+  SignalInputRepository,
+  SignalReviewRepository,
   SubscriptionRepository,
   TelegramInviteRepository,
   WebhookEventRepository
@@ -16,6 +24,10 @@ import type {
 
 export interface RepositorySeed {
   subscriptions?: SubscriptionSnapshot[];
+  signalInputs?: SignalInputSnapshot[];
+  signals?: SignalSnapshot[];
+  signalReviews?: SignalReviewSnapshot[];
+  marketInsights?: MarketInsightSnapshot[];
   channelAccess?: ChannelAccessRecord[];
   telegramInvites?: TelegramInvite[];
   auditLogs?: AuditLog[];
@@ -70,6 +82,86 @@ export class InMemoryChannelAccessRepository implements ChannelAccessRepository 
   async upsert(record: ChannelAccessRecord): Promise<ChannelAccessRecord> {
     this.items.set(record.userId, record);
     return record;
+  }
+}
+
+export class InMemorySignalRepository implements SignalRepository {
+  private readonly items = new Map<string, SignalSnapshot>();
+
+  constructor(seed: SignalSnapshot[] = []) {
+    seed.forEach((item) => {
+      this.items.set(item.id, item);
+    });
+  }
+
+  async findById(id: string): Promise<SignalSnapshot | null> {
+    return this.items.get(id) ?? null;
+  }
+
+  async listAll(): Promise<SignalSnapshot[]> {
+    return [...this.items.values()].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  async save(signal: SignalSnapshot): Promise<void> {
+    this.items.set(signal.id, signal);
+  }
+}
+
+export class InMemorySignalInputRepository implements SignalInputRepository {
+  private readonly items = new Map<string, SignalInputSnapshot>();
+
+  constructor(seed: SignalInputSnapshot[] = []) {
+    seed.forEach((item) => this.items.set(item.id, item));
+  }
+
+  async findById(id: string): Promise<SignalInputSnapshot | null> {
+    return this.items.get(id) ?? null;
+  }
+
+  async listAll(): Promise<SignalInputSnapshot[]> {
+    return [...this.items.values()].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  async save(input: SignalInputSnapshot): Promise<void> {
+    this.items.set(input.id, input);
+  }
+}
+
+export class InMemorySignalReviewRepository implements SignalReviewRepository {
+  private readonly items: SignalReviewSnapshot[];
+
+  constructor(seed: SignalReviewSnapshot[] = []) {
+    this.items = [...seed];
+  }
+
+  async listBySignalId(signalId: string): Promise<SignalReviewSnapshot[]> {
+    return this.items
+      .filter((item) => item.signalId === signalId)
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  async save(review: SignalReviewSnapshot): Promise<void> {
+    this.items.unshift(review);
+  }
+}
+
+export class InMemoryMarketInsightRepository implements MarketInsightRepository {
+  private readonly items = new Map<string, MarketInsightSnapshot>();
+
+  constructor(seed: MarketInsightSnapshot[] = []) {
+    seed.forEach((item) => this.items.set(item.id, item));
+  }
+
+  async findById(id: string): Promise<MarketInsightSnapshot | null> {
+    return this.items.get(id) ?? null;
+  }
+
+  async listAll(): Promise<MarketInsightSnapshot[]> {
+    return [...this.items.values()].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  async save(insight: MarketInsightSnapshot): Promise<void> {
+    this.items.set(insight.id, insight);
   }
 }
 
@@ -150,4 +242,3 @@ export class InMemoryWebhookEventRepository implements WebhookEventRepository {
     return [...this.items.values()];
   }
 }
-

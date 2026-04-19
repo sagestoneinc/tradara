@@ -71,6 +71,44 @@ enum AuditActorType {
   webhook
 }
 
+enum SignalStatus {
+  draft
+  ai_scored
+  pending_review
+  approved
+  edited
+  rejected
+  published
+  canceled
+}
+
+enum SignalSourceType {
+  tradingview
+  manual
+  ai_assisted
+}
+
+enum TradeDirection {
+  long
+  short
+  neutral
+}
+
+enum RiskLabel {
+  low
+  medium
+  high
+}
+
+enum MarketInsightStatus {
+  draft
+  pending_review
+  approved
+  published
+  rejected
+  canceled
+}
+
 model User {
   id             String          @id
   email          String?         @unique
@@ -163,4 +201,109 @@ model AuditLog {
   metadata   Json
   createdAt  DateTime       @default(now())
   user       User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model SignalInput {
+  id                    String            @id
+  sourceType            SignalSourceType
+  sourceProvider        WebhookProvider?
+  sourceEventId         String?
+  symbol                String
+  timeframe             String?
+  direction             TradeDirection?
+  entryZoneLow          Decimal?
+  entryZoneHigh         Decimal?
+  stopLoss              Decimal?
+  takeProfit1           Decimal?
+  takeProfit2           Decimal?
+  takeProfit3           Decimal?
+  marketPrice           Decimal?
+  trendAlignment        Int?
+  structureQuality      Int?
+  volatilityQuality     Int?
+  liquidityQuality      Int?
+  riskRewardQuality     Int?
+  conflictPenalty       Int?
+  note                  String?
+  strategyName          String?
+  detectedAt            DateTime?
+  metadata              Json
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  signal                Signal?
+
+  @@index([sourceType, createdAt])
+  @@index([sourceProvider, sourceEventId])
+}
+
+model Signal {
+  id                    String            @id
+  signalInputId         String            @unique
+  status                SignalStatus
+  sourceType            SignalSourceType
+  confidenceScore       Int?
+  setupQualityScore     Int?
+  riskLabel             RiskLabel?
+  invalidationSummary   String?
+  setupRationale        String?
+  marketContext         String?
+  warnings              Json
+  confidenceBreakdown   Json
+  telegramDraft         String?
+  expertReviewNotes     String?
+  editedTelegramDraft   String?
+  publishedTelegramText String?
+  publishedTelegramChatId String?
+  publishedTelegramMessageId String?
+  approvedBy            String?
+  approvedAt            DateTime?
+  rejectedBy            String?
+  rejectedAt            DateTime?
+  publishedBy           String?
+  publishedAt           DateTime?
+  canceledAt            DateTime?
+  metadata              Json
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  signalInput           SignalInput       @relation(fields: [signalInputId], references: [id], onDelete: Cascade)
+  reviews               SignalReview[]
+
+  @@index([status, createdAt])
+}
+
+model SignalReview {
+  id                String        @id
+  signalId          String
+  reviewerId        String
+  resultingStatus   SignalStatus
+  notes             String?
+  editedTelegramDraft String?
+  createdAt         DateTime      @default(now())
+  signal            Signal        @relation(fields: [signalId], references: [id], onDelete: Cascade)
+
+  @@index([signalId, createdAt])
+  @@index([reviewerId, createdAt])
+}
+
+model MarketInsight {
+  id                  String              @id
+  status              MarketInsightStatus
+  symbol              String
+  timeframe           String?
+  title               String
+  summary             String
+  body                String
+  telegramDraft       String?
+  approvedBy          String?
+  approvedAt          DateTime?
+  publishedBy         String?
+  publishedAt         DateTime?
+  rejectedBy          String?
+  rejectedAt          DateTime?
+  canceledAt          DateTime?
+  metadata            Json
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@index([status, createdAt])
 }

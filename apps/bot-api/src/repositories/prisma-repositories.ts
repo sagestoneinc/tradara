@@ -109,6 +109,7 @@ function toPrismaFailureKind(
   return value ?? null;
 }
 
+
 async function ensureUser(
   prisma: PrismaClient,
   input: {
@@ -265,6 +266,7 @@ function mapWebhookEvent(record: {
     receivedAt: record.receivedAt.toISOString()
   };
 }
+
 
 function resolveAuditUserId(metadata: Record<string, unknown>): string | null {
   const userId = metadata.userId;
