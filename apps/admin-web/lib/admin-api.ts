@@ -1,4 +1,6 @@
 import {
+  type AdminChannelAccessData,
+  type AdminOverviewData,
   adminAuditLogListDataSchema,
   adminChannelAccessDataSchema,
   adminDiagnosticsDataSchema,
@@ -15,20 +17,84 @@ function getEnv() {
   return loadAdminWebEnv(process.env);
 }
 
+function fallbackOverviewData(): AdminOverviewData {
+  const generatedAt = new Date().toISOString();
+
+  return {
+    generatedAt,
+    telegramAutomationState: "stubbed",
+    billingExecutionState: "stubbed",
+    metrics: {
+      grantedAccess: 0,
+      pendingActions: 0,
+      atRiskAccounts: 0
+    },
+    paymentsSummary: {
+      provider: "mixed",
+      executionState: "stubbed",
+      activeSubscriptions: 0,
+      recoverySubscriptions: 0,
+      expiredSubscriptions: 0,
+      note: "Admin API is temporarily unavailable. Displaying a safe empty-state snapshot.",
+      lastEvaluatedAt: generatedAt
+    },
+    recentAuditEntries: []
+  };
+}
+
+function fallbackChannelAccessData(): AdminChannelAccessData {
+  return {
+    generatedAt: new Date().toISOString(),
+    telegramAutomationState: "stubbed",
+    rows: []
+  };
+}
+
 async function fetchAdminData<TOutput>(
   path: string,
-  schema: { parse(input: unknown): TOutput }
+  schema: { parse(input: unknown): TOutput },
+  fallback?: () => TOutput
 ): Promise<TOutput> {
   const env = getEnv();
-  const response = await fetch(new URL(path, env.BOT_API_BASE_URL), {
-    cache: "no-store"
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(new URL(path, env.BOT_API_BASE_URL), {
+      cache: "no-store"
+    });
+  } catch (error) {
+    if (fallback) {
+      console.warn(`Admin API request failed for ${path}; using fallback snapshot.`, error);
+      return fallback();
+    }
+
+    throw error;
+  }
 
   if (!response.ok) {
+    if (fallback) {
+      console.warn(
+        `Admin API returned ${response.status} for ${path}; using fallback snapshot.`
+      );
+      return fallback();
+    }
+
     throw new Error(`Failed to load admin data from ${path}: ${response.status}`);
   }
 
-  const payload = await response.json();
+  let payload: unknown;
+
+  try {
+    payload = await response.json();
+  } catch (error) {
+    if (fallback) {
+      console.warn(`Admin API response parsing failed for ${path}; using fallback snapshot.`, error);
+      return fallback();
+    }
+
+    throw error;
+  }
+
   const envelope = payload as {
     success?: boolean;
     data?: unknown;
@@ -38,11 +104,20 @@ async function fetchAdminData<TOutput>(
     throw new Error(`Admin API returned a non-success envelope for ${path}`);
   }
 
-  return schema.parse(envelope.data);
+  try {
+    return schema.parse(envelope.data);
+  } catch (error) {
+    if (fallback) {
+      console.warn(`Admin API schema parse failed for ${path}; using fallback snapshot.`, error);
+      return fallback();
+    }
+
+    throw error;
+  }
 }
 
 export function getAdminOverviewData() {
-  return fetchAdminData("/v1/admin/overview", adminOverviewDataSchema);
+  return fetchAdminData("/v1/admin/overview", adminOverviewDataSchema, fallbackOverviewData);
 }
 
 export function getAdminUsersData() {
@@ -54,7 +129,11 @@ export function getAdminSubscriptionsData() {
 }
 
 export function getAdminChannelAccessData() {
-  return fetchAdminData("/v1/admin/channel-access", adminChannelAccessDataSchema);
+  return fetchAdminData(
+    "/v1/admin/channel-access",
+    adminChannelAccessDataSchema,
+    fallbackChannelAccessData
+  );
 }
 
 export function getAdminWebhookEventsData() {
