@@ -45,6 +45,8 @@ enum TelegramInviteStatus {
 enum WebhookProvider {
   telegram
   paymongo
+  paypal
+  xendit
   tradingview
 }
 

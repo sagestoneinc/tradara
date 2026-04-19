@@ -7,7 +7,13 @@ import {
   normalizeCommand,
   type SupportedCommand
 } from "../src/bot/commands";
-import { BOT_MESSAGES, FALLBACK_MESSAGE } from "../src/bot/content/bot-messages";
+import {
+  BOT_MESSAGES,
+  BOT_TELEGRAM_OPTIONS,
+  FALLBACK_MESSAGE
+} from "../src/bot/content/bot-messages";
+import { sendPlansResponse } from "../src/bot/commands/plans";
+import { sendUpgradeResponse } from "../src/bot/commands/upgrade";
 import { MAIN_MENU_KEYBOARD } from "../src/bot/keyboards/main-menu";
 import type { TelegramBotLike } from "../src/bot/types/bot";
 
@@ -50,10 +56,17 @@ describe("bot command foundation", () => {
         expect(sendMessage).toHaveBeenCalledWith(
           "chat-123",
           expectedMessageByCommand[command],
-          MAIN_MENU_KEYBOARD
+          {
+            ...BOT_TELEGRAM_OPTIONS,
+            ...MAIN_MENU_KEYBOARD
+          }
         );
       } else {
-        expect(sendMessage).toHaveBeenCalledWith("chat-123", expectedMessageByCommand[command]);
+        expect(sendMessage).toHaveBeenCalledWith(
+          "chat-123",
+          expectedMessageByCommand[command],
+          BOT_TELEGRAM_OPTIONS
+        );
       }
     }
   });
@@ -62,7 +75,10 @@ describe("bot command foundation", () => {
     const { bot, sendMessage } = createBotMock();
     await commandRegistry["/start"](bot, "chat-123");
 
-    expect(sendMessage).toHaveBeenCalledWith("chat-123", BOT_MESSAGES.start, MAIN_MENU_KEYBOARD);
+    expect(sendMessage).toHaveBeenCalledWith("chat-123", BOT_MESSAGES.start, {
+      ...BOT_TELEGRAM_OPTIONS,
+      ...MAIN_MENU_KEYBOARD
+    });
   });
 
   it("unknown commands send the fallback message", async () => {
@@ -95,6 +111,44 @@ describe("bot command foundation", () => {
     });
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(sendMessage).toHaveBeenCalledWith("chat-123", BOT_MESSAGES.plans);
+    expect(sendMessage).toHaveBeenCalledWith("chat-123", BOT_MESSAGES.plans, BOT_TELEGRAM_OPTIONS);
+  });
+
+  it("can append the BitxEX reminder after /plans when explicitly enabled", async () => {
+    const { bot, sendMessage } = createBotMock();
+
+    await sendPlansResponse(bot, "chat-123", { includeBitxexReminder: true });
+
+    expect(sendMessage).toHaveBeenNthCalledWith(
+      1,
+      "chat-123",
+      BOT_MESSAGES.plans,
+      BOT_TELEGRAM_OPTIONS
+    );
+    expect(sendMessage).toHaveBeenNthCalledWith(
+      2,
+      "chat-123",
+      BOT_MESSAGES.bitxexReminder,
+      BOT_TELEGRAM_OPTIONS
+    );
+  });
+
+  it("can append the BitxEX reminder after /upgrade when explicitly enabled", async () => {
+    const { bot, sendMessage } = createBotMock();
+
+    await sendUpgradeResponse(bot, "chat-123", { includeBitxexReminder: true });
+
+    expect(sendMessage).toHaveBeenNthCalledWith(
+      1,
+      "chat-123",
+      BOT_MESSAGES.upgrade,
+      BOT_TELEGRAM_OPTIONS
+    );
+    expect(sendMessage).toHaveBeenNthCalledWith(
+      2,
+      "chat-123",
+      BOT_MESSAGES.bitxexReminder,
+      BOT_TELEGRAM_OPTIONS
+    );
   });
 });

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadBotApiEnv } from "@tradara/shared-config";
 
 import { buildApp } from "../src/app";
@@ -26,7 +26,56 @@ function createPaymongoSignature(rawBody: string, timestamp = CURRENT_BILLING_TI
 }
 
 describe("billing routes", () => {
-  it("returns honest checkout scaffolding without claiming a live provider session", async () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("creates a deterministic checkout session through the selected provider", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+
+        if (url.includes("/v1/oauth2/token")) {
+          return new Response(
+            JSON.stringify({
+              access_token: "paypal-token",
+              expires_in: 3600,
+              scope: "*",
+              token_type: "Bearer",
+              app_id: "app_123"
+            }),
+            { status: 200, headers: { "content-type": "application/json" } }
+          );
+        }
+
+        if (url.includes("/v2/checkout/orders")) {
+          return new Response(
+            JSON.stringify({
+              id: "pp_order_001",
+              status: "CREATED",
+              links: [{ rel: "approve", href: "https://paypal.test/approve/pp_order_001" }]
+            }),
+            { status: 200, headers: { "content-type": "application/json" } }
+          );
+        }
+
+        if (url.includes("/v2/invoices")) {
+          return new Response(
+            JSON.stringify({
+              id: "x_inv_001",
+              invoice_url: "https://xendit.test/invoices/x_inv_001",
+              status: "PENDING",
+              external_id: "sub_checkout"
+            }),
+            { status: 200, headers: { "content-type": "application/json" } }
+          );
+        }
+
+        throw new Error(`Unexpected fetch URL in test: ${url}`);
+      })
+    );
+
     const app = buildApp(createContainer(env, { persistence: "memory" }));
     const response = await app.inject({
       method: "POST",
@@ -39,8 +88,8 @@ describe("billing routes", () => {
     });
 
     expect(response.statusCode).toBe(202);
-    expect(response.json().data.executionState).toBe("pending");
-    expect(response.json().data.checkoutUrl).toBeNull();
+    expect(response.json().data.executionState).toBe("live");
+    expect(response.json().data.checkoutUrl).toMatch(/^https:\/\//);
     expect(response.json().data.metadata.tradaraUserId).toBe("user_checkout");
   });
 

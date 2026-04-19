@@ -1,133 +1,172 @@
+export const BITXEX_REGISTRATION_URL = "https://xex1112gsa.sbs/register/GbSMuMyw";
+
+export const BOT_TELEGRAM_OPTIONS = {
+  parse_mode: "Markdown",
+  disable_web_page_preview: true
+} as const;
+
 export const BOT_MESSAGES = {
-  start: `Welcome to Tradara by SageStone Lab.
+  start: `👋 *Welcome to Tradara*
+_by SageStone Lab_
 
-Guided strategy for smarter trading.
+🎯 *Guided strategy for smarter trading.*
 
-Tradara is a Telegram-first crypto trading guidance platform designed for traders who want more structure, better clarity, and smarter risk awareness.
+Tradara is a Telegram-first crypto trading guidance platform built for traders who want:
 
-Here is what you can do here:
-- learn how Tradara works
-- view available plans
-- understand how alerts are structured
-- get upgrade information
-- access support and FAQs
+• clearer setups
+• structured entries and exits
+• AI-assisted market context
+• expert-reviewed trade ideas
+• better risk awareness
 
-Important:
-Trading involves risk. Losses are possible. Tradara provides market commentary, educational content, and trade ideas only. Past performance does not guarantee future results.
+Here’s what you can do:
 
-Use:
-/plans
-/faq
-/upgrade
-/help`,
-  plans: `Tradara Plans
+📘 \`/plans\` — View Tradara plans
+🚀 \`/upgrade\` — Join Premium
+❓ \`/faq\` — Common questions
+🛟 \`/help\` — Support
+⚠️ \`/risk\` — Risk guidance
+📡 \`/alerts\` — How Tradara alerts work
 
-Free
-- market updates
-- beginner-friendly crypto education
-- sample trade ideas
-- Tradara announcements
+_Trading involves risk. Losses are possible. Tradara provides market commentary, educational content, and trade ideas only. Past performance does not guarantee future results._`,
+  plans: `📦 *Tradara Plans*
 
-Premium
-- structured crypto trade alerts
-- entry, stop-loss, and target levels
-- AI-assisted market context
-- expert-reviewed trade setups
-- premium Telegram delivery
-- recap and risk-focused updates
+🆓 *Free*
+• market updates
+• beginner-friendly crypto education
+• sample trade ideas
+• Tradara announcements
 
-VIP
-- planned for later expansion
-- deeper guidance
-- higher-touch support
-- premium review experience
+💎 *Premium*
+• structured crypto trade alerts
+• entry, stop-loss, and target levels
+• AI-assisted market context
+• expert-reviewed trade setups
+• premium Telegram delivery
+• recap and risk-focused updates
 
-If you want the full Tradara experience, Premium is the best place to start.
+👑 *VIP*
+• planned for future expansion
+• deeper guidance
+• higher-touch support
+• premium review experience
 
-Use /upgrade to learn how to join.`,
-  upgrade: `Upgrade to Tradara Premium
+👉 If you want the full Tradara experience, *Premium* is the best place to start.
+
+Use \`/upgrade\` to learn how to join.`,
+  upgrade: `🚀 *Upgrade to Tradara Premium*
 
 Tradara Premium is built for traders who want:
-- structured alerts
-- clearer setup logic
-- better risk framing
-- less noise
-- premium Telegram delivery
 
-If billing or access is currently in beta, access may still be handled manually during launch.
+• structured alerts
+• clearer setup logic
+• better risk framing
+• less noise
+• premium Telegram delivery
+
+💳 If billing or access is still in beta, some onboarding steps may be handled manually during launch.
+
+🏦 *Need an exchange?*
+Most of our trading signal strategies are structured around *BitxEX*.
+
+🔗 ${BITXEX_REGISTRATION_URL}
 
 Use:
-/help
-for support
-or
-/faq
-to learn more before joining.`,
-  faq: `Tradara FAQ
+🛟 \`/help\` for support
+❓ \`/faq\` to learn more before joining`,
+  faq: `❓ *Tradara FAQ*
 
-What is Tradara?
+*What is Tradara?*
 Tradara is a Telegram-first crypto trading guidance platform by SageStone Lab.
 
-Does Tradara auto-trade for me?
+*Does Tradara auto-trade for me?*
 No. Tradara does not automatically execute trades. It provides structured trade ideas, market context, and guidance.
 
-Who is Tradara for?
-Tradara is designed for traders who want more structure, clearer setups, and better risk awareness - especially beginners and part-time traders.
+*Who is Tradara for?*
+Tradara is designed for traders who want more structure, clearer setups, and better risk awareness, especially beginners and part-time traders.
 
-What do Premium members get?
+*What do Premium members get?*
 Premium members receive structured alerts, trade plans, market context, and premium Telegram delivery.
 
-Are results guaranteed?
+*Are results guaranteed?*
 No. Trading involves risk, and no outcome is guaranteed.
 
-How do I join Premium?
-Use /upgrade for the latest access instructions.`,
-  help: `Tradara Support
+*How do I join Premium?*
+Use \`/upgrade\` for the latest access instructions.`,
+  help: `🛟 *Tradara Support*
 
-If you need help with:
-- understanding how Tradara works
-- Premium access
-- channel questions
-- onboarding
-- general support
+Need help with:
+
+• how Tradara works
+• Premium access
+• channel questions
+• onboarding
+• general support
 
 You can also use:
- /plans
- /faq
- /upgrade
 
-If you are in beta access, some support and onboarding steps may still be handled manually.`,
-  risk: `Tradara Risk Guidance
+📘 \`/plans\`
+❓ \`/faq\`
+🚀 \`/upgrade\`
+
+_If you are joining during beta, some support and onboarding steps may still be handled manually._`,
+  risk: `⚠️ *Tradara Risk Guidance*
 
 Good trading starts with good risk management.
 
 Core rules:
-- never risk more than you can afford to lose
-- avoid over-leverage
-- do not chase missed entries
-- use stop-loss levels with discipline
-- focus on consistency over emotion
 
-Tradara provides structured trade ideas, but every member remains responsible for their own execution and risk decisions.`,
-  alerts: `About Tradara Alerts
+• never risk more than you can afford to lose
+• avoid over-leverage
+• do not chase missed entries
+• use stop-loss levels with discipline
+• focus on consistency over emotion
 
-Tradara alerts are designed to provide structured trade guidance, not random market calls.
+📌 Tradara provides structured trade ideas, but every member remains responsible for their own execution and risk decisions.`,
+  alerts: `📡 *About Tradara Alerts*
+
+Tradara alerts are designed to provide *structured trade guidance*, not random market calls.
 
 A typical alert includes:
-- pair
-- direction
-- entry zone
-- stop-loss
-- take-profit targets
-- setup rationale
-- invalidation condition
-- risk note
 
-This helps traders make more disciplined decisions with clearer context.`,
-  status: `Membership Status
+• pair
+• direction
+• entry zone
+• stop-loss
+• take-profit targets
+• setup rationale
+• invalidation condition
+• risk note
 
-Your Tradara membership and access details will appear here as the platform continues to roll out billing and access automation.
+🧠 Many alerts may also include AI-assisted context and expert review notes to help traders make clearer decisions.`,
+  status: `📋 *Membership Status*
 
-If you already joined Premium and need help confirming access, please use /help.`
+Your Tradara membership and access details will appear here as billing and access automation continue rolling out.
+
+If you already joined Premium and need help confirming access, use \`/help\`.`,
+  freeChannelPinnedResources: `📌 *Tradara Resources*
+
+To get the most out of Tradara, make sure your trading setup is ready.
+
+Most of our trading signal strategies are structured around *BitxEX*, so using the same execution environment can help you follow entries, stop-loss levels, and target structure more smoothly.
+
+🔗 *Create your BitxEX account here:*
+${BITXEX_REGISTRATION_URL}
+
+Once you’re set up, review the pinned posts so you understand:
+• how Tradara signals work
+• how to manage risk
+• how to follow entries, stops, and targets
+
+⚠️ Always use proper risk management and only trade with funds you can afford to lose.`,
+  bitxexReminder: `🚀 *Quick Reminder*
+
+If you haven’t signed up for *BitxEX* yet, now is a good time to get your setup ready.
+
+Most of our trading signal strategies are built around *BitxEX*, which can make it easier to follow Tradara entries, stops, and target structure consistently.
+
+🔗 *Sign up here:*
+${BITXEX_REGISTRATION_URL}`
 } as const;
 
 export const FALLBACK_MESSAGE = `I didn't understand that command.

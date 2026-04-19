@@ -1,6 +1,7 @@
 import type { BotApiEnv } from "@tradara/shared-config";
 import { compareHexSignature, createHmacSha256Hex } from "../../../lib/security";
 import { DomainError } from "../../../lib/domain-error";
+import { decodePayPalCustomId } from "./paypal-metadata";
 
 export interface ParsedWebhookEvent {
   provider: "paypal" | "xendit" | "paymongo";
@@ -56,25 +57,22 @@ export class WebhookParser {
     let status: "paid" | "failed" | "expired" | "pending" = "pending";
     let subscriptionId = "";
     let metadata: Record<string, unknown> | undefined;
+    const resource = (body.resource ?? {}) as Record<string, unknown>;
+    const decodedMetadata = this.extractPayPalMetadata(resource);
 
     // Handle different PayPal event types
     if (eventType === "CHECKOUT.ORDER.COMPLETED") {
-      const resource = body.resource as Record<string, unknown>;
       status = resource.status === "COMPLETED" ? "paid" : "pending";
-      subscriptionId = (resource.id as string) || "";
-      if (typeof resource.custom_id === "string" && resource.custom_id.length > 0) {
-        metadata = { tradaraUserId: resource.custom_id };
-      }
+      subscriptionId = this.extractPayPalSubscriptionId(resource, decodedMetadata) ?? "";
+      metadata = decodedMetadata;
     } else if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
-      const resource = body.resource as Record<string, unknown>;
       status = (resource.status as string) === "COMPLETED" ? "paid" : "pending";
-      const supplementaryData = resource.supplementary_data as Record<string, unknown> | undefined;
-      const relatedIds = supplementaryData?.related_ids as unknown;
-      if (Array.isArray(relatedIds) && typeof relatedIds[0] === "string") {
-        subscriptionId = relatedIds[0];
-      }
+      subscriptionId = this.extractPayPalSubscriptionId(resource, decodedMetadata) ?? "";
+      metadata = decodedMetadata;
     } else if (eventType === "PAYMENT.CAPTURE.DENIED") {
       status = "failed";
+      subscriptionId = this.extractPayPalSubscriptionId(resource, decodedMetadata) ?? "";
+      metadata = decodedMetadata;
     }
 
     return {
@@ -95,7 +93,7 @@ export class WebhookParser {
   ): ParsedWebhookEvent {
     // Verify Xendit signature
     const callbackToken = headers["x-callback-token"];
-    if (callbackToken !== this.env.XENDIT_WEBHOOK_VERIFICATION_TOKEN) {
+    if (callbackToken !== this.env.XENDIT_WEBHOOK_TOKEN) {
       throw new DomainError("Invalid Xendit webhook signature", 401, "invalid_signature");
     }
 
@@ -212,5 +210,66 @@ export class WebhookParser {
       testSignature: entries.te ?? "",
       liveSignature: entries.li ?? ""
     };
+  }
+
+  private extractPayPalMetadata(
+    resource: Record<string, unknown>
+  ): Record<string, unknown> | undefined {
+    const directCustomId = this.decodePayPalMetadataValue(resource.custom_id);
+    if (directCustomId) {
+      return directCustomId;
+    }
+
+    const purchaseUnits = resource.purchase_units;
+    if (Array.isArray(purchaseUnits)) {
+      for (const purchaseUnit of purchaseUnits) {
+        if (purchaseUnit && typeof purchaseUnit === "object") {
+          const customId = this.decodePayPalMetadataValue(
+            (purchaseUnit as Record<string, unknown>).custom_id
+          );
+
+          if (customId) {
+            return customId;
+          }
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  private decodePayPalMetadataValue(value: unknown): Record<string, unknown> | undefined {
+    if (typeof value !== "string" || value.length === 0) {
+      return undefined;
+    }
+
+    return decodePayPalCustomId(value);
+  }
+
+  private extractPayPalSubscriptionId(
+    resource: Record<string, unknown>,
+    metadata?: Record<string, unknown>
+  ): string | undefined {
+    if (typeof metadata?.tradaraSubscriptionId === "string") {
+      return metadata.tradaraSubscriptionId;
+    }
+
+    const purchaseUnits = resource.purchase_units;
+    if (Array.isArray(purchaseUnits)) {
+      for (const purchaseUnit of purchaseUnits) {
+        if (purchaseUnit && typeof purchaseUnit === "object") {
+          const referenceId = (purchaseUnit as Record<string, unknown>).reference_id;
+          if (typeof referenceId === "string" && referenceId.length > 0) {
+            return referenceId;
+          }
+        }
+      }
+    }
+
+    if (typeof resource.id === "string" && resource.id.length > 0) {
+      return resource.id;
+    }
+
+    return undefined;
   }
 }

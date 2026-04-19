@@ -70,11 +70,11 @@ function toPrismaSubscriptionStatus(value: SubscriptionStatus): PrismaSubscripti
 }
 
 function toPrismaProviderName(value: ProviderName): PrismaWebhookProvider {
-  return value;
+  return value as unknown as PrismaWebhookProvider;
 }
 
 function fromPrismaProviderName(value: PrismaWebhookProvider | null): ProviderName | undefined {
-  return value ?? undefined;
+  return (value as ProviderName | null) ?? undefined;
 }
 
 function toPrismaChannelAccessStatus(
@@ -490,18 +490,18 @@ export class PrismaWebhookEventRepository implements WebhookEventRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async recordIncoming(event: WebhookEvent): Promise<{ duplicate: boolean; event: WebhookEvent }> {
-    const where = {
+    const where: Prisma.WebhookEventWhereUniqueInput = {
       provider_providerEventId: {
-        provider: event.provider,
+        provider: toPrismaProviderName(event.provider),
         providerEventId: event.providerEventId
       }
-    } as const;
+    };
 
     try {
       const created = await this.prisma.webhookEvent.create({
         data: {
           id: event.id,
-          provider: event.provider,
+          provider: toPrismaProviderName(event.provider),
           providerEventId: event.providerEventId,
           payloadHash: event.payloadHash,
           signatureValid: event.signatureValid,

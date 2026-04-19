@@ -3,6 +3,7 @@ import { subscriptionPlans } from "@tradara/shared-config";
 import type { SubscriptionPlanId } from "@tradara/shared-types";
 import { DomainError } from "../../../lib/domain-error";
 import { BasePaymentAdapter, type PaymentCheckoutRequest, type PaymentCheckoutResponse } from "./provider-adapter";
+import { encodePayPalCustomId } from "./paypal-metadata";
 
 interface PayPalOrderResponse {
   id: string;
@@ -58,7 +59,7 @@ export class PayPalAdapter extends BasePaymentAdapter {
             {
               reference_id: subscriptionId,
               description: `${plan.label} Subscription`,
-              custom_id: metadata.tradaraUserId,
+              custom_id: encodePayPalCustomId(metadata),
               amount: {
                 currency_code: "PHP",
                 value: String(plan.amountPhp / 100) // PayPal expects decimal amounts

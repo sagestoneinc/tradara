@@ -37,7 +37,7 @@ export class XenditAdapter extends BasePaymentAdapter {
 
       const metadata = this.createMetadata(request, subscriptionId);
 
-      const authString = Buffer.from(`${this.env.XENDIT_API_KEY}:`).toString("base64");
+      const authString = Buffer.from(`${this.env.XENDIT_SECRET_KEY}:`).toString("base64");
 
       const createInvoiceResponse = await fetch(`${this.baseUrl}/v2/invoices`, {
         method: "POST",
