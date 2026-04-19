@@ -1,6 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import type { BotApiEnv } from "@tradara/shared-config";
 import { ok } from "@tradara/shared-utils";
 
+import { DomainError } from "../../lib/domain-error";
 import { parseInput } from "../../lib/zod";
 import type { SignalAdminReadService } from "./signal-admin-read.service";
 import type { MarketInsightsService } from "./market-insights.service";
@@ -12,11 +14,13 @@ import {
   createMarketInsightSchema,
   publishSignalSchema,
   reviewSignalSchema,
+  tradingViewWebhookHeadersSchema,
   tradingViewSignalSchema
 } from "./signals.schemas";
 
 export class SignalsController {
   constructor(
+    private readonly env: BotApiEnv,
     private readonly signalIngestionService: SignalIngestionService,
     private readonly signalScoringService: SignalScoringService,
     private readonly signalReviewService: SignalReviewService,
@@ -26,6 +30,7 @@ export class SignalsController {
   ) {}
 
   ingestTradingView = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    this.verifyTradingViewSecret(parseInput(tradingViewWebhookHeadersSchema, request.headers));
     const body = parseInput(tradingViewSignalSchema, request.body);
     const result = await this.signalIngestionService.createDraftFromTradingView(body);
     reply.status(202).send(ok(result));
@@ -56,4 +61,32 @@ export class SignalsController {
   getSignalsAdminData = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     reply.send(ok(await this.signalAdminReadService.getAdminSignalsData()));
   };
+
+  private verifyTradingViewSecret(headers: {
+    authorization?: string;
+    "x-tradingview-secret"?: string;
+    "x-tradara-webhook-secret"?: string;
+  }): void {
+    if (!this.env.TRADINGVIEW_WEBHOOK_SECRET) {
+      throw new DomainError(
+        "TradingView webhook secret is not configured.",
+        503,
+        "tradingview_webhook_not_configured"
+      );
+    }
+
+    const bearerSecret = headers.authorization?.startsWith("Bearer ")
+      ? headers.authorization.slice("Bearer ".length).trim()
+      : null;
+    const providedSecret =
+      headers["x-tradara-webhook-secret"] ?? headers["x-tradingview-secret"] ?? bearerSecret;
+
+    if (providedSecret !== this.env.TRADINGVIEW_WEBHOOK_SECRET) {
+      throw new DomainError(
+        "TradingView webhook verification failed.",
+        401,
+        "tradingview_webhook_verification_failed"
+      );
+    }
+  }
 }

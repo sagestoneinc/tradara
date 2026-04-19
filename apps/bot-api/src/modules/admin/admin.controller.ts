@@ -42,6 +42,10 @@ export class AdminController {
     reply.send(ok(await this.adminService.getPublishedSignalsData()));
   };
 
+  getApprovedSignals = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    reply.send(ok(await this.adminService.getApprovedSignalsData()));
+  };
+
   getRejectedSignals = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     reply.send(ok(await this.adminService.getRejectedSignalsData()));
   };

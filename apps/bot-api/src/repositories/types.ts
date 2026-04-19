@@ -41,12 +41,17 @@ export interface WebhookEventRepository {
 
 export interface SignalRepository {
   findById(id: string): Promise<SignalSnapshot | null>;
+  findBySignalInputId(signalInputId: string): Promise<SignalSnapshot | null>;
   listAll(): Promise<SignalSnapshot[]>;
   save(signal: SignalSnapshot): Promise<void>;
 }
 
 export interface SignalInputRepository {
   findById(id: string): Promise<SignalInputSnapshot | null>;
+  findBySourceEventId(
+    sourceType: SignalInputSnapshot["sourceType"],
+    sourceEventId: string
+  ): Promise<SignalInputSnapshot | null>;
   listAll(): Promise<SignalInputSnapshot[]>;
   save(input: SignalInputSnapshot): Promise<void>;
 }

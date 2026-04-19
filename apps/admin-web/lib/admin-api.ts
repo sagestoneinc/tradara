@@ -166,6 +166,10 @@ export function getAdminPublishedSignalsData() {
   return fetchAdminData("/v1/admin/signals/published", adminSignalListDataSchema);
 }
 
+export function getAdminApprovedSignalsData() {
+  return fetchAdminData("/v1/admin/signals/approved", adminSignalListDataSchema);
+}
+
 export function getAdminRejectedSignalsData() {
   return fetchAdminData("/v1/admin/signals/rejected", adminSignalListDataSchema);
 }

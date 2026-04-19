@@ -58,6 +58,7 @@ import {
 } from "./modules/channel-access/telegram-access.adapter";
 import { MarketInsightsService } from "./modules/signals/market-insights.service";
 import { SignalAdminReadService } from "./modules/signals/signal-admin-read.service";
+import { SignalsController } from "./modules/signals/signals.controller";
 import { SignalIngestionService } from "./modules/signals/signal-ingestion.service";
 import { SignalPublishingService } from "./modules/signals/signal-publishing.service";
 import { SignalReviewService } from "./modules/signals/signal-review.service";
@@ -71,6 +72,7 @@ export interface AppContainer {
     admin: AdminController;
     billing: BillingController;
     channelAccess: ChannelAccessController;
+    signals: SignalsController;
     telegramWebhook: TelegramWebhookController;
   };
   jobs: {
@@ -159,6 +161,7 @@ export function createContainer(
   const signalIngestionService = new SignalIngestionService(
     signalInputRepository,
     signalRepository,
+    auditLogRepository,
     clock
   );
   const signalScoringService = new SignalScoringService(
@@ -172,7 +175,13 @@ export function createContainer(
     signalReviewRepository,
     clock
   );
-  const signalPublishingService = new SignalPublishingService(signalRepository, auditLogRepository);
+  const signalPublishingService = new SignalPublishingService(
+    signalRepository,
+    auditLogRepository,
+    telegramBot,
+    env.TELEGRAM_PREMIUM_CHANNEL_ID,
+    clock
+  );
   const marketInsightsService = new MarketInsightsService(
     marketInsightRepository,
     aiMarketAuditorService,
@@ -183,12 +192,6 @@ export function createContainer(
     marketInsightRepository,
     clock
   );
-
-  void signalIngestionService;
-  void signalScoringService;
-  void signalReviewService;
-  void signalPublishingService;
-  void marketInsightsService;
 
   const adminService = new AdminService(
     channelAccessService,
@@ -203,6 +206,15 @@ export function createContainer(
       admin: new AdminController(adminService),
       billing: new BillingController(billingService),
       channelAccess: new ChannelAccessController(channelAccessService, reconciliationJob),
+      signals: new SignalsController(
+        env,
+        signalIngestionService,
+        signalScoringService,
+        signalReviewService,
+        signalPublishingService,
+        marketInsightsService,
+        signalAdminReadService
+      ),
       telegramWebhook: new TelegramWebhookController(telegramWebhookService)
     },
     jobs: {

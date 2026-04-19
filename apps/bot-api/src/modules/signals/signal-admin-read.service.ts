@@ -22,6 +22,13 @@ export class SignalAdminReadService {
     return this.filterSignalsByStatus("published");
   }
 
+  async getApprovedSignals(): Promise<SignalSnapshot[]> {
+    const signals = await this.signalRepository.listAll();
+    return signals
+      .filter((signal) => signal.status === "approved" || signal.status === "edited")
+      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  }
+
   async getRejectedSignals(): Promise<SignalSnapshot[]> {
     return this.filterSignalsByStatus("rejected");
   }

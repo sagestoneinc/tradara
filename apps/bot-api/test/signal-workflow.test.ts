@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { loadBotApiEnv } from "@tradara/shared-config";
 
 import {
   InMemoryMarketInsightRepository,
@@ -14,6 +15,7 @@ import { SignalIngestionService } from "../src/modules/signals/signal-ingestion.
 import { SignalPublishingService } from "../src/modules/signals/signal-publishing.service";
 import { SignalReviewService } from "../src/modules/signals/signal-review.service";
 import { SignalScoringService } from "../src/modules/signals/signal-scoring.service";
+import { SignalsController } from "../src/modules/signals/signals.controller";
 
 describe("signal workflow foundation", () => {
   it("creates a draft signal, enriches it, and moves it to pending review", async () => {
@@ -175,5 +177,78 @@ describe("signal workflow foundation", () => {
     expect((await adminReadService.getReviewQueue())).toHaveLength(0);
     expect((await adminReadService.getRejectedSignals())).toHaveLength(1);
     expect((await adminReadService.getMarketInsights())).toHaveLength(1);
+  });
+
+  it("dedupes TradingView drafts by alert id and source type", async () => {
+    const signalInputRepository = new InMemorySignalInputRepository();
+    const signalRepository = new InMemorySignalRepository();
+    const ingestionService = new SignalIngestionService(signalInputRepository, signalRepository);
+
+    const first = await ingestionService.createDraftFromTradingView({
+      alertId: "tv_alert_001",
+      symbol: "BTCUSDT",
+      timeframe: "1H",
+      direction: "long",
+      trigger: "Breakout"
+    });
+    const second = await ingestionService.createDraftFromTradingView({
+      alertId: "tv_alert_001",
+      symbol: "BTCUSDT",
+      timeframe: "1H",
+      direction: "long",
+      trigger: "Breakout"
+    });
+
+    expect(first.signalInput.id).toBe(second.signalInput.id);
+    expect(first.signal.id).toBe(second.signal.id);
+    expect((await signalInputRepository.listAll())).toHaveLength(1);
+    expect((await signalRepository.listAll())).toHaveLength(1);
+  });
+
+  it("rejects TradingView ingestion when the webhook secret is invalid", async () => {
+    const env = loadBotApiEnv({
+      NODE_ENV: "test",
+      BOT_API_PORT: "3001",
+      BOT_API_BASE_URL: "http://localhost:3001",
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres",
+      TELEGRAM_BOT_TOKEN: "token",
+      TELEGRAM_WEBHOOK_SECRET: "telegram-secret",
+      TELEGRAM_PREMIUM_CHANNEL_ID: "-1000001",
+      TELEGRAM_BOT_USERNAME: "tradara_bot",
+      TRADINGVIEW_WEBHOOK_SECRET: "tv-secret",
+      ACCESS_GRACE_PERIOD_HOURS: "72"
+    });
+
+    const controller = new SignalsController(
+      env,
+      new SignalIngestionService(new InMemorySignalInputRepository(), new InMemorySignalRepository()),
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never
+    );
+
+    await expect(
+      controller.ingestTradingView(
+        {
+          headers: {
+            "x-tradara-webhook-secret": "wrong-secret"
+          },
+          body: {
+            alertId: "tv_alert_002",
+            symbol: "ETHUSDT"
+          }
+        } as never,
+        {
+          status() {
+            return this;
+          },
+          send() {}
+        } as never
+      )
+    ).rejects.toMatchObject({
+      code: "tradingview_webhook_verification_failed"
+    });
   });
 });

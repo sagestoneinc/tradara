@@ -10,6 +10,7 @@ const navItems = [
   { href: "/channel-access", label: "Channel Access", helper: "Delivery layer", count: "12" },
   { href: "/diagnostics", label: "Diagnostics", helper: "Ops health", count: "07" },
   { href: "/signals/review-queue", label: "Signals", helper: "Review queue", count: "05" },
+  { href: "/signals/approved", label: "Approved", helper: "Ready to publish", count: "04" },
   { href: "/signals/market-insights", label: "Insights", helper: "Market drafts", count: "03" },
   { href: "/users", label: "Users", helper: "Identity map", count: "36" },
   { href: "/subscriptions", label: "Subscriptions", helper: "Billing truth", count: "09" },

@@ -98,6 +98,10 @@ export class InMemorySignalRepository implements SignalRepository {
     return this.items.get(id) ?? null;
   }
 
+  async findBySignalInputId(signalInputId: string): Promise<SignalSnapshot | null> {
+    return [...this.items.values()].find((item) => item.signalInputId === signalInputId) ?? null;
+  }
+
   async listAll(): Promise<SignalSnapshot[]> {
     return [...this.items.values()].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
   }
@@ -116,6 +120,17 @@ export class InMemorySignalInputRepository implements SignalInputRepository {
 
   async findById(id: string): Promise<SignalInputSnapshot | null> {
     return this.items.get(id) ?? null;
+  }
+
+  async findBySourceEventId(
+    sourceType: SignalInputSnapshot["sourceType"],
+    sourceEventId: string
+  ): Promise<SignalInputSnapshot | null> {
+    return (
+      [...this.items.values()].find(
+        (item) => item.sourceType === sourceType && item.sourceEventId === sourceEventId
+      ) ?? null
+    );
   }
 
   async listAll(): Promise<SignalInputSnapshot[]> {

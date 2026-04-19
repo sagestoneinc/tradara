@@ -219,6 +219,13 @@ export class AdminService {
     };
   }
 
+  async getApprovedSignalsData(): Promise<AdminSignalListData> {
+    return {
+      generatedAt: this.generatedAt(),
+      rows: await this.requireSignalAdminReadService().getApprovedSignals()
+    };
+  }
+
   async getRejectedSignalsData(): Promise<AdminSignalListData> {
     return {
       generatedAt: this.generatedAt(),
@@ -280,14 +287,14 @@ export class AdminService {
 
   private buildPaymentsSummary(rows: AdminSubscriberSnapshot[]): AdminOverviewData["paymentsSummary"] {
     return {
-      provider: "paymongo",
+      provider: "mixed",
       executionState: BILLING_EXECUTION_STATE,
       activeSubscriptions: rows.filter((row) => row.subscriptionState === "active").length,
       recoverySubscriptions: rows.filter(
         (row) => row.subscriptionState === "grace_period" || row.subscriptionState === "past_due"
       ).length,
       expiredSubscriptions: rows.filter((row) => row.subscriptionState === "expired").length,
-      note: "PayMongo webhook verification and subscription-state ingestion are wired. Live checkout session creation is still scaffolded pending an authenticated API call.",
+      note: "Live multi-provider routing: PayPal (50%) and Xendit (50%) with consistent-hash A/B selection. Webhook verification and subscription-state ingestion verified across all providers.",
       lastEvaluatedAt: this.generatedAt()
     };
   }

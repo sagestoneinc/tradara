@@ -348,6 +348,7 @@ describe("admin data services", () => {
     );
 
     expect(adminSignalListDataSchema.parse(await adminService.getSignalReviewQueueData()).rows).toHaveLength(1);
+    expect(adminSignalListDataSchema.parse(await adminService.getApprovedSignalsData()).rows).toHaveLength(0);
     expect(adminSignalListDataSchema.parse(await adminService.getPublishedSignalsData()).rows).toHaveLength(1);
     expect(adminSignalListDataSchema.parse(await adminService.getRejectedSignalsData()).rows).toHaveLength(1);
     expect(adminSignalListDataSchema.parse(await adminService.getSignalWatchlistData()).rows).toHaveLength(1);

@@ -298,6 +298,16 @@ export class PrismaSignalRepository implements SignalRepository {
     return rows[0] ? mapSignal(rows[0]) : null;
   }
 
+  async findBySignalInputId(signalInputId: string): Promise<SignalSnapshot | null> {
+    const rows = await this.prisma.$queryRaw<SignalRow[]>`
+      SELECT * FROM "Signal"
+      WHERE "signalInputId" = ${signalInputId}
+      LIMIT 1
+    `;
+
+    return rows[0] ? mapSignal(rows[0]) : null;
+  }
+
   async listAll(): Promise<SignalSnapshot[]> {
     const rows = await this.prisma.$queryRaw<SignalRow[]>`
       SELECT * FROM "Signal"
@@ -367,6 +377,20 @@ export class PrismaSignalInputRepository implements SignalInputRepository {
     const rows = await this.prisma.$queryRaw<SignalInputRow[]>`
       SELECT * FROM "SignalInput"
       WHERE "id" = ${id}
+      LIMIT 1
+    `;
+
+    return rows[0] ? mapSignalInput(rows[0]) : null;
+  }
+
+  async findBySourceEventId(
+    sourceType: SignalInputSnapshot["sourceType"],
+    sourceEventId: string
+  ): Promise<SignalInputSnapshot | null> {
+    const rows = await this.prisma.$queryRaw<SignalInputRow[]>`
+      SELECT * FROM "SignalInput"
+      WHERE "sourceType" = ${sourceType}
+        AND "sourceEventId" = ${sourceEventId}
       LIMIT 1
     `;
 

@@ -1,4 +1,5 @@
 import type {
+  AuditLog,
   CreateSignalInputRequest,
   SignalInputSnapshot,
   SignalSnapshot,
@@ -6,12 +7,17 @@ import type {
 } from "@tradara/shared-types";
 import { createId, isoNow } from "@tradara/shared-utils";
 
-import type { SignalInputRepository, SignalRepository } from "../../repositories/types";
+import type {
+  AuditLogRepository,
+  SignalInputRepository,
+  SignalRepository
+} from "../../repositories/types";
 
 export class SignalIngestionService {
   constructor(
     private readonly signalInputRepository: SignalInputRepository,
     private readonly signalRepository: SignalRepository,
+    private readonly auditLogRepository: AuditLogRepository | null = null,
     private readonly clock: () => Date = () => new Date()
   ) {}
 
@@ -92,6 +98,21 @@ export class SignalIngestionService {
 
     await this.signalInputRepository.save(signalInput);
     await this.signalRepository.save(signal);
+    await this.appendAuditLog({
+      id: createId("audit"),
+      actorType: "system",
+      actorId: "signal-ingestion",
+      action: "signal.draft_created",
+      entityType: "signal",
+      entityId: signal.id,
+      metadata: {
+        signalId: signal.id,
+        signalInputId: signalInput.id,
+        sourceType: signal.sourceType,
+        sourceEventId: signalInput.sourceEventId
+      },
+      createdAt: now
+    });
 
     return { signalInput, signal };
   }
@@ -100,6 +121,20 @@ export class SignalIngestionService {
     signalInput: SignalInputSnapshot;
     signal: SignalSnapshot;
   }> {
+    const existingInput = await this.signalInputRepository.findBySourceEventId(
+      "tradingview",
+      input.alertId
+    );
+    if (existingInput) {
+      const existingSignal = await this.signalRepository.findBySignalInputId(existingInput.id);
+      if (existingSignal) {
+        return {
+          signalInput: existingInput,
+          signal: existingSignal
+        };
+      }
+    }
+
     return this.createDraft({
       sourceType: "tradingview",
       sourceEventId: input.alertId,
@@ -122,5 +157,13 @@ export class SignalIngestionService {
         ...(input.metadata ?? {})
       }
     });
+  }
+
+  private async appendAuditLog(log: AuditLog): Promise<void> {
+    if (!this.auditLogRepository) {
+      return;
+    }
+
+    await this.auditLogRepository.append(log);
   }
 }
