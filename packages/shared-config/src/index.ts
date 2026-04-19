@@ -60,22 +60,28 @@ const botApiEnvSchema = z.object({
   PAYMENT_PROVIDER_PAYPAL_WEIGHT: z.coerce.number().default(50),
   PAYMENT_PROVIDER_XENDIT_WEIGHT: z.coerce.number().default(50),
   PAYMENT_PROVIDER_PAYMONGO_WEIGHT: z.coerce.number().default(0),
+  BILLING_PROVIDER_XENDIT_ENABLED: z.coerce.boolean().default(true),
+  BILLING_PROVIDER_PAYPAL_ENABLED: z.coerce.boolean().default(true),
   // PayPal
-  PAYPAL_CLIENT_ID: z.string().min(1),
-  PAYPAL_CLIENT_SECRET: z.string().min(1),
-  PAYPAL_WEBHOOK_ID: z.string().min(1),
+  PAYPAL_CLIENT_ID: z.string().default(""),
+  PAYPAL_CLIENT_SECRET: z.string().default(""),
+  PAYPAL_WEBHOOK_ID: z.string().default(""),
+  PAYPAL_PLAN_PREMIUM_ID: z.string().default(""),
+  PAYPAL_PLAN_VIP_ID: z.string().default(""),
   PAYPAL_MODE: z.enum(["live", "sandbox"]).default("live"),
   // Xendit
-  XENDIT_API_KEY: z.string().min(1),
-  XENDIT_WEBHOOK_VERIFICATION_TOKEN: z.string().min(1),
+  XENDIT_SECRET_KEY: z.string().default(""),
+  XENDIT_WEBHOOK_TOKEN: z.string().default(""),
+  XENDIT_PLAN_PREMIUM_ID: z.string().default(""),
+  XENDIT_PLAN_VIP_ID: z.string().default(""),
   XENDIT_MODE: z.enum(["live", "test"]).default("live"),
   // PayMongo
   PAYMONGO_API_KEY: z.string().default(""),
   PAYMONGO_WEBHOOK_SECRET: z.string().default(""),
   PAYMONGO_MODE: z.enum(["live", "test"]).default("live"),
   // Shared redirect URLs
-  CHECKOUT_SUCCESS_URL: z.string().url(),
-  CHECKOUT_CANCEL_URL: z.string().url()
+  CHECKOUT_SUCCESS_URL: z.string().url().default("http://localhost:3000/checkout/success"),
+  CHECKOUT_CANCEL_URL: z.string().url().default("http://localhost:3000/checkout/cancel")
 });
 
 const adminWebEnvSchema = z.object({
@@ -88,7 +94,8 @@ const adminWebEnvSchema = z.object({
 
 const marketingSiteEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  MARKETING_SITE_BASE_URL: z.string().url()
+  MARKETING_SITE_BASE_URL: z.string().url(),
+  BOT_API_BASE_URL: z.string().url().default("http://localhost:3001")
 });
 
 export type BotApiEnv = z.infer<typeof botApiEnvSchema>;

@@ -41,7 +41,7 @@ export type TelegramInviteStatus = z.infer<typeof telegramInviteStatusSchema>;
 export const auditActorTypeSchema = z.enum(["system", "admin", "job", "webhook"]);
 export type AuditActorType = z.infer<typeof auditActorTypeSchema>;
 
-export const providerNameSchema = z.enum(["telegram", "paymongo", "tradingview"]);
+export const providerNameSchema = z.enum(["telegram", "paymongo", "tradingview", "paypal", "xendit"]);
 export type ProviderName = z.infer<typeof providerNameSchema>;
 export const paymentProviderSchema = z.enum(["paypal", "xendit", "paymongo"]);
 export type PaymentProvider = z.infer<typeof paymentProviderSchema>;
@@ -230,12 +230,12 @@ export const adminPlanSnapshotSchema = z.object({
 export type AdminPlanSnapshot = z.infer<typeof adminPlanSnapshotSchema>;
 
 export const adminPaymentsSummarySchema = z.object({
-  provider: z.literal("paymongo"),
+  provider: z.union([paymentProviderSchema, z.literal("mixed")]),
   executionState: integrationExecutionStateSchema,
   activeSubscriptions: z.number().int().nonnegative(),
   recoverySubscriptions: z.number().int().nonnegative(),
   expiredSubscriptions: z.number().int().nonnegative(),
-  lastEventType: paymongoEventTypeSchema.nullable().optional(),
+  lastEventType: paymentEventTypeSchema.nullable().optional(),
   note: z.string(),
   lastEvaluatedAt: z.string().datetime()
 });
@@ -358,6 +358,7 @@ export type AdminDiagnosticsData = z.infer<typeof adminDiagnosticsDataSchema>;
 export const createBillingCheckoutSessionRequestSchema = z.object({
   userId: z.string().min(1),
   planId: subscriptionPlanIdSchema,
+  provider: paymentProviderSchema.optional(),
   email: z.string().email().nullable().optional(),
   successUrl: z.string().url().nullable().optional(),
   cancelUrl: z.string().url().nullable().optional()
