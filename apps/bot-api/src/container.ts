@@ -10,7 +10,8 @@ import type {
 import { addHours, isoNow } from "@tradara/shared-utils";
 import type { PrismaClient } from "@prisma/client";
 
-import { StubTelegramBotAdapter } from "./bot/telegram-bot.adapter";
+import { TelegramBotApiAdapter } from "./bot/telegram-bot.adapter";
+import type { TelegramBotLike } from "./bot/types/bot";
 import { getPrismaClient } from "./lib/prisma";
 import {
   InMemoryAuditLogRepository,
@@ -37,7 +38,6 @@ import { ChannelAccessService } from "./modules/channel-access/channel-access.se
 import { EntitlementService } from "./modules/channel-access/entitlement.service";
 import { ChannelAccessReconciliationService } from "./modules/channel-access/reconciliation.service";
 import {
-  StubTelegramAccessAdapter,
   TelegramBotApiAccessAdapter,
   type TelegramAccessAdapter
 } from "./modules/channel-access/telegram-access.adapter";
@@ -62,6 +62,7 @@ export interface CreateContainerOptions {
   prisma?: PrismaClient;
   seed?: RepositorySeed;
   telegramAccessAdapter?: TelegramAccessAdapter;
+  telegramBot?: TelegramBotLike;
 }
 
 export function createContainer(
@@ -71,6 +72,7 @@ export function createContainer(
   const persistence = options.persistence ?? "prisma";
   const telegramAccessAdapter =
     options.telegramAccessAdapter ?? new TelegramBotApiAccessAdapter(env);
+  const telegramBot = options.telegramBot ?? new TelegramBotApiAdapter(env);
   const now = new Date("2026-04-18T12:00:00.000Z");
   const clock = persistence === "memory" ? () => new Date(now.getTime()) : () => new Date();
 
@@ -103,7 +105,6 @@ export function createContainer(
     channelAccessService
   );
   const reconciliationJob = new ChannelAccessReconciliationJob(reconciliationService);
-  const telegramBot = new StubTelegramBotAdapter();
   const telegramWebhookService = new TelegramWebhookService(
     env,
     webhookEventRepository,

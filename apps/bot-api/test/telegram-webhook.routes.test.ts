@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { loadBotApiEnv } from "@tradara/shared-config";
 
 import { buildApp } from "../src/app";
 import { createContainer } from "../src/container";
+import type { TelegramBotLike } from "../src/bot/types/bot";
+import { BOT_MESSAGES, FALLBACK_MESSAGE } from "../src/bot/content/bot-messages";
 
 const env = loadBotApiEnv({
   NODE_ENV: "test",
@@ -76,5 +78,67 @@ describe("telegram webhook route", () => {
     expect(firstResponse.statusCode).toBe(202);
     expect(secondResponse.statusCode).toBe(200);
     expect(accessResponse.json().data.accessRecord.status).toBe("granted");
+  });
+
+  it("dispatches hard-coded commands from webhook messages to the bot sender", async () => {
+    const sendMessage = vi.fn().mockResolvedValue({ ok: true });
+    const telegramBot: TelegramBotLike = {
+      sendMessage
+    };
+    const app = buildApp(
+      createContainer(env, {
+        persistence: "memory",
+        telegramBot
+      })
+    );
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/webhooks/telegram",
+      headers: {
+        "x-telegram-bot-api-secret-token": "telegram-secret"
+      },
+      payload: {
+        update_id: 1003,
+        message: {
+          chat: { id: 12345, type: "private" },
+          text: "/plans@tradara_bot now"
+        }
+      }
+    });
+
+    expect(response.statusCode).toBe(202);
+    expect(sendMessage).toHaveBeenCalledWith("12345", BOT_MESSAGES.plans);
+  });
+
+  it("handles edited messages and falls back for unknown commands", async () => {
+    const sendMessage = vi.fn().mockResolvedValue({ ok: true });
+    const telegramBot: TelegramBotLike = {
+      sendMessage
+    };
+    const app = buildApp(
+      createContainer(env, {
+        persistence: "memory",
+        telegramBot
+      })
+    );
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/webhooks/telegram",
+      headers: {
+        "x-telegram-bot-api-secret-token": "telegram-secret"
+      },
+      payload: {
+        update_id: 1004,
+        edited_message: {
+          chat: { id: "chat-9", type: "private" },
+          text: "/unknown@tradara_bot please"
+        }
+      }
+    });
+
+    expect(response.statusCode).toBe(202);
+    expect(sendMessage).toHaveBeenCalledWith("chat-9", FALLBACK_MESSAGE);
   });
 });

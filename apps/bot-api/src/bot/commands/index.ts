@@ -37,9 +37,18 @@ export async function dispatchCommand(input: {
   bot: TelegramBotLike;
   chatId: TelegramChatId;
   text: string;
+  logger?: Pick<Console, "info" | "warn">;
 }): Promise<void> {
   const command = normalizeCommand(input.text);
   const handler = command ? commandRegistry[command] : undefined;
+  const logger = input.logger ?? console;
+
+  logger.info("[tradara.telegram.command.dispatch]", {
+    chatId: String(input.chatId),
+    text: input.text,
+    normalizedCommand: command,
+    handlerFound: Boolean(handler)
+  });
 
   if (handler) {
     await handler(input.bot, input.chatId);
@@ -49,7 +58,7 @@ export async function dispatchCommand(input: {
   await input.bot.sendMessage(input.chatId, FALLBACK_MESSAGE);
 }
 
-function normalizeCommand(text: string): SupportedCommand | null {
+export function normalizeCommand(text: string): SupportedCommand | null {
   const firstToken = text.trim().split(/\s+/u)[0] ?? "";
 
   if (!firstToken.startsWith("/")) {

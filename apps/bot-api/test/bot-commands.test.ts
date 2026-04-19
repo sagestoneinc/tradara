@@ -4,6 +4,7 @@ import {
   commandRegistry,
   dispatchCommand,
   EXPECTED_COMMANDS,
+  normalizeCommand,
   type SupportedCommand
 } from "../src/bot/commands";
 import { BOT_MESSAGES, FALLBACK_MESSAGE } from "../src/bot/content/bot-messages";
@@ -75,5 +76,25 @@ describe("bot command foundation", () => {
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
     expect(sendMessage).toHaveBeenCalledWith("chat-123", FALLBACK_MESSAGE);
+  });
+
+  it("normalizes Telegram command variants before dispatch", async () => {
+    expect(normalizeCommand("/start")).toBe("/start");
+    expect(normalizeCommand("/start@TradaraBot")).toBe("/start");
+    expect(normalizeCommand("/start hello")).toBe("/start");
+    expect(normalizeCommand("/plans@TradaraBot something")).toBe("/plans");
+  });
+
+  it("dispatches normalized command variants to the right handler", async () => {
+    const { bot, sendMessage } = createBotMock();
+
+    await dispatchCommand({
+      bot,
+      chatId: "chat-123",
+      text: "/plans@TradaraBot something"
+    });
+
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(sendMessage).toHaveBeenCalledWith("chat-123", BOT_MESSAGES.plans);
   });
 });

@@ -15,13 +15,21 @@ export class TelegramWebhookService {
     private readonly webhookEventRepository: WebhookEventRepository,
     private readonly channelAccessService: ChannelAccessService,
     private readonly telegramBot: TelegramBotLike,
-    private readonly clock: () => Date = () => new Date()
+    private readonly clock: () => Date = () => new Date(),
+    private readonly logger: Pick<Console, "info" | "warn" | "error"> = console
   ) {}
 
   async handleIncoming(secretToken: string | undefined, payload: TelegramWebhookPayload): Promise<{
     duplicate: boolean;
     observedMembershipChange: boolean;
   }> {
+    this.logger.info("[tradara.telegram.webhook.received]", {
+      updateId: payload.update_id,
+      hasMessage: Boolean(payload.message),
+      hasEditedMessage: Boolean(payload.edited_message),
+      hasChatMember: Boolean(payload.chat_member)
+    });
+
     if (!compareSecret(secretToken, this.env.TELEGRAM_WEBHOOK_SECRET)) {
       throw new DomainError("Webhook secret verification failed.", 401, "invalid_signature");
     }
@@ -64,11 +72,23 @@ export class TelegramWebhookService {
       observedMembershipChange = true;
     }
 
-    if (payload.message?.text) {
+    const inboundMessage = this.extractInboundMessage(payload);
+    if (inboundMessage) {
+      this.logger.info("[tradara.telegram.webhook.command_message]", {
+        updateId: payload.update_id,
+        source: inboundMessage.source,
+        text: inboundMessage.text
+      });
+
       await dispatchCommand({
         bot: this.telegramBot,
-        chatId: payload.message.chat.id,
-        text: payload.message.text
+        chatId: inboundMessage.chatId,
+        text: inboundMessage.text,
+        logger: this.logger
+      });
+    } else {
+      this.logger.warn("[tradara.telegram.webhook.no_command_message]", {
+        updateId: payload.update_id
       });
     }
 
@@ -78,5 +98,29 @@ export class TelegramWebhookService {
       duplicate: false,
       observedMembershipChange
     };
+  }
+
+  private extractInboundMessage(payload: TelegramWebhookPayload): {
+    chatId: string;
+    text: string;
+    source: "message" | "edited_message";
+  } | null {
+    if (payload.message?.text) {
+      return {
+        chatId: payload.message.chat.id,
+        text: payload.message.text,
+        source: "message"
+      };
+    }
+
+    if (payload.edited_message?.text) {
+      return {
+        chatId: payload.edited_message.chat.id,
+        text: payload.edited_message.text,
+        source: "edited_message"
+      };
+    }
+
+    return null;
   }
 }

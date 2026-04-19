@@ -33,6 +33,7 @@ export const telegramWebhookHeadersSchema = z.object({
 export const telegramWebhookPayloadSchema = z.object({
   update_id: z.union([z.number(), z.string()]).transform(String),
   message: inboundMessageSchema.optional(),
+  edited_message: inboundMessageSchema.optional(),
   chat_member: chatMemberUpdateSchema.optional(),
   my_chat_member: chatMemberUpdateSchema.optional()
 });
