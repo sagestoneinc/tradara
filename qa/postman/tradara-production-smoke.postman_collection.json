@@ -1,0 +1,672 @@
+{
+  "info": {
+    "_postman_id": "a4d1d2f5-7cb5-4c20-9bf5-8d83e7386bb0",
+    "name": "Tradara Production Smoke",
+    "description": "Route-aligned Postman smoke collection for Tradara bot-api. Keeps provider verification boundaries honest and follows the current runtime routes exposed by the repo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "api_base_url", "value": "https://tradaraapi.sagestonelab.tech" },
+    { "key": "tg_webhook_secret", "value": "" },
+    { "key": "tv_webhook_secret", "value": "" },
+    { "key": "xendit_webhook_token", "value": "" },
+    { "key": "signal_id", "value": "" },
+    { "key": "user_id", "value": "user_smoke_001" },
+    { "key": "subscription_id", "value": "sub-smoke-001" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/",
+              "host": ["{{api_base_url}}"],
+              "path": [""]
+            }
+          }
+        },
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/health",
+              "host": ["{{api_base_url}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Telegram Webhook",
+      "item": [
+        {
+          "name": "POST /v1/webhooks/telegram - /start",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              {
+                "key": "x-telegram-bot-api-secret-token",
+                "value": "{{tg_webhook_secret}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"update_id\": 1000001,\n  \"message\": {\n    \"chat\": { \"id\": 999001, \"type\": \"private\" },\n    \"text\": \"/start\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/telegram",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "telegram"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/telegram - /plans@TradaraBot",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              {
+                "key": "x-telegram-bot-api-secret-token",
+                "value": "{{tg_webhook_secret}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"update_id\": 1000002,\n  \"message\": {\n    \"chat\": { \"id\": 999001, \"type\": \"private\" },\n    \"text\": \"/plans@TradaraBot\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/telegram",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "telegram"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/telegram - /start hello",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              {
+                "key": "x-telegram-bot-api-secret-token",
+                "value": "{{tg_webhook_secret}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"update_id\": 1000003,\n  \"message\": {\n    \"chat\": { \"id\": 999001, \"type\": \"private\" },\n    \"text\": \"/start hello\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/telegram",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "telegram"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/telegram - edited_message /help",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              {
+                "key": "x-telegram-bot-api-secret-token",
+                "value": "{{tg_webhook_secret}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"update_id\": 1000004,\n  \"edited_message\": {\n    \"chat\": { \"id\": 999001, \"type\": \"private\" },\n    \"text\": \"/help\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/telegram",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "telegram"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/telegram - invalid secret",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              {
+                "key": "x-telegram-bot-api-secret-token",
+                "value": "wrong-secret"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"update_id\": 1000005,\n  \"message\": {\n    \"chat\": { \"id\": 999001, \"type\": \"private\" },\n    \"text\": \"/faq\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/telegram",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "telegram"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "TradingView Signals",
+      "item": [
+        {
+          "name": "POST /v1/webhooks/tradingview/signals - valid",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tradara-webhook-secret", "value": "{{tv_webhook_secret}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alertId\": \"tv-btc-001\",\n  \"symbol\": \"BTCUSDT\",\n  \"timeframe\": \"1h\",\n  \"direction\": \"long\",\n  \"trigger\": \"breakout-retest\",\n  \"entryZoneLow\": 64000,\n  \"entryZoneHigh\": 64300,\n  \"stopLoss\": 63200,\n  \"takeProfit1\": 65000,\n  \"takeProfit2\": 65800,\n  \"takeProfit3\": 66600,\n  \"marketPrice\": 64210,\n  \"strategyName\": \"Trend Continuation\",\n  \"note\": \"Breakout retest candidate\",\n  \"detectedAt\": \"2026-04-19T14:00:00.000Z\",\n  \"metadata\": {\n    \"exchange\": \"BINANCE\",\n    \"triggerSource\": \"tv-alert\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/tradingview/signals",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "tradingview", "signals"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/tradingview/signals - duplicate replay",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tradara-webhook-secret", "value": "{{tv_webhook_secret}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alertId\": \"tv-btc-001\",\n  \"symbol\": \"BTCUSDT\",\n  \"timeframe\": \"1h\",\n  \"direction\": \"long\",\n  \"trigger\": \"breakout-retest\",\n  \"entryZoneLow\": 64000,\n  \"entryZoneHigh\": 64300,\n  \"stopLoss\": 63200,\n  \"takeProfit1\": 65000,\n  \"takeProfit2\": 65800,\n  \"takeProfit3\": 66600,\n  \"marketPrice\": 64210,\n  \"strategyName\": \"Trend Continuation\",\n  \"note\": \"Breakout retest candidate\",\n  \"detectedAt\": \"2026-04-19T14:00:00.000Z\",\n  \"metadata\": {\n    \"exchange\": \"BINANCE\",\n    \"triggerSource\": \"tv-alert\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/tradingview/signals",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "tradingview", "signals"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/tradingview/signals - invalid secret",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tradara-webhook-secret", "value": "wrong-secret" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alertId\": \"tv-btc-bad\",\n  \"symbol\": \"BTCUSDT\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/tradingview/signals",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "tradingview", "signals"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Signals Workflow",
+      "item": [
+        {
+          "name": "POST /v1/signals/:signalId/enrich",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{api_base_url}}/v1/signals/{{signal_id}}/enrich",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "signals", "{{signal_id}}", "enrich"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/signals/:signalId/reviews - approve",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerId\": \"admin-console\",\n  \"action\": \"approve\",\n  \"notes\": \"Setup is clean and aligned.\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/signals/{{signal_id}}/reviews",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "signals", "{{signal_id}}", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/signals/:signalId/reviews - edit",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerId\": \"admin-console\",\n  \"action\": \"edit\",\n  \"notes\": \"Refined the wording and invalidation note.\",\n  \"editedTelegramDraft\": \"Updated premium-ready signal draft\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/signals/{{signal_id}}/reviews",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "signals", "{{signal_id}}", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/signals/:signalId/reviews - watchlist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerId\": \"admin-console\",\n  \"action\": \"watchlist\",\n  \"notes\": \"Good idea, but market context is not favorable enough yet.\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/signals/{{signal_id}}/reviews",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "signals", "{{signal_id}}", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/signals/:signalId/reviews - reject",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerId\": \"admin-console\",\n  \"action\": \"reject\",\n  \"notes\": \"Low-quality setup with too much conflict.\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/signals/{{signal_id}}/reviews",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "signals", "{{signal_id}}", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/signals/:signalId/publish",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publisherId\": \"admin-console\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/signals/{{signal_id}}/publish",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "signals", "{{signal_id}}", "publish"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/market-insights",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"CRYPTO-MKT\",\n  \"timeframe\": \"4h\",\n  \"title\": \"Morning Market Audit\",\n  \"summary\": \"BTC stable, ETH neutral, altcoins selective.\",\n  \"body\": \"Conditions are mixed. Focus on cleaner continuation setups and avoid noisy overextended names.\",\n  \"metadata\": {\n    \"source\": \"manual-smoke-test\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/market-insights",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "market-insights"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing",
+      "item": [
+        {
+          "name": "POST /v1/billing/checkout-sessions",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"planId\": \"tradara-pro-monthly\",\n  \"provider\": \"paypal\",\n  \"email\": \"smoke@example.com\",\n  \"successUrl\": \"https://tradara.sagestonelab.tech/billing/success\",\n  \"cancelUrl\": \"https://tradara.sagestonelab.tech/billing/cancel\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/billing/checkout-sessions",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "billing", "checkout-sessions"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/xendit - paid",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-callback-token", "value": "{{xendit_webhook_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"invoice.paid\",\n  \"data\": {\n    \"id\": \"xendit-event-001\",\n    \"external_id\": \"{{subscription_id}}\",\n    \"metadata\": {\n      \"tradaraUserId\": \"{{user_id}}\",\n      \"tradaraPlanId\": \"tradara-pro-monthly\",\n      \"tradaraSubscriptionId\": \"{{subscription_id}}\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/xendit",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "xendit"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/xendit - duplicate replay",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-callback-token", "value": "{{xendit_webhook_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"invoice.paid\",\n  \"data\": {\n    \"id\": \"xendit-event-001\",\n    \"external_id\": \"{{subscription_id}}\",\n    \"metadata\": {\n      \"tradaraUserId\": \"{{user_id}}\",\n      \"tradaraPlanId\": \"tradara-pro-monthly\",\n      \"tradaraSubscriptionId\": \"{{subscription_id}}\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/xendit",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "xendit"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/xendit - failed",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-callback-token", "value": "{{xendit_webhook_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"invoice.failed\",\n  \"data\": {\n    \"id\": \"xendit-event-002\",\n    \"external_id\": \"{{subscription_id}}\",\n    \"metadata\": {\n      \"tradaraUserId\": \"{{user_id}}\",\n      \"tradaraPlanId\": \"tradara-pro-monthly\",\n      \"tradaraSubscriptionId\": \"{{subscription_id}}\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/xendit",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "xendit"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/xendit - invalid token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-callback-token", "value": "wrong-token" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"invoice.paid\",\n  \"data\": {\n    \"id\": \"bad-001\",\n    \"external_id\": \"sub-bad\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/xendit",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "xendit"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/paypal - completed",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"WH-PAYPAL-001\",\n  \"event_type\": \"PAYMENT.CAPTURE.COMPLETED\",\n  \"resource\": {\n    \"status\": \"COMPLETED\",\n    \"custom_id\": \"{\\\"tradaraUserId\\\":\\\"{{user_id}}\\\",\\\"tradaraPlanId\\\":\\\"tradara-pro-monthly\\\",\\\"tradaraSubscriptionId\\\":\\\"sub-smoke-002\\\"}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/paypal",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "paypal"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/webhooks/paypal - denied",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"WH-PAYPAL-002\",\n  \"event_type\": \"PAYMENT.CAPTURE.DENIED\",\n  \"resource\": {\n    \"status\": \"DENIED\",\n    \"custom_id\": \"{\\\"tradaraUserId\\\":\\\"{{user_id}}\\\",\\\"tradaraPlanId\\\":\\\"tradara-pro-monthly\\\",\\\"tradaraSubscriptionId\\\":\\\"sub-smoke-002\\\"}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/v1/webhooks/paypal",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "webhooks", "paypal"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Channel Access and Audit",
+      "item": [
+        {
+          "name": "GET /v1/channel-access",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/channel-access",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "channel-access"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/channel-access/:userId",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/channel-access/{{user_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "channel-access", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "POST /v1/channel-access/reconcile",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{api_base_url}}/v1/channel-access/reconcile",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "channel-access", "reconcile"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/audit-logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/audit-logs",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "audit-logs"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "GET /v1/admin/overview",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/overview",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "overview"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/users",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/subscriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/subscriptions",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/channel-access",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/channel-access",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "channel-access"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/webhook-events",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/webhook-events",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "webhook-events"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/diagnostics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/diagnostics",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "diagnostics"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/audit-logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/audit-logs",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "audit-logs"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/signals",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/signals",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "signals"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/signals/review-queue",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/signals/review-queue",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "signals", "review-queue"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/signals/approved",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/signals/approved",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "signals", "approved"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/signals/published",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/signals/published",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "signals", "published"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/signals/rejected",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/signals/rejected",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "signals", "rejected"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/signals/watchlist",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/signals/watchlist",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "signals", "watchlist"]
+            }
+          }
+        },
+        {
+          "name": "GET /v1/admin/signals/market-insights",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_base_url}}/v1/admin/signals/market-insights",
+              "host": ["{{api_base_url}}"],
+              "path": ["v1", "admin", "signals", "market-insights"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
