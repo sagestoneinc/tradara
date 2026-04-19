@@ -33,6 +33,9 @@ import { AdminController } from "./modules/admin/admin.controller";
 import { AdminService } from "./modules/admin/admin.service";
 import { BillingController } from "./modules/billing/billing.controller";
 import { BillingService } from "./modules/billing/billing.service";
+import { PayPalAdapter } from "./modules/billing/providers/paypal-adapter";
+import { XenditAdapter } from "./modules/billing/providers/xendit-adapter";
+import { PayMongoAdapter } from "./modules/billing/providers/paymongo-adapter";
 import { ChannelAccessController } from "./modules/channel-access/channel-access.controller";
 import { ChannelAccessService } from "./modules/channel-access/channel-access.service";
 import { EntitlementService } from "./modules/channel-access/entitlement.service";
@@ -112,11 +115,19 @@ export function createContainer(
     telegramBot,
     clock
   );
+
+  // Create payment provider adapters
+  const paymentProviders = new Map();
+  paymentProviders.set("paypal", new PayPalAdapter(env));
+  paymentProviders.set("xendit", new XenditAdapter(env));
+  paymentProviders.set("paymongo", new PayMongoAdapter(env));
+
   const billingService = new BillingService(
     env,
     subscriptionRepository,
     webhookEventRepository,
     auditLogRepository,
+    paymentProviders,
     clock
   );
   const adminService = new AdminService(channelAccessService, webhookEventRepository, clock);

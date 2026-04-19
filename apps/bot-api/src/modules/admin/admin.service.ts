@@ -22,7 +22,7 @@ import type { WebhookEventRepository } from "../../repositories/types";
 import type { ChannelAccessOverview, ChannelAccessService } from "../channel-access/channel-access.service";
 
 const TELEGRAM_AUTOMATION_STATE: IntegrationExecutionState = "live";
-const BILLING_EXECUTION_STATE: IntegrationExecutionState = "pending";
+const BILLING_EXECUTION_STATE: IntegrationExecutionState = "live";
 
 export class AdminService {
   constructor(

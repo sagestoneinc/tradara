@@ -4,98 +4,130 @@ import type {
   AuditLog,
   BillingCheckoutSessionScaffold,
   CreateBillingCheckoutSessionRequest,
-  PaymongoEventType,
+  PaymentEventType,
   SubscriptionSnapshot,
   WebhookEvent
 } from "@tradara/shared-types";
 import { createId, isoNow } from "@tradara/shared-utils";
 
 import { DomainError } from "../../lib/domain-error";
-import { compareHexSignature, createHmacSha256Hex, hashPayload } from "../../lib/security";
+import { hashPayload } from "../../lib/security";
 import type {
   AuditLogRepository,
   SubscriptionRepository,
   WebhookEventRepository
 } from "../../repositories/types";
-import type { PaymongoWebhookPayload } from "./billing.schemas";
-
-interface PaymongoSignatureParts {
-  timestamp: string;
-  testSignature: string;
-  liveSignature: string;
-}
+import type { PaymentProvider } from "./providers/provider-adapter";
+import { ProviderRouter } from "./providers/provider-router";
+import { WebhookParser, type ParsedWebhookEvent } from "./providers/webhook-parser";
 
 interface BillingTransitionResult {
-  eventType: PaymongoEventType;
+  eventType: PaymentEventType;
   duplicate: boolean;
   subscription: SubscriptionSnapshot | null;
   stateChanged: boolean;
 }
 
 export class BillingService {
+  private readonly router: ProviderRouter;
+  private readonly webhookParser: WebhookParser;
+
   constructor(
     private readonly env: BotApiEnv,
     private readonly subscriptionRepository: SubscriptionRepository,
     private readonly webhookEventRepository: WebhookEventRepository,
     private readonly auditLogRepository: AuditLogRepository,
+    providers: Map<string, PaymentProvider>,
     private readonly clock: () => Date = () => new Date()
-  ) {}
+  ) {
+    this.router = ProviderRouter.fromEnv(env, providers);
+    this.webhookParser = new WebhookParser(env);
+  }
 
-  async createCheckoutSessionScaffold(
+  async createCheckoutSession(
     request: CreateBillingCheckoutSessionRequest
   ): Promise<BillingCheckoutSessionScaffold> {
     const subscriptionId = createId("sub");
+    const provider = this.router.selectProvider(request.userId);
 
-    await this.appendAuditLog({
-      actorType: "system",
-      actorId: "billing-checkout-scaffold",
-      action: "billing.checkout_scaffold_created",
-      entityType: "billing_checkout",
-      entityId: subscriptionId,
-      metadata: {
+    try {
+      const session = await provider.createCheckoutSession(request, subscriptionId);
+
+      await this.appendAuditLog({
+        actorType: "system",
+        actorId: `billing-checkout-${provider.name}`,
+        action: "billing.checkout_session_created",
+        entityType: "billing_checkout",
+        entityId: subscriptionId,
+        metadata: {
+          userId: request.userId,
+          planId: request.planId,
+          provider: provider.name,
+          providerSessionId: session.providerCheckoutSessionId
+        }
+      });
+
+      return {
+        executionState: "live",
+        provider: provider.name,
         userId: request.userId,
-        planId: request.planId
-      }
-    });
+        planId: request.planId,
+        checkoutUrl: session.checkoutUrl,
+        providerCheckoutSessionId: session.providerCheckoutSessionId,
+        metadata: session.metadata,
+        note: `Checkout session created with ${provider.name}`
+      };
+    } catch (err) {
+      await this.appendAuditLog({
+        actorType: "system",
+        actorId: `billing-checkout-${provider.name}`,
+        action: "billing.checkout_session_failed",
+        entityType: "billing_checkout",
+        entityId: subscriptionId,
+        metadata: {
+          userId: request.userId,
+          planId: request.planId,
+          provider: provider.name,
+          error: err instanceof Error ? err.message : "Unknown error"
+        }
+      });
 
-    return {
-      executionState: "pending",
-      provider: "paymongo",
-      userId: request.userId,
-      planId: request.planId,
-      checkoutUrl: null,
-      providerCheckoutSessionId: null,
-      metadata: {
-        tradaraUserId: request.userId,
-        tradaraPlanId: request.planId,
-        tradaraSubscriptionId: subscriptionId
-      },
-      note: "PayMongo checkout session creation is scaffolded. Wire a live authenticated Checkout Session API call and pass this metadata through to webhook events."
-    };
+      if (err instanceof DomainError) throw err;
+      throw new DomainError(
+        `Checkout creation failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+        500,
+        "checkout_failed"
+      );
+    }
   }
 
   async handleWebhook(input: {
-    signatureHeader: string | undefined;
-    rawBody: string | undefined;
-    payload: PaymongoWebhookPayload;
+    provider: string;
+    headers: Record<string, string>;
+    rawBody: string;
+    payload: Record<string, unknown>;
   }): Promise<BillingTransitionResult> {
-    const rawBody = input.rawBody;
-
-    if (!rawBody) {
+    if (!input.rawBody) {
       throw new DomainError(
-        "Raw request body is required for PayMongo signature verification.",
+        "Raw request body is required for webhook verification.",
         400,
         "missing_raw_body"
       );
     }
 
-    this.verifySignature(input.signatureHeader, rawBody, input.payload);
+    // Parse and verify webhook
+    const parsedEvent = this.webhookParser.parseAndVerify(
+      input.provider,
+      input.headers,
+      input.rawBody,
+      input.payload
+    );
 
-    const eventType = input.payload.data.attributes.type;
+    // Record webhook event for idempotency
     const recorded = await this.webhookEventRepository.recordIncoming({
       id: createId("wh"),
-      provider: "paymongo",
-      providerEventId: input.payload.data.id,
+      provider: (input.provider as any),
+      providerEventId: parsedEvent.eventId,
       signatureValid: true,
       payloadHash: hashPayload(input.payload),
       processedAt: null,
@@ -104,131 +136,97 @@ export class BillingService {
 
     if (recorded.duplicate) {
       return {
-        eventType,
+        eventType: (parsedEvent.eventType as PaymentEventType),
         duplicate: true,
         subscription: null,
         stateChanged: false
       };
     }
 
-    const subscription = await this.applyTransition(input.payload);
+    // Apply state transition
+    const subscription = await this.applyTransition(parsedEvent);
     await this.webhookEventRepository.markProcessed(recorded.event.id, isoNow(this.clock()));
 
     return {
-      eventType,
+      eventType: (parsedEvent.eventType as PaymentEventType),
       duplicate: false,
       subscription,
       stateChanged: subscription !== null
     };
   }
 
-  private verifySignature(
-    signatureHeader: string | undefined,
-    rawBody: string,
-    payload: PaymongoWebhookPayload
-  ): void {
-    const parts = this.parseSignatureHeader(signatureHeader);
-    const expected = createHmacSha256Hex(
-      this.env.PAYMONGO_WEBHOOK_SECRET,
-      `${parts.timestamp}.${rawBody}`
-    );
-    const provided = payload.data.attributes.livemode ? parts.liveSignature : parts.testSignature;
+  private async applyTransition(event: ParsedWebhookEvent): Promise<SubscriptionSnapshot | null> {
+    const { subscriptionId, status, metadata, eventType } = event;
 
-    if (!compareHexSignature(provided, expected)) {
-      throw new DomainError("PayMongo webhook signature verification failed.", 401, "invalid_signature");
-    }
-  }
+    // Extract Tradara metadata
+    const tradaraUserId = (metadata?.tradaraUserId ?? metadata?.userId) as string | undefined;
+    const tradaraPlanId = (metadata?.tradaraPlanId ?? metadata?.planId) as string | undefined;
+    const tradaraSubscriptionId = (metadata?.tradaraSubscriptionId ?? metadata?.subscriptionId) as string | undefined;
 
-  private parseSignatureHeader(signatureHeader: string | undefined): PaymongoSignatureParts {
-    if (!signatureHeader) {
-      throw new DomainError("Missing PayMongo webhook signature.", 401, "invalid_signature");
-    }
-
-    const entries = Object.fromEntries(
-      signatureHeader.split(",").map((part) => {
-        const [key, value] = part.split("=");
-        return [key?.trim() ?? "", value?.trim() ?? ""];
-      })
-    );
-
-    if (!entries.t || (!entries.te && !entries.li)) {
-      throw new DomainError("Malformed PayMongo webhook signature.", 401, "invalid_signature");
-    }
-
-    return {
-      timestamp: entries.t,
-      testSignature: entries.te ?? "",
-      liveSignature: entries.li ?? ""
-    };
-  }
-
-  private async applyTransition(
-    payload: PaymongoWebhookPayload
-  ): Promise<SubscriptionSnapshot | null> {
-    const eventType = payload.data.attributes.type;
-    const resource = payload.data.attributes.data;
-    const metadata = this.extractMetadata(payload);
-    const effectiveAt = this.resolveEffectiveAt(payload);
-
-    if (!metadata.userId || !metadata.planId) {
+    if (!tradaraUserId || !tradaraPlanId) {
       await this.appendAuditLog({
         actorType: "webhook",
-        actorId: "paymongo",
+        actorId: event.provider,
         action: "billing.event_ignored",
         entityType: "billing_event",
-        entityId: payload.data.id,
+        entityId: event.eventId,
         metadata: {
           eventType,
-          reason: "Missing Tradara metadata for user or plan."
+          reason: "Missing Tradara metadata for user or plan.",
+          provider: event.provider
         }
       });
-
       return null;
     }
 
-    const existing = await this.subscriptionRepository.findByUserId(metadata.userId);
-    const subscriptionId = metadata.subscriptionId ?? existing?.id ?? createId("sub");
-    const periodEnd = this.resolveCurrentPeriodEnd(effectiveAt, metadata.planId, existing);
+    const existing = await this.subscriptionRepository.findByUserId(tradaraUserId);
+    const effectiveSubscriptionId = tradaraSubscriptionId ?? existing?.id ?? createId("sub");
+    const effectiveAt = this.clock();
+    const periodEnd = this.resolveCurrentPeriodEnd(effectiveAt, tradaraPlanId as any, existing);
 
     let next: SubscriptionSnapshot;
 
-    switch (eventType) {
-      case "checkout_session.payment.paid":
-      case "payment.paid":
+    switch (status) {
+      case "paid":
         next = {
-          id: subscriptionId,
-          userId: metadata.userId,
-          planId: metadata.planId,
+          id: effectiveSubscriptionId,
+          userId: tradaraUserId,
+          planId: tradaraPlanId as any,
           status: "active",
-          providerName: "paymongo",
+          providerName: event.provider as any,
           currentPeriodEndsAt: periodEnd,
           gracePeriodEndsAt: null,
           canceledAt: null,
           providerCustomerId: existing?.providerCustomerId ?? null,
-          providerSubscriptionId:
-            resource.type === "checkout_session"
-              ? resource.id
-              : resource.attributes.payment_intent_id ?? resource.id
+          providerSubscriptionId: subscriptionId
         };
         break;
-      case "payment.failed":
+      case "failed":
         next = {
-          id: subscriptionId,
-          userId: metadata.userId,
-          planId: metadata.planId,
+          id: effectiveSubscriptionId,
+          userId: tradaraUserId,
+          planId: tradaraPlanId as any,
           status: "past_due",
-          providerName: "paymongo",
+          providerName: event.provider as any,
           currentPeriodEndsAt: existing?.currentPeriodEndsAt ?? effectiveAt.toISOString(),
-          gracePeriodEndsAt: this.addHours(
-            effectiveAt,
-            accessPolicy.defaultGracePeriodHours
-          ).toISOString(),
+          gracePeriodEndsAt: this.addHours(effectiveAt, accessPolicy.defaultGracePeriodHours).toISOString(),
           canceledAt: existing?.canceledAt ?? null,
           providerCustomerId: existing?.providerCustomerId ?? null,
-          providerSubscriptionId:
-            resource.type === "checkout_session"
-              ? resource.id
-              : resource.attributes.payment_intent_id ?? resource.id
+          providerSubscriptionId: subscriptionId
+        };
+        break;
+      case "expired":
+        next = {
+          id: effectiveSubscriptionId,
+          userId: tradaraUserId,
+          planId: tradaraPlanId as any,
+          status: "expired",
+          providerName: event.provider as any,
+          currentPeriodEndsAt: existing?.currentPeriodEndsAt ?? effectiveAt.toISOString(),
+          gracePeriodEndsAt: null,
+          canceledAt: effectiveAt.toISOString(),
+          providerCustomerId: existing?.providerCustomerId ?? null,
+          providerSubscriptionId: subscriptionId
         };
         break;
       default:
@@ -238,7 +236,7 @@ export class BillingService {
     await this.subscriptionRepository.save(next);
     await this.appendAuditLog({
       actorType: "webhook",
-      actorId: "paymongo",
+      actorId: event.provider,
       action: `billing.${eventType.replaceAll(".", "_")}`,
       entityType: "subscription",
       entityId: next.id,
@@ -246,77 +244,12 @@ export class BillingService {
         userId: next.userId,
         planId: next.planId,
         status: next.status,
-        providerEventId: payload.data.id
+        providerEventId: event.eventId,
+        provider: event.provider
       }
     });
 
     return next;
-  }
-
-  private extractMetadata(payload: PaymongoWebhookPayload): {
-    userId: string | null;
-    planId: SubscriptionSnapshot["planId"] | null;
-    subscriptionId: string | null;
-  } {
-    const resource = payload.data.attributes.data;
-    const candidates =
-      resource.type === "checkout_session"
-        ? [
-            resource.attributes.metadata,
-            resource.attributes.payment_intent?.attributes?.metadata,
-            resource.attributes.payments?.[0]?.attributes.metadata
-          ]
-        : [resource.attributes.metadata];
-
-    for (const candidate of candidates) {
-      if (!candidate) {
-        continue;
-      }
-
-      const userId = candidate.tradaraUserId ?? candidate.userId ?? null;
-      const planId = candidate.tradaraPlanId ?? candidate.planId ?? null;
-      const subscriptionId =
-        candidate.tradaraSubscriptionId ?? candidate.subscriptionId ?? null;
-
-      if (userId && planId) {
-        return {
-          userId,
-          planId,
-          subscriptionId
-        };
-      }
-    }
-
-    return {
-      userId: null,
-      planId: null,
-      subscriptionId: null
-    };
-  }
-
-  private resolveEffectiveAt(payload: PaymongoWebhookPayload): Date {
-    const resource = payload.data.attributes.data;
-
-    if (resource.type === "checkout_session") {
-      const timestamp =
-        resource.attributes.paid_at ??
-        resource.attributes.updated_at ??
-        resource.attributes.created_at ??
-        payload.data.attributes.updated_at ??
-        payload.data.attributes.created_at;
-
-      return timestamp ? new Date(timestamp * 1000) : this.clock();
-    }
-
-    const timestamp =
-      resource.attributes.paid_at ??
-      resource.attributes.failed_at ??
-      resource.attributes.updated_at ??
-      resource.attributes.created_at ??
-      payload.data.attributes.updated_at ??
-      payload.data.attributes.created_at;
-
-    return timestamp ? new Date(timestamp * 1000) : this.clock();
   }
 
   private resolveCurrentPeriodEnd(

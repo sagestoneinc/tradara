@@ -55,8 +55,27 @@ const botApiEnvSchema = z.object({
   TELEGRAM_WEBHOOK_SECRET: z.string().min(1),
   TELEGRAM_PREMIUM_CHANNEL_ID: z.string().min(1),
   TELEGRAM_BOT_USERNAME: z.string().min(1),
+  ACCESS_GRACE_PERIOD_HOURS: z.coerce.number().default(accessPolicy.defaultGracePeriodHours),
+  // Provider routing (A/B test weights)
+  PAYMENT_PROVIDER_PAYPAL_WEIGHT: z.coerce.number().default(50),
+  PAYMENT_PROVIDER_XENDIT_WEIGHT: z.coerce.number().default(25),
+  PAYMENT_PROVIDER_PAYMONGO_WEIGHT: z.coerce.number().default(25),
+  // PayPal
+  PAYPAL_CLIENT_ID: z.string().min(1),
+  PAYPAL_CLIENT_SECRET: z.string().min(1),
+  PAYPAL_WEBHOOK_ID: z.string().min(1),
+  PAYPAL_MODE: z.enum(["live", "sandbox"]).default("live"),
+  // Xendit
+  XENDIT_API_KEY: z.string().min(1),
+  XENDIT_WEBHOOK_VERIFICATION_TOKEN: z.string().min(1),
+  XENDIT_MODE: z.enum(["live", "test"]).default("live"),
+  // PayMongo
+  PAYMONGO_API_KEY: z.string().min(1),
   PAYMONGO_WEBHOOK_SECRET: z.string().min(1),
-  ACCESS_GRACE_PERIOD_HOURS: z.coerce.number().default(accessPolicy.defaultGracePeriodHours)
+  PAYMONGO_MODE: z.enum(["live", "test"]).default("live"),
+  // Shared redirect URLs
+  CHECKOUT_SUCCESS_URL: z.string().url(),
+  CHECKOUT_CANCEL_URL: z.string().url()
 });
 
 const adminWebEnvSchema = z.object({

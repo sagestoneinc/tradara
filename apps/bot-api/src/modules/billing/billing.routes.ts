@@ -6,6 +6,6 @@ export async function registerBillingRoutes(
   app: FastifyInstance,
   controller: BillingController
 ): Promise<void> {
-  app.post("/v1/billing/checkout-sessions", controller.createCheckoutScaffold);
-  app.post("/v1/webhooks/paymongo", controller.handlePaymongoWebhook);
+  app.post("/v1/billing/checkout-sessions", controller.createCheckoutSession);
+  app.post("/v1/webhooks/:provider", controller.handleWebhook);
 }
