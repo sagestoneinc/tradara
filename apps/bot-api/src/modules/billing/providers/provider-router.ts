@@ -23,11 +23,12 @@ export class ProviderRouter {
   }
 
   static fromEnv(env: BotApiEnv, providers: Map<string, PaymentProvider>): ProviderRouter {
+    const hasPayMongo = providers.has("paymongo");
     return new ProviderRouter(
       {
         paypalWeight: env.PAYMENT_PROVIDER_PAYPAL_WEIGHT,
         xenditWeight: env.PAYMENT_PROVIDER_XENDIT_WEIGHT,
-        paymongoWeight: env.PAYMENT_PROVIDER_PAYMONGO_WEIGHT
+        paymongoWeight: hasPayMongo ? env.PAYMENT_PROVIDER_PAYMONGO_WEIGHT : 0
       },
       providers
     );

@@ -70,8 +70,8 @@ const botApiEnvSchema = z.object({
   XENDIT_WEBHOOK_VERIFICATION_TOKEN: z.string().min(1),
   XENDIT_MODE: z.enum(["live", "test"]).default("live"),
   // PayMongo
-  PAYMONGO_API_KEY: z.string().min(1),
-  PAYMONGO_WEBHOOK_SECRET: z.string().min(1),
+  PAYMONGO_API_KEY: z.string().default(""),
+  PAYMONGO_WEBHOOK_SECRET: z.string().default(""),
   PAYMONGO_MODE: z.enum(["live", "test"]).default("live"),
   // Shared redirect URLs
   CHECKOUT_SUCCESS_URL: z.string().url(),

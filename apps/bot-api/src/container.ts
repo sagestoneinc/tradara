@@ -120,7 +120,9 @@ export function createContainer(
   const paymentProviders = new Map();
   paymentProviders.set("paypal", new PayPalAdapter(env));
   paymentProviders.set("xendit", new XenditAdapter(env));
-  paymentProviders.set("paymongo", new PayMongoAdapter(env));
+  if (env.PAYMONGO_API_KEY) {
+    paymentProviders.set("paymongo", new PayMongoAdapter(env));
+  }
 
   const billingService = new BillingService(
     env,
