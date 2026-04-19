@@ -2,7 +2,9 @@ import {
   adminAuditLogListDataSchema,
   adminChannelAccessDataSchema,
   adminDiagnosticsDataSchema,
+  adminMarketInsightsListDataSchema,
   adminOverviewDataSchema,
+  adminSignalListDataSchema,
   adminSubscriptionsDataSchema,
   adminUsersDataSchema,
   adminWebhookEventsDataSchema
@@ -65,4 +67,24 @@ export function getAdminDiagnosticsData() {
 
 export function getAdminAuditLogData() {
   return fetchAdminData("/v1/admin/audit-logs", adminAuditLogListDataSchema);
+}
+
+export function getAdminSignalReviewQueueData() {
+  return fetchAdminData("/v1/admin/signals/review-queue", adminSignalListDataSchema);
+}
+
+export function getAdminPublishedSignalsData() {
+  return fetchAdminData("/v1/admin/signals/published", adminSignalListDataSchema);
+}
+
+export function getAdminRejectedSignalsData() {
+  return fetchAdminData("/v1/admin/signals/rejected", adminSignalListDataSchema);
+}
+
+export function getAdminSignalWatchlistData() {
+  return fetchAdminData("/v1/admin/signals/watchlist", adminSignalListDataSchema);
+}
+
+export function getAdminMarketInsightsData() {
+  return fetchAdminData("/v1/admin/signals/market-insights", adminMarketInsightsListDataSchema);
 }

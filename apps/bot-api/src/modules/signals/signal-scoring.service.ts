@@ -29,12 +29,14 @@ export class SignalScoringService {
     }
 
     const enrichment = await this.aiSignalAnalyst.analyze(this.mapInput(signalInput));
+    const now = isoNow(this.clock());
     const aiScored: SignalSnapshot = {
       ...signal,
       status: "ai_scored",
       confidenceScore: enrichment.confidenceScore,
       setupQualityScore: enrichment.confidenceBreakdown.setupQualityScore,
       riskLabel: enrichment.riskLabel,
+      publishRecommendation: enrichment.publishRecommendation,
       invalidationSummary: enrichment.invalidationSummary,
       setupRationale: enrichment.rationale,
       marketContext: enrichment.marketContext,
@@ -46,25 +48,31 @@ export class SignalScoringService {
             finalScore: enrichment.confidenceBreakdown.finalScore
           }
         : signal.confidenceBreakdown,
-      telegramDraft: enrichment.telegramDraft,
+      telegramDraft: enrichment.formattedTelegramMessage,
       metadata: {
         ...signal.metadata,
         aiEnrichment: enrichment
       },
-      updatedAt: isoNow(this.clock())
+      updatedAt: now
     };
 
-    const pendingReview: SignalSnapshot = {
+    const gatedStatus =
+      enrichment.publishRecommendation === "review"
+        ? "pending_review"
+        : enrichment.publishRecommendation === "watchlist"
+          ? "watchlist"
+          : "rejected";
+    const gatedSignal: SignalSnapshot = {
       ...aiScored,
-      status: "pending_review",
-      updatedAt: isoNow(this.clock())
+      status: gatedStatus,
+      updatedAt: now
     };
 
     await this.signalRepository.save(aiScored);
-    await this.signalRepository.save(pendingReview);
+    await this.signalRepository.save(gatedSignal);
 
     return {
-      signal: pendingReview,
+      signal: gatedSignal,
       enrichment
     };
   }

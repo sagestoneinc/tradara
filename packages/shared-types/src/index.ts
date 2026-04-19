@@ -79,7 +79,8 @@ export const signalStatusSchema = z.enum([
   "edited",
   "rejected",
   "published",
-  "canceled"
+  "canceled",
+  "watchlist"
 ]);
 export type SignalStatus = z.infer<typeof signalStatusSchema>;
 
@@ -101,6 +102,20 @@ export const marketInsightStatusSchema = z.enum([
   "canceled"
 ]);
 export type MarketInsightStatus = z.infer<typeof marketInsightStatusSchema>;
+
+export const publishRecommendationSchema = z.enum(["review", "watchlist", "reject"]);
+export type PublishRecommendation = z.infer<typeof publishRecommendationSchema>;
+
+export const marketBiasSchema = z.enum(["bullish", "neutral", "bearish"]);
+export type MarketBias = z.infer<typeof marketBiasSchema>;
+
+export const executionPostureSchema = z.enum([
+  "aggressive",
+  "selective",
+  "patient",
+  "stand_down"
+]);
+export type ExecutionPosture = z.infer<typeof executionPostureSchema>;
 
 export const telegramExecutionStatusSchema = z.enum([
   "idle",
@@ -262,6 +277,7 @@ export const signalSnapshotSchema = z.object({
   confidenceScore: z.number().int().min(0).max(100).nullable(),
   setupQualityScore: z.number().int().min(0).max(100).nullable(),
   riskLabel: riskLabelSchema.nullable(),
+  publishRecommendation: publishRecommendationSchema.nullable(),
   invalidationSummary: z.string().nullable(),
   setupRationale: z.string().nullable(),
   marketContext: z.string().nullable(),
@@ -306,7 +322,7 @@ export const signalReviewSnapshotSchema = z.object({
 });
 export type SignalReviewSnapshot = z.infer<typeof signalReviewSnapshotSchema>;
 
-export const signalReviewActionSchema = z.enum(["approve", "edit", "reject", "cancel"]);
+export const signalReviewActionSchema = z.enum(["approve", "edit", "reject", "cancel", "watchlist"]);
 export type SignalReviewAction = z.infer<typeof signalReviewActionSchema>;
 
 export const signalReviewRequestSchema = z.object({
@@ -330,6 +346,12 @@ export const marketInsightSnapshotSchema = z.object({
   title: z.string(),
   summary: z.string(),
   body: z.string(),
+  btcBias: marketBiasSchema,
+  ethBias: marketBiasSchema,
+  altcoinBias: marketBiasSchema,
+  riskEnvironment: riskLabelSchema,
+  executionPosture: executionPostureSchema,
+  warnings: z.array(z.string()),
   telegramDraft: z.string().nullable(),
   approvedBy: z.string().nullable(),
   approvedAt: z.string().datetime().nullable(),
@@ -378,6 +400,26 @@ export const createSignalInputRequestSchema = z.object({
 });
 export type CreateSignalInputRequest = z.infer<typeof createSignalInputRequestSchema>;
 
+export const tradingViewSignalWebhookSchema = z.object({
+  alertId: z.string().min(1),
+  symbol: z.string().min(1),
+  timeframe: z.string().min(1).optional(),
+  direction: z.enum(["long", "short", "neutral"]).optional(),
+  trigger: z.string().min(1).optional(),
+  entryZoneLow: z.number().optional(),
+  entryZoneHigh: z.number().optional(),
+  stopLoss: z.number().optional(),
+  takeProfit1: z.number().optional(),
+  takeProfit2: z.number().optional(),
+  takeProfit3: z.number().optional(),
+  marketPrice: z.number().optional(),
+  strategyName: z.string().optional(),
+  note: z.string().optional(),
+  detectedAt: z.string().datetime().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional()
+});
+export type TradingViewSignalWebhook = z.infer<typeof tradingViewSignalWebhookSchema>;
+
 export const createMarketInsightRequestSchema = z.object({
   symbol: z.string().min(1),
   timeframe: z.string().nullable().optional(),
@@ -422,8 +464,9 @@ export const signalAiEnrichmentSchema = z.object({
   confidenceBreakdown: signalScoringResultSchema,
   confidenceScore: z.number().int().min(0).max(100),
   riskLabel: riskLabelSchema,
+  publishRecommendation: publishRecommendationSchema,
   invalidationSummary: z.string(),
-  telegramDraft: z.string()
+  formattedTelegramMessage: z.string()
 });
 export type SignalAiEnrichment = z.infer<typeof signalAiEnrichmentSchema>;
 
@@ -596,10 +639,12 @@ export const adminSignalRowSchema = z.object({
   symbol: z.string(),
   timeframe: z.string().nullable(),
   direction: z.string().nullable(),
-  sourceProvider: providerNameSchema,
+  sourceProvider: providerNameSchema.nullable(),
   confidenceScore: z.number().int().min(0).max(100).nullable(),
   setupQualityScore: z.number().int().min(0).max(100).nullable(),
   riskLabel: riskLabelSchema.nullable(),
+  publishRecommendation: publishRecommendationSchema.nullable(),
+  executionPosture: executionPostureSchema.nullable().optional(),
   approvedBy: z.string().nullable(),
   publishedAt: z.string().datetime().nullable(),
   updatedAt: z.string().datetime(),
@@ -619,6 +664,18 @@ export const adminSignalsDataSchema = z.object({
   rows: z.array(adminSignalRowSchema)
 });
 export type AdminSignalsData = z.infer<typeof adminSignalsDataSchema>;
+
+export const adminSignalListDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  rows: z.array(signalSnapshotSchema)
+});
+export type AdminSignalListData = z.infer<typeof adminSignalListDataSchema>;
+
+export const adminMarketInsightsListDataSchema = z.object({
+  generatedAt: z.string().datetime(),
+  rows: z.array(marketInsightSnapshotSchema)
+});
+export type AdminMarketInsightsListData = z.infer<typeof adminMarketInsightsListDataSchema>;
 
 export const createBillingCheckoutSessionRequestSchema = z.object({
   userId: z.string().min(1),

@@ -80,6 +80,7 @@ enum SignalStatus {
   rejected
   published
   canceled
+  watchlist
 }
 
 enum SignalSourceType {
@@ -107,6 +108,25 @@ enum MarketInsightStatus {
   published
   rejected
   canceled
+}
+
+enum PublishRecommendation {
+  review
+  watchlist
+  reject
+}
+
+enum MarketBias {
+  bullish
+  neutral
+  bearish
+}
+
+enum ExecutionPosture {
+  aggressive
+  selective
+  patient
+  stand_down
 }
 
 model User {
@@ -244,6 +264,7 @@ model Signal {
   confidenceScore       Int?
   setupQualityScore     Int?
   riskLabel             RiskLabel?
+  publishRecommendation PublishRecommendation?
   invalidationSummary   String?
   setupRationale        String?
   marketContext         String?
@@ -293,6 +314,12 @@ model MarketInsight {
   title               String
   summary             String
   body                String
+  btcBias             MarketBias
+  ethBias             MarketBias
+  altcoinBias         MarketBias
+  riskEnvironment     RiskLabel
+  executionPosture    ExecutionPosture
+  warnings            Json
   telegramDraft       String?
   approvedBy          String?
   approvedAt          DateTime?

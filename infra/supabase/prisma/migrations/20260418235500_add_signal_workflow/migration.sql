@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "SignalStatus" AS ENUM ('draft', 'ai_scored', 'pending_review', 'approved', 'edited', 'rejected', 'published', 'canceled');
+CREATE TYPE "SignalStatus" AS ENUM ('draft', 'ai_scored', 'pending_review', 'approved', 'edited', 'rejected', 'published', 'canceled', 'watchlist');
 
 -- CreateEnum
 CREATE TYPE "SignalSourceType" AS ENUM ('tradingview', 'manual', 'ai_assisted');
@@ -12,6 +12,15 @@ CREATE TYPE "RiskLabel" AS ENUM ('low', 'medium', 'high');
 
 -- CreateEnum
 CREATE TYPE "MarketInsightStatus" AS ENUM ('draft', 'pending_review', 'approved', 'published', 'rejected', 'canceled');
+
+-- CreateEnum
+CREATE TYPE "PublishRecommendation" AS ENUM ('review', 'watchlist', 'reject');
+
+-- CreateEnum
+CREATE TYPE "MarketBias" AS ENUM ('bullish', 'neutral', 'bearish');
+
+-- CreateEnum
+CREATE TYPE "ExecutionPosture" AS ENUM ('aggressive', 'selective', 'patient', 'stand_down');
 
 -- CreateTable
 CREATE TABLE "SignalInput" (
@@ -54,6 +63,7 @@ CREATE TABLE "Signal" (
     "confidenceScore" INTEGER,
     "setupQualityScore" INTEGER,
     "riskLabel" "RiskLabel",
+    "publishRecommendation" "PublishRecommendation",
     "invalidationSummary" TEXT,
     "setupRationale" TEXT,
     "marketContext" TEXT,
@@ -101,6 +111,12 @@ CREATE TABLE "MarketInsight" (
     "title" TEXT NOT NULL,
     "summary" TEXT NOT NULL,
     "body" TEXT NOT NULL,
+    "btcBias" "MarketBias" NOT NULL,
+    "ethBias" "MarketBias" NOT NULL,
+    "altcoinBias" "MarketBias" NOT NULL,
+    "riskEnvironment" "RiskLabel" NOT NULL,
+    "executionPosture" "ExecutionPosture" NOT NULL,
+    "warnings" JSONB NOT NULL,
     "telegramDraft" TEXT,
     "approvedBy" TEXT,
     "approvedAt" TIMESTAMP(3),

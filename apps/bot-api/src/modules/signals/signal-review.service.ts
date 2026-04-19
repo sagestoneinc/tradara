@@ -8,7 +8,8 @@ const REVIEW_ACTION_TO_STATUS: Record<SignalReviewRequest["action"], SignalStatu
   approve: "approved",
   edit: "edited",
   reject: "rejected",
-  cancel: "canceled"
+  cancel: "canceled",
+  watchlist: "watchlist"
 };
 
 export class SignalReviewService {
@@ -29,7 +30,7 @@ export class SignalReviewService {
 
     const canReview =
       input.action === "cancel"
-        ? ["draft", "ai_scored", "pending_review", "approved", "edited"].includes(signal.status)
+        ? ["draft", "ai_scored", "pending_review", "approved", "edited", "watchlist"].includes(signal.status)
         : signal.status === "pending_review";
 
     if (!canReview) {

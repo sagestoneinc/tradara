@@ -16,6 +16,10 @@ import { getPrismaClient } from "./lib/prisma";
 import {
   InMemoryAuditLogRepository,
   InMemoryChannelAccessRepository,
+  InMemoryMarketInsightRepository,
+  InMemorySignalInputRepository,
+  InMemorySignalRepository,
+  InMemorySignalReviewRepository,
   InMemorySubscriptionRepository,
   InMemoryTelegramInviteRepository,
   InMemoryWebhookEventRepository,
@@ -28,9 +32,17 @@ import {
   PrismaTelegramInviteRepository,
   PrismaWebhookEventRepository
 } from "./repositories/prisma-repositories";
+import {
+  PrismaMarketInsightRepository,
+  PrismaSignalInputRepository,
+  PrismaSignalRepository,
+  PrismaSignalReviewRepository
+} from "./repositories/prisma-signal-repositories";
 import { ChannelAccessReconciliationJob } from "./jobs/channel-access-reconciliation.job";
 import { AdminController } from "./modules/admin/admin.controller";
 import { AdminService } from "./modules/admin/admin.service";
+import { AiMarketAuditorService } from "./modules/ai/ai-market-auditor.service";
+import { AiSignalAnalystService } from "./modules/ai/ai-signal-analyst.service";
 import { BillingController } from "./modules/billing/billing.controller";
 import { BillingService } from "./modules/billing/billing.service";
 import { PayPalAdapter } from "./modules/billing/providers/paypal-adapter";
@@ -44,6 +56,12 @@ import {
   TelegramBotApiAccessAdapter,
   type TelegramAccessAdapter
 } from "./modules/channel-access/telegram-access.adapter";
+import { MarketInsightsService } from "./modules/signals/market-insights.service";
+import { SignalAdminReadService } from "./modules/signals/signal-admin-read.service";
+import { SignalIngestionService } from "./modules/signals/signal-ingestion.service";
+import { SignalPublishingService } from "./modules/signals/signal-publishing.service";
+import { SignalReviewService } from "./modules/signals/signal-review.service";
+import { SignalScoringService } from "./modules/signals/signal-scoring.service";
 import { TelegramWebhookController } from "./modules/webhooks/telegram/telegram-webhook.controller";
 import { TelegramWebhookService } from "./modules/webhooks/telegram/telegram-webhook.service";
 
@@ -84,7 +102,11 @@ export function createContainer(
     channelAccessRepository,
     inviteRepository,
     auditLogRepository,
-    webhookEventRepository
+    webhookEventRepository,
+    signalInputRepository,
+    signalRepository,
+    signalReviewRepository,
+    marketInsightRepository
   } =
     persistence === "memory"
       ? createInMemoryRepositories(options.seed ?? createDefaultSeed(env, now))
@@ -132,7 +154,48 @@ export function createContainer(
     paymentProviders,
     clock
   );
-  const adminService = new AdminService(channelAccessService, webhookEventRepository, clock);
+  const aiSignalAnalystService = new AiSignalAnalystService();
+  const aiMarketAuditorService = new AiMarketAuditorService();
+  const signalIngestionService = new SignalIngestionService(
+    signalInputRepository,
+    signalRepository,
+    clock
+  );
+  const signalScoringService = new SignalScoringService(
+    signalRepository,
+    signalInputRepository,
+    aiSignalAnalystService,
+    clock
+  );
+  const signalReviewService = new SignalReviewService(
+    signalRepository,
+    signalReviewRepository,
+    clock
+  );
+  const signalPublishingService = new SignalPublishingService(signalRepository, auditLogRepository);
+  const marketInsightsService = new MarketInsightsService(
+    marketInsightRepository,
+    aiMarketAuditorService,
+    clock
+  );
+  const signalAdminReadService = new SignalAdminReadService(
+    signalRepository,
+    marketInsightRepository,
+    clock
+  );
+
+  void signalIngestionService;
+  void signalScoringService;
+  void signalReviewService;
+  void signalPublishingService;
+  void marketInsightsService;
+
+  const adminService = new AdminService(
+    channelAccessService,
+    webhookEventRepository,
+    signalAdminReadService,
+    clock
+  );
 
   return {
     env,
@@ -154,7 +217,11 @@ function createInMemoryRepositories(seed: RepositorySeed) {
     channelAccessRepository: new InMemoryChannelAccessRepository(seed.channelAccess),
     inviteRepository: new InMemoryTelegramInviteRepository(seed.telegramInvites),
     auditLogRepository: new InMemoryAuditLogRepository(seed.auditLogs),
-    webhookEventRepository: new InMemoryWebhookEventRepository(seed.webhookEvents)
+    webhookEventRepository: new InMemoryWebhookEventRepository(seed.webhookEvents),
+    signalInputRepository: new InMemorySignalInputRepository(seed.signalInputs),
+    signalRepository: new InMemorySignalRepository(seed.signals),
+    signalReviewRepository: new InMemorySignalReviewRepository(seed.signalReviews),
+    marketInsightRepository: new InMemoryMarketInsightRepository(seed.marketInsights)
   };
 }
 
@@ -164,7 +231,11 @@ function createPrismaRepositories(prisma: PrismaClient) {
     channelAccessRepository: new PrismaChannelAccessRepository(prisma),
     inviteRepository: new PrismaTelegramInviteRepository(prisma),
     auditLogRepository: new PrismaAuditLogRepository(prisma),
-    webhookEventRepository: new PrismaWebhookEventRepository(prisma)
+    webhookEventRepository: new PrismaWebhookEventRepository(prisma),
+    signalInputRepository: new PrismaSignalInputRepository(prisma),
+    signalRepository: new PrismaSignalRepository(prisma),
+    signalReviewRepository: new PrismaSignalReviewRepository(prisma),
+    marketInsightRepository: new PrismaMarketInsightRepository(prisma)
   };
 }
 

@@ -33,4 +33,24 @@ export class AdminController {
   getAuditLogs = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     reply.send(ok(await this.adminService.getAuditLogData()));
   };
+
+  getSignalReviewQueue = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    reply.send(ok(await this.adminService.getSignalReviewQueueData()));
+  };
+
+  getPublishedSignals = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    reply.send(ok(await this.adminService.getPublishedSignalsData()));
+  };
+
+  getRejectedSignals = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    reply.send(ok(await this.adminService.getRejectedSignalsData()));
+  };
+
+  getSignalWatchlist = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    reply.send(ok(await this.adminService.getSignalWatchlistData()));
+  };
+
+  getMarketInsights = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    reply.send(ok(await this.adminService.getMarketInsightsListData()));
+  };
 }

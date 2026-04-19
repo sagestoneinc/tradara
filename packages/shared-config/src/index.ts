@@ -89,6 +89,11 @@ const adminWebEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   ADMIN_WEB_BASE_URL: z.string().url(),
   BOT_API_BASE_URL: z.string().url(),
+  ADMIN_TELEGRAM_AUTH_ENABLED: z.enum(["true", "false"]).default("false"),
+  ADMIN_TELEGRAM_BOT_TOKEN: z.string().default(""),
+  ADMIN_TELEGRAM_BOT_USERNAME: z.string().default(""),
+  ADMIN_TELEGRAM_ALLOWED_USER_IDS: z.string().default(""),
+  ADMIN_SESSION_SECRET: z.string().default(""),
   NEXT_PUBLIC_BRAND_NAME: z.string().default(brand.name),
   NEXT_PUBLIC_TAGLINE: z.string().default(brand.tagline)
 });

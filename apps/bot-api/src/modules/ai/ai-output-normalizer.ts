@@ -1,6 +1,6 @@
 import type { CreateSignalInputRequest, SignalAiEnrichment } from "@tradara/shared-types";
 
-import { calculateSignalScore } from "../signals/signal-scoring";
+import { calculateSignalScore, derivePublishRecommendation } from "../signals/signal-scoring";
 
 function formatRange(low?: number | null, high?: number | null): string {
   if (low == null && high == null) {
@@ -35,12 +35,35 @@ export function normalizeSignalAnalysis(input: CreateSignalInputRequest): Signal
     warnings.push("Volatility conditions look noisy, which can reduce setup clarity.");
   }
 
+  const marketPosture = (() => {
+    const posture = input.metadata?.executionPosture;
+    return typeof posture === "string" ? posture : undefined;
+  })();
+  const publishRecommendation = derivePublishRecommendation({
+    finalScore: scoring.finalScore,
+    conflictPenalty: input.conflictPenalty ?? 0,
+    marketPosture:
+      marketPosture === "aggressive" ||
+      marketPosture === "selective" ||
+      marketPosture === "patient" ||
+      marketPosture === "stand_down"
+        ? marketPosture
+        : undefined
+  });
+  if (publishRecommendation === "watchlist") {
+    warnings.push("This setup should stay selective or watchlist-only until conditions improve.");
+  }
+  if (publishRecommendation === "reject") {
+    warnings.push("This setup is too conflicted or the market posture is too poor for escalation.");
+  }
+
   const directionLabel = input.direction ? input.direction.toUpperCase() : "UNSPECIFIED";
   const telegramDraft = `*${input.symbol}* ${directionLabel}
 
 Setup quality: *${scoring.setupQualityScore}/100*
 Confidence: *${scoring.confidenceScore}/100*
 Risk label: *${scoring.riskLabel.toUpperCase()}*
+Action: *${publishRecommendation.toUpperCase()}*
 
 Entry zone: ${formatRange(input.entryZoneLow, input.entryZoneHigh)}
 Stop loss: ${input.stopLoss ?? "not provided"}
@@ -60,8 +83,9 @@ Invalidation: A loss of structure or clean invalidation through the stop zone wo
     confidenceBreakdown: scoring,
     confidenceScore: scoring.confidenceScore,
     riskLabel: scoring.riskLabel,
+    publishRecommendation,
     invalidationSummary:
       "Invalidate the idea if price breaks the structure behind the stop zone or if conflicting conditions increase before review.",
-    telegramDraft
+    formattedTelegramMessage: telegramDraft
   };
 }

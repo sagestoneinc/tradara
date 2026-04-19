@@ -9,6 +9,8 @@ const navItems = [
   { href: "/", label: "Dashboard", helper: "Overview", count: "04" },
   { href: "/channel-access", label: "Channel Access", helper: "Delivery layer", count: "12" },
   { href: "/diagnostics", label: "Diagnostics", helper: "Ops health", count: "07" },
+  { href: "/signals/review-queue", label: "Signals", helper: "Review queue", count: "05" },
+  { href: "/signals/market-insights", label: "Insights", helper: "Market drafts", count: "03" },
   { href: "/users", label: "Users", helper: "Identity map", count: "36" },
   { href: "/subscriptions", label: "Subscriptions", helper: "Billing truth", count: "09" },
   { href: "/settings", label: "Settings", helper: "Config", count: "02" }
@@ -30,7 +32,9 @@ export function AdminShell({ children }: { children: React.ReactNode }): React.J
 
           <nav className="mt-10 space-y-2">
             {navItems.map((item) => {
-              const active = pathname === item.href;
+              const active =
+                pathname === item.href ||
+                (item.href === "/signals/review-queue" && pathname.startsWith("/signals/"));
               return (
                 <Link
                   key={item.href}

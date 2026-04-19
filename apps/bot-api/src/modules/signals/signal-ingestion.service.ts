@@ -1,4 +1,9 @@
-import type { CreateSignalInputRequest, SignalInputSnapshot, SignalSnapshot } from "@tradara/shared-types";
+import type {
+  CreateSignalInputRequest,
+  SignalInputSnapshot,
+  SignalSnapshot,
+  TradingViewSignalWebhook
+} from "@tradara/shared-types";
 import { createId, isoNow } from "@tradara/shared-utils";
 
 import type { SignalInputRepository, SignalRepository } from "../../repositories/types";
@@ -52,6 +57,7 @@ export class SignalIngestionService {
       confidenceScore: null,
       setupQualityScore: null,
       riskLabel: null,
+      publishRecommendation: null,
       invalidationSummary: null,
       setupRationale: null,
       marketContext: null,
@@ -88,5 +94,33 @@ export class SignalIngestionService {
     await this.signalRepository.save(signal);
 
     return { signalInput, signal };
+  }
+
+  async createDraftFromTradingView(input: TradingViewSignalWebhook): Promise<{
+    signalInput: SignalInputSnapshot;
+    signal: SignalSnapshot;
+  }> {
+    return this.createDraft({
+      sourceType: "tradingview",
+      sourceEventId: input.alertId,
+      symbol: input.symbol,
+      timeframe: input.timeframe ?? null,
+      direction: input.direction ?? null,
+      entryZoneLow: input.entryZoneLow ?? null,
+      entryZoneHigh: input.entryZoneHigh ?? null,
+      stopLoss: input.stopLoss ?? null,
+      takeProfit1: input.takeProfit1 ?? null,
+      takeProfit2: input.takeProfit2 ?? null,
+      takeProfit3: input.takeProfit3 ?? null,
+      marketPrice: input.marketPrice ?? null,
+      strategyName: input.strategyName ?? null,
+      note: input.note ?? null,
+      detectedAt: input.detectedAt ?? null,
+      metadata: {
+        trigger: input.trigger ?? null,
+        rawTradingViewPayload: input,
+        ...(input.metadata ?? {})
+      }
+    });
   }
 }

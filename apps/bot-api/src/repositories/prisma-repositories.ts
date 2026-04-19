@@ -139,7 +139,7 @@ function mapSubscription(record: {
   userId: string;
   planId: PrismaSubscriptionPlanId;
   status: PrismaSubscriptionStatus;
-  providerName: PrismaWebhookProvider | null;
+  providerName?: PrismaWebhookProvider | null;
   providerCustomerId: string | null;
   providerSubscriptionId: string | null;
   currentPeriodEndsAt: Date;
@@ -151,7 +151,8 @@ function mapSubscription(record: {
     userId: record.userId,
     planId: fromPrismaPlanId(record.planId),
     status: record.status,
-    providerName: fromPrismaProviderName(record.providerName),
+    providerName:
+      record.providerName !== undefined ? fromPrismaProviderName(record.providerName) : undefined,
     providerCustomerId: record.providerCustomerId,
     providerSubscriptionId: record.providerSubscriptionId,
     currentPeriodEndsAt: record.currentPeriodEndsAt.toISOString(),
@@ -287,6 +288,17 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
   async findByUserId(userId: string): Promise<SubscriptionSnapshot | null> {
     const record = await this.prisma.subscription.findFirst({
       where: { userId },
+      select: {
+        id: true,
+        userId: true,
+        planId: true,
+        status: true,
+        providerCustomerId: true,
+        providerSubscriptionId: true,
+        currentPeriodEndsAt: true,
+        gracePeriodEndsAt: true,
+        canceledAt: true
+      },
       orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }]
     });
 
@@ -295,6 +307,17 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
 
   async listAll(): Promise<SubscriptionSnapshot[]> {
     const records = await this.prisma.subscription.findMany({
+      select: {
+        id: true,
+        userId: true,
+        planId: true,
+        status: true,
+        providerCustomerId: true,
+        providerSubscriptionId: true,
+        currentPeriodEndsAt: true,
+        gracePeriodEndsAt: true,
+        canceledAt: true
+      },
       orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }]
     });
 
@@ -310,9 +333,6 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
         userId: subscription.userId,
         planId: toPrismaPlanId(subscription.planId),
         status: toPrismaSubscriptionStatus(subscription.status),
-        providerName: subscription.providerName
-          ? toPrismaProviderName(subscription.providerName)
-          : null,
         providerCustomerId: subscription.providerCustomerId ?? null,
         providerSubscriptionId: subscription.providerSubscriptionId ?? null,
         currentPeriodEndsAt: new Date(subscription.currentPeriodEndsAt),
@@ -323,9 +343,6 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
         userId: subscription.userId,
         planId: toPrismaPlanId(subscription.planId),
         status: toPrismaSubscriptionStatus(subscription.status),
-        providerName: subscription.providerName
-          ? toPrismaProviderName(subscription.providerName)
-          : null,
         providerCustomerId: subscription.providerCustomerId ?? null,
         providerSubscriptionId: subscription.providerSubscriptionId ?? null,
         currentPeriodEndsAt: new Date(subscription.currentPeriodEndsAt),

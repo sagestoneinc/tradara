@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import fastify from "fastify";
 import type { BotApiEnv } from "@tradara/shared-config";
 import { failure } from "@tradara/shared-utils";
 
@@ -10,8 +10,8 @@ import { registerChannelAccessRoutes } from "./modules/channel-access/channel-ac
 import { registerHealthRoutes } from "./modules/health/health.routes";
 import { registerTelegramWebhookRoutes } from "./modules/webhooks/telegram/telegram-webhook.routes";
 
-export function buildApp(container: AppContainer): ReturnType<typeof Fastify> {
-  const app = Fastify({
+export function buildApp(container: AppContainer): ReturnType<typeof fastify> {
+  const app = fastify({
     logger: false
   });
 
@@ -53,6 +53,6 @@ export function buildApp(container: AppContainer): ReturnType<typeof Fastify> {
   return app;
 }
 
-export function createDefaultApp(env: BotApiEnv): ReturnType<typeof Fastify> {
+export function createDefaultApp(env: BotApiEnv): ReturnType<typeof fastify> {
   return buildApp(createContainer(env));
 }

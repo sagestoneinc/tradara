@@ -13,4 +13,9 @@ export async function registerAdminRoutes(
   app.get("/v1/admin/webhook-events", controller.getWebhookEvents);
   app.get("/v1/admin/diagnostics", controller.getDiagnostics);
   app.get("/v1/admin/audit-logs", controller.getAuditLogs);
+  app.get("/v1/admin/signals/review-queue", controller.getSignalReviewQueue);
+  app.get("/v1/admin/signals/published", controller.getPublishedSignals);
+  app.get("/v1/admin/signals/rejected", controller.getRejectedSignals);
+  app.get("/v1/admin/signals/watchlist", controller.getSignalWatchlist);
+  app.get("/v1/admin/signals/market-insights", controller.getMarketInsights);
 }

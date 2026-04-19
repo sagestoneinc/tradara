@@ -1,6 +1,9 @@
 import type {
   CreateMarketInsightRequest,
   CreateSignalInputRequest,
+  ExecutionPosture,
+  MarketBias,
+  PublishRecommendation,
   RiskLabel,
   SignalScoringResult
 } from "@tradara/shared-types";
@@ -14,8 +17,9 @@ export interface TradaraAiSignalAnalysisOutput {
   invalidationSummary: string;
   confidenceScore: number;
   riskLabel: RiskLabel;
+  publishRecommendation: PublishRecommendation;
   confidenceBreakdown: SignalScoringResult;
-  telegramDraft: string;
+  formattedTelegramMessage: string;
 }
 
 export interface TradaraAiMarketAuditInput extends CreateMarketInsightRequest {}
@@ -25,10 +29,10 @@ export interface TradaraAiMarketAuditOutput {
   warnings: string[];
   riskEnvironment: "low" | "medium" | "high";
   marketBias: {
-    btc: "bullish" | "neutral" | "bearish";
-    eth: "bullish" | "neutral" | "bearish";
-    altcoins: "bullish" | "neutral" | "bearish";
+    btc: MarketBias;
+    eth: MarketBias;
+    altcoins: MarketBias;
   };
-  posture: "aggressive" | "selective" | "patient";
+  posture: ExecutionPosture;
   telegramDraft: string;
 }

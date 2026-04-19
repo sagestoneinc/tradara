@@ -1,4 +1,4 @@
-import type { RiskLabel, SignalScoringInput, SignalScoringResult } from "@tradara/shared-types";
+import type { PublishRecommendation, RiskLabel, SignalScoringInput, SignalScoringResult } from "@tradara/shared-types";
 
 const WEIGHTS = {
   trendAlignment: 0.2,
@@ -51,4 +51,26 @@ export function calculateSignalScore(input: SignalScoringInput): SignalScoringRe
       conflictPenalty: input.conflictPenalty
     }
   };
+}
+
+export function derivePublishRecommendation(input: {
+  finalScore: number;
+  conflictPenalty: number;
+  marketPosture?: "aggressive" | "selective" | "patient" | "stand_down" | null;
+}): PublishRecommendation {
+  const posture = input.marketPosture ?? "selective";
+
+  if (posture === "stand_down" || input.conflictPenalty >= 60 || input.finalScore < 45) {
+    return "reject";
+  }
+
+  if (
+    posture === "patient" ||
+    input.conflictPenalty >= 25 ||
+    input.finalScore < 72
+  ) {
+    return "watchlist";
+  }
+
+  return "review";
 }

@@ -4,7 +4,9 @@ import type {
   AdminAuditLogListData,
   AdminChannelAccessData,
   AdminDiagnosticsData,
+  AdminMarketInsightsListData,
   AdminOverviewData,
+  AdminSignalListData,
   AdminSubscriberSnapshot,
   AdminSubscriptionsData,
   AdminUsersData,
@@ -20,6 +22,7 @@ import { isoNow } from "@tradara/shared-utils";
 
 import type { WebhookEventRepository } from "../../repositories/types";
 import type { ChannelAccessOverview, ChannelAccessService } from "../channel-access/channel-access.service";
+import type { SignalAdminReadService } from "../signals/signal-admin-read.service";
 
 const TELEGRAM_AUTOMATION_STATE: IntegrationExecutionState = "live";
 const BILLING_EXECUTION_STATE: IntegrationExecutionState = "live";
@@ -28,6 +31,7 @@ export class AdminService {
   constructor(
     private readonly channelAccessService: ChannelAccessService,
     private readonly webhookEventRepository: WebhookEventRepository,
+    private readonly signalAdminReadService: SignalAdminReadService | null,
     private readonly clock: () => Date = () => new Date()
   ) {}
 
@@ -198,6 +202,41 @@ export class AdminService {
     return {
       generatedAt: this.generatedAt(),
       rows: await this.buildAuditEntries(limit)
+    };
+  }
+
+  async getSignalReviewQueueData(): Promise<AdminSignalListData> {
+    return {
+      generatedAt: this.generatedAt(),
+      rows: await this.requireSignalAdminReadService().getReviewQueue()
+    };
+  }
+
+  async getPublishedSignalsData(): Promise<AdminSignalListData> {
+    return {
+      generatedAt: this.generatedAt(),
+      rows: await this.requireSignalAdminReadService().getPublishedSignals()
+    };
+  }
+
+  async getRejectedSignalsData(): Promise<AdminSignalListData> {
+    return {
+      generatedAt: this.generatedAt(),
+      rows: await this.requireSignalAdminReadService().getRejectedSignals()
+    };
+  }
+
+  async getSignalWatchlistData(): Promise<AdminSignalListData> {
+    return {
+      generatedAt: this.generatedAt(),
+      rows: await this.requireSignalAdminReadService().getWatchlistSignals()
+    };
+  }
+
+  async getMarketInsightsListData(): Promise<AdminMarketInsightsListData> {
+    return {
+      generatedAt: this.generatedAt(),
+      rows: await this.requireSignalAdminReadService().getMarketInsights()
     };
   }
 
@@ -407,6 +446,14 @@ export class AdminService {
 
   private generatedAt(): string {
     return isoNow(this.clock());
+  }
+
+  private requireSignalAdminReadService(): SignalAdminReadService {
+    if (!this.signalAdminReadService) {
+      throw new Error("Signal admin read service is not configured.");
+    }
+
+    return this.signalAdminReadService;
   }
 
   private async listWebhookEvents(): Promise<WebhookEvent[]> {

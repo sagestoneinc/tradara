@@ -66,12 +66,12 @@ describe("signal workflow foundation", () => {
       symbol: "ETHUSDT",
       timeframe: "4H",
       direction: "short",
-      trendAlignment: 72,
-      structureQuality: 70,
-      volatilityQuality: 66,
-      liquidityQuality: 74,
-      riskRewardQuality: 79,
-      conflictPenalty: 12
+      trendAlignment: 84,
+      structureQuality: 82,
+      volatilityQuality: 72,
+      liquidityQuality: 80,
+      riskRewardQuality: 86,
+      conflictPenalty: 10
     });
     const enriched = await scoringService.enrichDraft(signal.id);
 
@@ -105,12 +105,12 @@ describe("signal workflow foundation", () => {
       symbol: "SOLUSDT",
       timeframe: "15M",
       direction: "long",
-      trendAlignment: 69,
-      structureQuality: 72,
-      volatilityQuality: 62,
-      liquidityQuality: 81,
-      riskRewardQuality: 84,
-      conflictPenalty: 16
+      trendAlignment: 86,
+      structureQuality: 84,
+      volatilityQuality: 76,
+      liquidityQuality: 83,
+      riskRewardQuality: 90,
+      conflictPenalty: 9
     });
     const enriched = await scoringService.enrichDraft(signal.id);
     await reviewService.submitReview(enriched.signal.id, {
@@ -120,13 +120,11 @@ describe("signal workflow foundation", () => {
     });
 
     const published = await publishingService.publish(enriched.signal.id, {
-      publisherId: "publisher_001",
-      chatId: "-100123456",
-      messageId: "msg_001"
+      publisherId: "publisher_001"
     });
 
     expect(published.signal.status).toBe("published");
-    expect(published.publishMetadata.chatId).toBe("-100123456");
+    expect(published.publishMetadata.chatId).toBe("tradara-signal-preview");
     expect(published.signal.metadata.publishMetadata).toBeDefined();
   });
 
@@ -153,12 +151,12 @@ describe("signal workflow foundation", () => {
       symbol: "BTCUSDT",
       timeframe: "1D",
       direction: "neutral",
-      trendAlignment: 55,
-      structureQuality: 58,
-      volatilityQuality: 50,
-      liquidityQuality: 80,
-      riskRewardQuality: 62,
-      conflictPenalty: 22
+      trendAlignment: 82,
+      structureQuality: 79,
+      volatilityQuality: 68,
+      liquidityQuality: 84,
+      riskRewardQuality: 85,
+      conflictPenalty: 11
     });
     const enriched = await scoringService.enrichDraft(signal.id);
     await reviewService.submitReview(enriched.signal.id, {
