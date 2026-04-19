@@ -64,6 +64,12 @@ enum TelegramFailureKind {
   non_retryable
 }
 
+enum TelegramLinkState {
+  unlinked
+  pending
+  linked
+}
+
 enum AuditActorType {
   system
   admin
@@ -130,15 +136,34 @@ enum ExecutionPosture {
 }
 
 model User {
-  id             String          @id
-  email          String?         @unique
-  telegramUserId String?         @unique
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  subscriptions  Subscription[]
-  channelAccess  ChannelAccess[]
-  auditLogs      AuditLog[]
-  invites        TelegramInvite[]
+  id                 String                @id
+  email              String?               @unique
+  clerkUserId        String?               @unique
+  displayName        String?
+  telegramUserId     String?               @unique
+  telegramLinkState  TelegramLinkState     @default(unlinked)
+  telegramLinkedAt   DateTime?
+  lastLoginAt        DateTime?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  subscriptions      Subscription[]
+  channelAccess      ChannelAccess[]
+  auditLogs          AuditLog[]
+  invites            TelegramInvite[]
+  telegramLinkSessions TelegramLinkSession[]
+}
+
+model TelegramLinkSession {
+  id          String   @id
+  userId      String
+  clerkUserId String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model Subscription {

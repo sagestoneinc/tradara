@@ -6,7 +6,9 @@ import type {
   SignalReviewSnapshot,
   SignalSnapshot,
   SubscriptionSnapshot,
+  TelegramLinkSession,
   TelegramInvite,
+  UserSnapshot,
   WebhookEvent
 } from "@tradara/shared-types";
 
@@ -18,7 +20,9 @@ import type {
   SignalInputRepository,
   SignalReviewRepository,
   SubscriptionRepository,
+  TelegramLinkSessionRepository,
   TelegramInviteRepository,
+  UserRepository,
   WebhookEventRepository
 } from "./types";
 
@@ -29,6 +33,8 @@ export interface RepositorySeed {
   signalReviews?: SignalReviewSnapshot[];
   marketInsights?: MarketInsightSnapshot[];
   channelAccess?: ChannelAccessRecord[];
+  users?: UserSnapshot[];
+  telegramLinkSessions?: TelegramLinkSession[];
   telegramInvites?: TelegramInvite[];
   auditLogs?: AuditLog[];
   webhookEvents?: WebhookEvent[];
@@ -82,6 +88,50 @@ export class InMemoryChannelAccessRepository implements ChannelAccessRepository 
   async upsert(record: ChannelAccessRecord): Promise<ChannelAccessRecord> {
     this.items.set(record.userId, record);
     return record;
+  }
+}
+
+export class InMemoryUserRepository implements UserRepository {
+  private readonly items = new Map<string, UserSnapshot>();
+
+  constructor(seed: UserSnapshot[] = []) {
+    seed.forEach((item) => this.items.set(item.id, item));
+  }
+
+  async findById(id: string): Promise<UserSnapshot | null> {
+    return this.items.get(id) ?? null;
+  }
+
+  async findByClerkUserId(clerkUserId: string): Promise<UserSnapshot | null> {
+    return [...this.items.values()].find((item) => item.clerkUserId === clerkUserId) ?? null;
+  }
+
+  async findByEmail(email: string): Promise<UserSnapshot | null> {
+    return (
+      [...this.items.values()].find(
+        (item) => item.email?.toLowerCase() === email.toLowerCase()
+      ) ?? null
+    );
+  }
+
+  async save(user: UserSnapshot): Promise<void> {
+    this.items.set(user.id, user);
+  }
+}
+
+export class InMemoryTelegramLinkSessionRepository implements TelegramLinkSessionRepository {
+  private readonly items = new Map<string, TelegramLinkSession>();
+
+  constructor(seed: TelegramLinkSession[] = []) {
+    seed.forEach((item) => this.items.set(item.tokenHash, item));
+  }
+
+  async findByTokenHash(tokenHash: string): Promise<TelegramLinkSession | null> {
+    return this.items.get(tokenHash) ?? null;
+  }
+
+  async save(session: TelegramLinkSession): Promise<void> {
+    this.items.set(session.tokenHash, session);
   }
 }
 

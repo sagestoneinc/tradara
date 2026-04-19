@@ -6,9 +6,12 @@ import type {
   SubscriptionSnapshot,
   SubscriptionStatus,
   TelegramFailureKind,
+  TelegramLinkSession,
   TelegramInvite,
   TelegramInviteStatus,
+  TelegramLinkState,
   TelegramExecutionStatus,
+  UserSnapshot,
   WebhookEvent
 } from "@tradara/shared-types";
 import {
@@ -29,7 +32,9 @@ import type {
   AuditLogRepository,
   ChannelAccessRepository,
   SubscriptionRepository,
+  TelegramLinkSessionRepository,
   TelegramInviteRepository,
+  UserRepository,
   WebhookEventRepository
 } from "./types";
 
@@ -109,6 +114,14 @@ function toPrismaFailureKind(
   return value ?? null;
 }
 
+function deriveDisplayName(input: {
+  displayName?: string | null;
+  email?: string | null;
+  clerkUserId?: string | null;
+  id: string;
+}): string {
+  return input.displayName ?? input.email ?? input.clerkUserId ?? input.id;
+}
 
 async function ensureUser(
   prisma: PrismaClient,
@@ -265,6 +278,53 @@ function mapWebhookEvent(record: {
     signatureValid: record.signatureValid,
     processedAt: formatDate(record.processedAt),
     receivedAt: record.receivedAt.toISOString()
+  };
+}
+
+function mapUser(record: {
+  id: string;
+  email: string | null;
+  clerkUserId?: string | null;
+  displayName?: string | null;
+  telegramUserId: string | null;
+  telegramLinkState?: TelegramLinkState;
+  telegramLinkedAt?: Date | null;
+  lastLoginAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): UserSnapshot {
+  return {
+    id: record.id,
+    displayName: deriveDisplayName(record),
+    email: record.email,
+    clerkUserId: record.clerkUserId,
+    telegramHandle: null,
+    telegramUserId: record.telegramUserId,
+    telegramLinkState: record.telegramLinkState ?? (record.telegramUserId ? "linked" : "unlinked"),
+    telegramLinkedAt: formatDate(record.telegramLinkedAt ?? null),
+    lastLoginAt: formatDate(record.lastLoginAt ?? null),
+    createdAt: record.createdAt.toISOString(),
+    updatedAt: record.updatedAt.toISOString()
+  };
+}
+
+function mapTelegramLinkSession(record: {
+  id: string;
+  userId: string;
+  clerkUserId: string;
+  tokenHash: string;
+  expiresAt: Date;
+  consumedAt: Date | null;
+  createdAt: Date;
+}): TelegramLinkSession {
+  return {
+    id: record.id,
+    userId: record.userId,
+    clerkUserId: record.clerkUserId,
+    tokenHash: record.tokenHash,
+    expiresAt: record.expiresAt.toISOString(),
+    consumedAt: formatDate(record.consumedAt),
+    createdAt: record.createdAt.toISOString()
   };
 }
 
@@ -585,5 +645,165 @@ export class PrismaWebhookEventRepository implements WebhookEventRepository {
     });
 
     return records.map((record) => mapWebhookEvent(record));
+  }
+}
+
+export class PrismaUserRepository implements UserRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  async findById(id: string): Promise<UserSnapshot | null> {
+    const record = await this.prisma.$queryRaw<
+      Array<{
+        id: string;
+        email: string | null;
+        clerkUserId: string | null;
+        displayName: string | null;
+        telegramUserId: string | null;
+        telegramLinkState: TelegramLinkState;
+        telegramLinkedAt: Date | null;
+        lastLoginAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+      }>
+    >`SELECT "id", "email", "clerkUserId", "displayName", "telegramUserId", "telegramLinkState", "telegramLinkedAt", "lastLoginAt", "createdAt", "updatedAt"
+      FROM "User"
+      WHERE "id" = ${id}
+      LIMIT 1`;
+    return record[0] ? mapUser(record[0]) : null;
+  }
+
+  async findByClerkUserId(clerkUserId: string): Promise<UserSnapshot | null> {
+    const record = await this.prisma.$queryRaw<
+      Array<{
+        id: string;
+        email: string | null;
+        clerkUserId: string | null;
+        displayName: string | null;
+        telegramUserId: string | null;
+        telegramLinkState: TelegramLinkState;
+        telegramLinkedAt: Date | null;
+        lastLoginAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+      }>
+    >`SELECT "id", "email", "clerkUserId", "displayName", "telegramUserId", "telegramLinkState", "telegramLinkedAt", "lastLoginAt", "createdAt", "updatedAt"
+      FROM "User"
+      WHERE "clerkUserId" = ${clerkUserId}
+      LIMIT 1`;
+    return record[0] ? mapUser(record[0]) : null;
+  }
+
+  async findByEmail(email: string): Promise<UserSnapshot | null> {
+    const normalizedEmail = email.toLowerCase();
+    const record = await this.prisma.$queryRaw<
+      Array<{
+        id: string;
+        email: string | null;
+        clerkUserId: string | null;
+        displayName: string | null;
+        telegramUserId: string | null;
+        telegramLinkState: TelegramLinkState;
+        telegramLinkedAt: Date | null;
+        lastLoginAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+      }>
+    >`SELECT "id", "email", "clerkUserId", "displayName", "telegramUserId", "telegramLinkState", "telegramLinkedAt", "lastLoginAt", "createdAt", "updatedAt"
+      FROM "User"
+      WHERE LOWER("email") = ${normalizedEmail}
+      LIMIT 1`;
+    return record[0] ? mapUser(record[0]) : null;
+  }
+
+  async save(user: UserSnapshot): Promise<void> {
+    await this.prisma.$executeRaw`
+      INSERT INTO "User" (
+        "id",
+        "email",
+        "clerkUserId",
+        "displayName",
+        "telegramUserId",
+        "telegramLinkState",
+        "telegramLinkedAt",
+        "lastLoginAt",
+        "createdAt",
+        "updatedAt"
+      )
+      VALUES (
+        ${user.id},
+        ${user.email?.toLowerCase() ?? null},
+        ${user.clerkUserId ?? null},
+        ${user.displayName},
+        ${user.telegramUserId ?? null},
+        ${user.telegramLinkState ?? (user.telegramUserId ? "linked" : "unlinked")},
+        ${parseDate(user.telegramLinkedAt)},
+        ${parseDate(user.lastLoginAt)},
+        ${new Date(user.createdAt)},
+        ${new Date(user.updatedAt)}
+      )
+      ON CONFLICT ("id")
+      DO UPDATE SET
+        "email" = EXCLUDED."email",
+        "clerkUserId" = EXCLUDED."clerkUserId",
+        "displayName" = EXCLUDED."displayName",
+        "telegramUserId" = EXCLUDED."telegramUserId",
+        "telegramLinkState" = EXCLUDED."telegramLinkState",
+        "telegramLinkedAt" = EXCLUDED."telegramLinkedAt",
+        "lastLoginAt" = EXCLUDED."lastLoginAt",
+        "updatedAt" = EXCLUDED."updatedAt"`;
+  }
+}
+
+export class PrismaTelegramLinkSessionRepository implements TelegramLinkSessionRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  async findByTokenHash(tokenHash: string): Promise<TelegramLinkSession | null> {
+    const record = await this.prisma.$queryRaw<
+      Array<{
+        id: string;
+        userId: string;
+        clerkUserId: string;
+        tokenHash: string;
+        expiresAt: Date;
+        consumedAt: Date | null;
+        createdAt: Date;
+      }>
+    >`SELECT "id", "userId", "clerkUserId", "tokenHash", "expiresAt", "consumedAt", "createdAt"
+      FROM "TelegramLinkSession"
+      WHERE "tokenHash" = ${tokenHash}
+      LIMIT 1`;
+    return record[0] ? mapTelegramLinkSession(record[0]) : null;
+  }
+
+  async save(session: TelegramLinkSession): Promise<void> {
+    await ensureUser(this.prisma, {
+      id: session.userId
+    });
+
+    await this.prisma.$executeRaw`
+      INSERT INTO "TelegramLinkSession" (
+        "id",
+        "userId",
+        "clerkUserId",
+        "tokenHash",
+        "expiresAt",
+        "consumedAt",
+        "createdAt"
+      )
+      VALUES (
+        ${session.id},
+        ${session.userId},
+        ${session.clerkUserId},
+        ${session.tokenHash},
+        ${new Date(session.expiresAt)},
+        ${parseDate(session.consumedAt)},
+        ${new Date(session.createdAt)}
+      )
+      ON CONFLICT ("tokenHash")
+      DO UPDATE SET
+        "userId" = EXCLUDED."userId",
+        "clerkUserId" = EXCLUDED."clerkUserId",
+        "expiresAt" = EXCLUDED."expiresAt",
+        "consumedAt" = EXCLUDED."consumedAt"`;
   }
 }

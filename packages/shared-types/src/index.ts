@@ -130,6 +130,9 @@ export type TelegramExecutionStatus = z.infer<typeof telegramExecutionStatusSche
 export const telegramFailureKindSchema = z.enum(["retryable", "non_retryable"]);
 export type TelegramFailureKind = z.infer<typeof telegramFailureKindSchema>;
 
+export const telegramLinkStateSchema = z.enum(["unlinked", "pending", "linked"]);
+export type TelegramLinkState = z.infer<typeof telegramLinkStateSchema>;
+
 export const adminTelegramConnectionStatusSchema = z.enum(["connected", "invited", "missing"]);
 export type AdminTelegramConnectionStatus = z.infer<typeof adminTelegramConnectionStatusSchema>;
 
@@ -137,12 +140,27 @@ export const userSnapshotSchema = z.object({
   id: z.string(),
   displayName: z.string(),
   email: z.string().email().nullable(),
+  clerkUserId: z.string().nullable().optional(),
   telegramHandle: z.string().nullable(),
   telegramUserId: z.string().nullable(),
+  telegramLinkState: telegramLinkStateSchema.optional(),
+  telegramLinkedAt: z.string().datetime().nullable().optional(),
+  lastLoginAt: z.string().datetime().nullable().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });
 export type UserSnapshot = z.infer<typeof userSnapshotSchema>;
+
+export const telegramLinkSessionSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  clerkUserId: z.string(),
+  tokenHash: z.string(),
+  expiresAt: z.string().datetime(),
+  consumedAt: z.string().datetime().nullable(),
+  createdAt: z.string().datetime()
+});
+export type TelegramLinkSession = z.infer<typeof telegramLinkSessionSchema>;
 
 export const subscriptionSnapshotSchema = z.object({
   id: z.string(),
@@ -207,6 +225,24 @@ export const channelAccessRecordSchema = z.object({
   updatedAt: z.string().datetime()
 });
 export type ChannelAccessRecord = z.infer<typeof channelAccessRecordSchema>;
+
+export const accountProfileSchema = z.object({
+  user: userSnapshotSchema
+});
+export type AccountProfile = z.infer<typeof accountProfileSchema>;
+
+export const accountAccessSnapshotSchema = z.object({
+  user: userSnapshotSchema,
+  subscription: subscriptionSnapshotSchema.nullable(),
+  entitlement: entitlementSnapshotSchema,
+  channelAccess: channelAccessRecordSchema.nullable(),
+  checklist: z.object({
+    hasBilling: z.boolean(),
+    telegramLinked: z.boolean(),
+    premiumAccessReady: z.boolean()
+  })
+});
+export type AccountAccessSnapshot = z.infer<typeof accountAccessSnapshotSchema>;
 
 export const reconciliationActionSchema = z.object({
   type: z.enum(["grant", "revoke", "noop"]),

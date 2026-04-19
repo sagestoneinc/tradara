@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 
 import "./globals.css";
+import { OptionalClerkProvider } from "./components/providers/optional-clerk-provider";
 import { site, siteUrl } from "./lib/site";
 
 const dmSans = DM_Sans({
@@ -74,13 +75,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={dmSans.variable}>
       <body className="font-[family:var(--font-dm-sans)]">
-        <a
-          href="#content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-cyan-300 focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-950"
-        >
-          Skip to content
-        </a>
-        {children}
+        <OptionalClerkProvider>
+          <a
+            href="#content"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-cyan-300 focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-950"
+          >
+            Skip to content
+          </a>
+          {children}
+        </OptionalClerkProvider>
       </body>
     </html>
   );

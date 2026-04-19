@@ -5,6 +5,7 @@ import { failure } from "@tradara/shared-utils";
 import { createContainer, type AppContainer } from "./container";
 import { DomainError } from "./lib/domain-error";
 import { registerAdminRoutes } from "./modules/admin/admin.routes";
+import { registerAuthRoutes } from "./modules/auth/auth.routes";
 import { registerBillingRoutes } from "./modules/billing/billing.routes";
 import { registerChannelAccessRoutes } from "./modules/channel-access/channel-access.routes";
 import { registerHealthRoutes } from "./modules/health/health.routes";
@@ -47,6 +48,7 @@ export function buildApp(container: AppContainer): ReturnType<typeof fastify> {
 
   registerHealthRoutes(app);
   registerAdminRoutes(app, container.controllers.admin);
+  registerAuthRoutes(app, container.controllers.auth);
   registerBillingRoutes(app, container.controllers.billing);
   registerChannelAccessRoutes(app, container.controllers.channelAccess);
   registerSignalsRoutes(app, container.controllers.signals);

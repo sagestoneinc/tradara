@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { brand } from "@tradara/shared-config";
 
 import "./globals.css";
+import { OptionalClerkProvider } from "./components/providers/optional-clerk-provider";
 import { AdminShell } from "../components/admin-shell";
 
 export const metadata: Metadata = {
@@ -29,7 +30,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AdminShell>{children}</AdminShell>
+        <OptionalClerkProvider>
+          <AdminShell>{children}</AdminShell>
+        </OptionalClerkProvider>
       </body>
     </html>
   );

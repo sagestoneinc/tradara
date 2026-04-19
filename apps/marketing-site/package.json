@@ -12,6 +12,7 @@
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.23.3",
     "@tradara/shared-config": "workspace:*",
     "@tradara/ui": "workspace:*",
     "@types/react": "^19.2.14",

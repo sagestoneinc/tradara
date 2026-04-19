@@ -51,6 +51,8 @@ const botApiEnvSchema = z.object({
   BOT_API_PORT: z.coerce.number().default(3001),
   BOT_API_BASE_URL: z.string().url(),
   DATABASE_URL: z.string().min(1),
+  CLERK_SECRET_KEY: z.string().default(""),
+  CLERK_WEBHOOK_SECRET: z.string().default(""),
   TELEGRAM_BOT_TOKEN: z.string().min(1),
   TELEGRAM_WEBHOOK_SECRET: z.string().min(1),
   TELEGRAM_PREMIUM_CHANNEL_ID: z.string().min(1),
@@ -89,6 +91,8 @@ const adminWebEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   ADMIN_WEB_BASE_URL: z.string().url(),
   BOT_API_BASE_URL: z.string().url(),
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().default(""),
+  CLERK_SECRET_KEY: z.string().default(""),
   ADMIN_TELEGRAM_AUTH_ENABLED: z.enum(["true", "false"]).default("false"),
   ADMIN_TELEGRAM_BOT_TOKEN: z.string().default(""),
   ADMIN_TELEGRAM_BOT_USERNAME: z.string().default(""),
@@ -101,7 +105,9 @@ const adminWebEnvSchema = z.object({
 const marketingSiteEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   MARKETING_SITE_BASE_URL: z.string().url(),
-  BOT_API_BASE_URL: z.string().url().default("http://localhost:3001")
+  BOT_API_BASE_URL: z.string().url().default("http://localhost:3001"),
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().default(""),
+  CLERK_SECRET_KEY: z.string().default("")
 });
 
 export type BotApiEnv = z.infer<typeof botApiEnvSchema>;

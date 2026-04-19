@@ -6,7 +6,9 @@ import type {
   SignalReviewSnapshot,
   SignalSnapshot,
   SubscriptionSnapshot,
+  TelegramLinkSession,
   TelegramInvite,
+  UserSnapshot,
   WebhookEvent
 } from "@tradara/shared-types";
 
@@ -37,6 +39,18 @@ export interface WebhookEventRepository {
   recordIncoming(event: WebhookEvent): Promise<{ duplicate: boolean; event: WebhookEvent }>;
   markProcessed(id: string, processedAt: string): Promise<void>;
   listAll(): Promise<WebhookEvent[]>;
+}
+
+export interface UserRepository {
+  findById(id: string): Promise<UserSnapshot | null>;
+  findByClerkUserId(clerkUserId: string): Promise<UserSnapshot | null>;
+  findByEmail(email: string): Promise<UserSnapshot | null>;
+  save(user: UserSnapshot): Promise<void>;
+}
+
+export interface TelegramLinkSessionRepository {
+  findByTokenHash(tokenHash: string): Promise<TelegramLinkSession | null>;
+  save(session: TelegramLinkSession): Promise<void>;
 }
 
 export interface SignalRepository {

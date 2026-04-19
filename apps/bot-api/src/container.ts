@@ -21,7 +21,9 @@ import {
   InMemorySignalRepository,
   InMemorySignalReviewRepository,
   InMemorySubscriptionRepository,
+  InMemoryTelegramLinkSessionRepository,
   InMemoryTelegramInviteRepository,
+  InMemoryUserRepository,
   InMemoryWebhookEventRepository,
   type RepositorySeed
 } from "./repositories/in-memory-repositories";
@@ -29,7 +31,9 @@ import {
   PrismaAuditLogRepository,
   PrismaChannelAccessRepository,
   PrismaSubscriptionRepository,
+  PrismaTelegramLinkSessionRepository,
   PrismaTelegramInviteRepository,
+  PrismaUserRepository,
   PrismaWebhookEventRepository
 } from "./repositories/prisma-repositories";
 import {
@@ -52,6 +56,10 @@ import { ChannelAccessController } from "./modules/channel-access/channel-access
 import { ChannelAccessService } from "./modules/channel-access/channel-access.service";
 import { EntitlementService } from "./modules/channel-access/entitlement.service";
 import { ChannelAccessReconciliationService } from "./modules/channel-access/reconciliation.service";
+import { AuthController } from "./modules/auth/auth.controller";
+import { AccountService } from "./modules/auth/account.service";
+import { ClerkAuthService } from "./modules/auth/clerk-auth.service";
+import { ClerkBackendVerifier, type ClerkVerifier } from "./modules/auth/clerk-verifier";
 import {
   TelegramBotApiAccessAdapter,
   type TelegramAccessAdapter
@@ -70,6 +78,7 @@ export interface AppContainer {
   env: BotApiEnv;
   controllers: {
     admin: AdminController;
+    auth: AuthController;
     billing: BillingController;
     channelAccess: ChannelAccessController;
     signals: SignalsController;
@@ -86,6 +95,7 @@ export interface CreateContainerOptions {
   seed?: RepositorySeed;
   telegramAccessAdapter?: TelegramAccessAdapter;
   telegramBot?: TelegramBotLike;
+  clerkVerifier?: ClerkVerifier;
 }
 
 export function createContainer(
@@ -96,6 +106,7 @@ export function createContainer(
   const telegramAccessAdapter =
     options.telegramAccessAdapter ?? new TelegramBotApiAccessAdapter(env);
   const telegramBot = options.telegramBot ?? new TelegramBotApiAdapter(env);
+  const clerkVerifier = options.clerkVerifier ?? new ClerkBackendVerifier(env);
   const now = new Date("2026-04-18T12:00:00.000Z");
   const clock = persistence === "memory" ? () => new Date(now.getTime()) : () => new Date();
 
@@ -105,6 +116,7 @@ export function createContainer(
     inviteRepository,
     auditLogRepository,
     webhookEventRepository,
+    userRepository,
     signalInputRepository,
     signalRepository,
     signalReviewRepository,
@@ -192,6 +204,19 @@ export function createContainer(
     marketInsightRepository,
     clock
   );
+  const clerkAuthService = new ClerkAuthService(
+    env,
+    userRepository,
+    auditLogRepository,
+    clerkVerifier,
+    clock
+  );
+  const accountService = new AccountService(
+    clerkAuthService,
+    subscriptionRepository,
+    channelAccessRepository,
+    entitlementService
+  );
 
   const adminService = new AdminService(
     channelAccessService,
@@ -204,6 +229,7 @@ export function createContainer(
     env,
     controllers: {
       admin: new AdminController(adminService),
+      auth: new AuthController(clerkAuthService, accountService),
       billing: new BillingController(billingService),
       channelAccess: new ChannelAccessController(channelAccessService, reconciliationJob),
       signals: new SignalsController(
@@ -230,6 +256,10 @@ function createInMemoryRepositories(seed: RepositorySeed) {
     inviteRepository: new InMemoryTelegramInviteRepository(seed.telegramInvites),
     auditLogRepository: new InMemoryAuditLogRepository(seed.auditLogs),
     webhookEventRepository: new InMemoryWebhookEventRepository(seed.webhookEvents),
+    userRepository: new InMemoryUserRepository(seed.users),
+    telegramLinkSessionRepository: new InMemoryTelegramLinkSessionRepository(
+      seed.telegramLinkSessions
+    ),
     signalInputRepository: new InMemorySignalInputRepository(seed.signalInputs),
     signalRepository: new InMemorySignalRepository(seed.signals),
     signalReviewRepository: new InMemorySignalReviewRepository(seed.signalReviews),
@@ -244,6 +274,8 @@ function createPrismaRepositories(prisma: PrismaClient) {
     inviteRepository: new PrismaTelegramInviteRepository(prisma),
     auditLogRepository: new PrismaAuditLogRepository(prisma),
     webhookEventRepository: new PrismaWebhookEventRepository(prisma),
+    userRepository: new PrismaUserRepository(prisma),
+    telegramLinkSessionRepository: new PrismaTelegramLinkSessionRepository(prisma),
     signalInputRepository: new PrismaSignalInputRepository(prisma),
     signalRepository: new PrismaSignalRepository(prisma),
     signalReviewRepository: new PrismaSignalReviewRepository(prisma),
