@@ -17,6 +17,10 @@ function getEnv() {
   return loadAdminWebEnv(process.env);
 }
 
+function formatErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unknown error";
+}
+
 function fallbackOverviewData(): AdminOverviewData {
   const generatedAt = new Date().toISOString();
 
@@ -64,7 +68,9 @@ async function fetchAdminData<TOutput>(
     });
   } catch (error) {
     if (fallback) {
-      console.warn(`Admin API request failed for ${path}; using fallback snapshot.`, error);
+      console.warn(
+        `Admin API request failed for ${path}; using fallback snapshot. ${formatErrorMessage(error)}`
+      );
       return fallback();
     }
 
@@ -88,7 +94,9 @@ async function fetchAdminData<TOutput>(
     payload = await response.json();
   } catch (error) {
     if (fallback) {
-      console.warn(`Admin API response parsing failed for ${path}; using fallback snapshot.`, error);
+      console.warn(
+        `Admin API response parsing failed for ${path}; using fallback snapshot. ${formatErrorMessage(error)}`
+      );
       return fallback();
     }
 
@@ -108,7 +116,9 @@ async function fetchAdminData<TOutput>(
     return schema.parse(envelope.data);
   } catch (error) {
     if (fallback) {
-      console.warn(`Admin API schema parse failed for ${path}; using fallback snapshot.`, error);
+      console.warn(
+        `Admin API schema parse failed for ${path}; using fallback snapshot. ${formatErrorMessage(error)}`
+      );
       return fallback();
     }
 
