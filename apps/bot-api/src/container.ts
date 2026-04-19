@@ -85,7 +85,7 @@ export function createContainer(
   } =
     persistence === "memory"
       ? createInMemoryRepositories(options.seed ?? createDefaultSeed(env, now))
-      : createPrismaRepositories(options.prisma ?? getPrismaClient());
+      : createPrismaRepositories(options.prisma ?? getPrismaClient(env.DATABASE_URL));
 
   const entitlementService = new EntitlementService(clock);
   const channelAccessService = new ChannelAccessService(
