@@ -58,8 +58,8 @@ const botApiEnvSchema = z.object({
   ACCESS_GRACE_PERIOD_HOURS: z.coerce.number().default(accessPolicy.defaultGracePeriodHours),
   // Provider routing (A/B test weights)
   PAYMENT_PROVIDER_PAYPAL_WEIGHT: z.coerce.number().default(50),
-  PAYMENT_PROVIDER_XENDIT_WEIGHT: z.coerce.number().default(25),
-  PAYMENT_PROVIDER_PAYMONGO_WEIGHT: z.coerce.number().default(25),
+  PAYMENT_PROVIDER_XENDIT_WEIGHT: z.coerce.number().default(50),
+  PAYMENT_PROVIDER_PAYMONGO_WEIGHT: z.coerce.number().default(0),
   // PayPal
   PAYPAL_CLIENT_ID: z.string().min(1),
   PAYPAL_CLIENT_SECRET: z.string().min(1),
