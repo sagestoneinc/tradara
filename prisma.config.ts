@@ -5,7 +5,7 @@ export default defineConfig({
   migrations: {
     path: "infra/supabase/prisma/migrations"
   },
-  engine: "classic",
+  engine: "js",
   datasource: {
     url: process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:54322/postgres"
   }
