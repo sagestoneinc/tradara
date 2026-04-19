@@ -9,7 +9,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-[1.5rem] border border-white/8 bg-[linear-gradient(180deg,rgba(8,18,36,0.94),rgba(3,10,24,0.88))] shadow-[0_24px_70px_rgba(2,8,23,0.42)] backdrop-blur",
+        "relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(8,18,36,0.92),rgba(4,10,22,0.88))] shadow-[0_24px_70px_rgba(2,8,23,0.42)] backdrop-blur-xl before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.32),transparent)]",
         className
       )}
       {...props}
@@ -35,7 +35,7 @@ export function CardDescription({
   className,
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>): React.JSX.Element {
-  return <p className={cn("text-sm leading-6 text-slate-400", className)} {...props} />;
+  return <p className={cn("text-sm leading-6 text-slate-400/95", className)} {...props} />;
 }
 
 export function CardContent({

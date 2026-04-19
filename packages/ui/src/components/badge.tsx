@@ -4,14 +4,14 @@ import * as React from "react";
 import { cn } from "../lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em]",
+  "inline-flex items-center rounded-full border px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em]",
   {
     variants: {
       variant: {
-        active: "border-emerald-400/40 bg-emerald-500/15 text-emerald-300",
-        grace: "border-amber-300/45 bg-amber-500/15 text-amber-200",
-        inactive: "border-slate-700 bg-slate-800 text-slate-300",
-        outline: "border-slate-700 text-slate-300"
+        active: "border-emerald-400/40 bg-emerald-500/15 text-emerald-300 shadow-[0_0_18px_rgba(16,185,129,0.16)]",
+        grace: "border-amber-300/45 bg-amber-500/15 text-amber-200 shadow-[0_0_18px_rgba(245,158,11,0.16)]",
+        inactive: "border-slate-700 bg-slate-800/90 text-slate-300",
+        outline: "border-slate-700 bg-slate-950/35 text-slate-300"
       }
     },
     defaultVariants: {
@@ -27,4 +27,3 @@ export interface BadgeProps
 export function Badge({ className, variant, ...props }: BadgeProps): React.JSX.Element {
   return <span className={cn(badgeVariants({ variant, className }))} {...props} />;
 }
-
