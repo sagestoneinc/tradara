@@ -43,22 +43,22 @@ export type AuditActorType = z.infer<typeof auditActorTypeSchema>;
 
 export const providerNameSchema = z.enum(["telegram", "paymongo", "tradingview"]);
 export type ProviderName = z.infer<typeof providerNameSchema>;
-export const paymentProviderSchema = z.enum([\"paypal\", \"xendit\", \"paymongo\"]);
+export const paymentProviderSchema = z.enum(["paypal", "xendit", "paymongo"]);
 export type PaymentProvider = z.infer<typeof paymentProviderSchema>;
 
 export const paymentEventTypeSchema = z.enum([
   // PayPal events
-  \"paypal.checkout.order_approved\",
-  \"paypal.payment_capture.completed\",
-  \"paypal.payment_capture.failed\",
+  "paypal.checkout.order_approved",
+  "paypal.payment_capture.completed",
+  "paypal.payment_capture.failed",
   // Xendit events
-  \"xendit.invoice.paid\",
-  \"xendit.invoice.failed\",
-  \"xendit.invoice.expired\",
+  "xendit.invoice.paid",
+  "xendit.invoice.failed",
+  "xendit.invoice.expired",
   // PayMongo events
-  \"paymongo.checkout_session.payment.paid\",
-  \"paymongo.payment.paid\",
-  \"paymongo.payment.failed\"
+  "paymongo.checkout_session.payment.paid",
+  "paymongo.payment.paid",
+  "paymongo.payment.failed"
 ]);
 export type PaymentEventType = z.infer<typeof paymentEventTypeSchema>;
 export const paymongoEventTypeSchema = z.enum([

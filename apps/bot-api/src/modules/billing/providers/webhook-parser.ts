@@ -62,11 +62,17 @@ export class WebhookParser {
       const resource = body.resource as Record<string, unknown>;
       status = resource.status === "COMPLETED" ? "paid" : "pending";
       subscriptionId = (resource.id as string) || "";
-      metadata = (resource.custom_id && { tradaraUserId: resource.custom_id }) || undefined;
+      if (typeof resource.custom_id === "string" && resource.custom_id.length > 0) {
+        metadata = { tradaraUserId: resource.custom_id };
+      }
     } else if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
       const resource = body.resource as Record<string, unknown>;
       status = (resource.status as string) === "COMPLETED" ? "paid" : "pending";
-      subscriptionId = (resource.supplementary_data as Record<string, unknown>)?.related_ids?.[0] as string || "";
+      const supplementaryData = resource.supplementary_data as Record<string, unknown> | undefined;
+      const relatedIds = supplementaryData?.related_ids as unknown;
+      if (Array.isArray(relatedIds) && typeof relatedIds[0] === "string") {
+        subscriptionId = relatedIds[0];
+      }
     } else if (eventType === "PAYMENT.CAPTURE.DENIED") {
       status = "failed";
     }
@@ -140,15 +146,16 @@ export class WebhookParser {
       `${parts.timestamp}.${rawBody}`
     );
 
-    const provided = (body.data as Record<string, unknown>)?.attributes?.livemode 
-      ? parts.liveSignature 
-      : parts.testSignature;
+    const paymongoData = body.data as Record<string, unknown> | undefined;
+    const paymongoAttributes = paymongoData?.attributes as Record<string, unknown> | undefined;
+    const isLiveMode = paymongoAttributes?.livemode === true;
+    const provided = isLiveMode ? parts.liveSignature : parts.testSignature;
 
     if (!compareHexSignature(provided, expected)) {
       throw new DomainError("PayMongo webhook signature verification failed", 401, "invalid_signature");
     }
 
-    const attributes = (body.data as Record<string, unknown>)?.attributes as Record<string, unknown>;
+    const attributes = paymongoAttributes as Record<string, unknown>;
     const eventType = attributes.type as string;
     const resource = attributes.data as Record<string, unknown>;
 
