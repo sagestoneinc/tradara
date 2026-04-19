@@ -2,11 +2,14 @@ import type { BotApiEnv } from "@tradara/shared-config";
 import { createId, isoNow } from "@tradara/shared-utils";
 
 import { dispatchCommand } from "../../../bot/commands";
+import { TELEGRAM_LINK_MESSAGES } from "../../../bot/content/bot-messages";
+import { sendBotMessage } from "../../../bot/content/bot-message-delivery";
 import type { TelegramBotLike } from "../../../bot/types/bot";
 import { DomainError } from "../../../lib/domain-error";
 import { compareSecret, hashPayload } from "../../../lib/security";
 import type { WebhookEventRepository } from "../../../repositories/types";
 import type { ChannelAccessService } from "../../channel-access/channel-access.service";
+import type { ClerkAuthService } from "../../auth/clerk-auth.service";
 import type { TelegramWebhookPayload } from "./telegram-webhook.schemas";
 
 export class TelegramWebhookService {
@@ -15,6 +18,7 @@ export class TelegramWebhookService {
     private readonly webhookEventRepository: WebhookEventRepository,
     private readonly channelAccessService: ChannelAccessService,
     private readonly telegramBot: TelegramBotLike,
+    private readonly clerkAuthService: ClerkAuthService,
     private readonly clock: () => Date = () => new Date(),
     private readonly logger: Pick<Console, "info" | "warn" | "error"> = console
   ) {}
@@ -74,6 +78,10 @@ export class TelegramWebhookService {
 
     const inboundMessage = this.extractInboundMessage(payload);
     if (inboundMessage) {
+      const linkToken = this.extractTelegramLinkToken(inboundMessage.text);
+      if (linkToken) {
+        await this.handleTelegramLinkCompletion(inboundMessage.chatId, linkToken);
+      } else {
       this.logger.info("[tradara.telegram.webhook.command_message]", {
         updateId: payload.update_id,
         source: inboundMessage.source,
@@ -84,8 +92,12 @@ export class TelegramWebhookService {
         bot: this.telegramBot,
         chatId: inboundMessage.chatId,
         text: inboundMessage.text,
+        context: {
+          marketingSiteBaseUrl: this.env.MARKETING_SITE_BASE_URL
+        },
         logger: this.logger
       });
+      }
     } else {
       this.logger.warn("[tradara.telegram.webhook.no_command_message]", {
         updateId: payload.update_id
@@ -122,5 +134,47 @@ export class TelegramWebhookService {
     }
 
     return null;
+  }
+
+  private extractTelegramLinkToken(text: string): string | null {
+    const parts = text.trim().split(/\s+/u);
+    if (parts[0]?.toLowerCase() !== "/start") {
+      return null;
+    }
+
+    const token = parts[1];
+    if (!token?.startsWith("link_")) {
+      return null;
+    }
+
+    return token.slice("link_".length).trim() || null;
+  }
+
+  private async handleTelegramLinkCompletion(chatId: string, token: string): Promise<void> {
+    const result = await this.clerkAuthService.completeTelegramLink({
+      token,
+      telegramUserId: chatId
+    });
+
+    switch (result.outcome) {
+      case "linked":
+        await sendBotMessage(
+          this.telegramBot,
+          chatId,
+          result.premiumAccessReady
+            ? TELEGRAM_LINK_MESSAGES.linked
+            : TELEGRAM_LINK_MESSAGES.linkedPendingBilling
+        );
+        return;
+      case "already_linked":
+        await sendBotMessage(this.telegramBot, chatId, TELEGRAM_LINK_MESSAGES.alreadyLinked);
+        return;
+      case "expired":
+        await sendBotMessage(this.telegramBot, chatId, TELEGRAM_LINK_MESSAGES.expired);
+        return;
+      case "invalid":
+        await sendBotMessage(this.telegramBot, chatId, TELEGRAM_LINK_MESSAGES.invalid);
+        return;
+    }
   }
 }

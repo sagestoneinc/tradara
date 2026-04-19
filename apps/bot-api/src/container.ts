@@ -117,6 +117,7 @@ export function createContainer(
     auditLogRepository,
     webhookEventRepository,
     userRepository,
+    telegramLinkSessionRepository,
     signalInputRepository,
     signalRepository,
     signalReviewRepository,
@@ -144,13 +145,6 @@ export function createContainer(
     channelAccessService
   );
   const reconciliationJob = new ChannelAccessReconciliationJob(reconciliationService);
-  const telegramWebhookService = new TelegramWebhookService(
-    env,
-    webhookEventRepository,
-    channelAccessService,
-    telegramBot,
-    clock
-  );
 
   // Create payment provider adapters
   const paymentProviders = new Map();
@@ -207,6 +201,11 @@ export function createContainer(
   const clerkAuthService = new ClerkAuthService(
     env,
     userRepository,
+    telegramLinkSessionRepository,
+    subscriptionRepository,
+    channelAccessRepository,
+    channelAccessService,
+    entitlementService,
     auditLogRepository,
     clerkVerifier,
     clock
@@ -216,6 +215,14 @@ export function createContainer(
     subscriptionRepository,
     channelAccessRepository,
     entitlementService
+  );
+  const telegramWebhookService = new TelegramWebhookService(
+    env,
+    webhookEventRepository,
+    channelAccessService,
+    telegramBot,
+    clerkAuthService,
+    clock
   );
 
   const adminService = new AdminService(

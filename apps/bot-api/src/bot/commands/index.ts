@@ -1,5 +1,5 @@
 import { FALLBACK_MESSAGE } from "../content/bot-messages";
-import type { BotCommandHandler, TelegramBotLike, TelegramChatId } from "../types/bot";
+import type { BotCommandContext, BotCommandHandler, TelegramBotLike, TelegramChatId } from "../types/bot";
 import { handleAlerts } from "./alerts";
 import { handleFaq } from "./faq";
 import { handleHelp } from "./help";
@@ -37,6 +37,7 @@ export async function dispatchCommand(input: {
   bot: TelegramBotLike;
   chatId: TelegramChatId;
   text: string;
+  context?: BotCommandContext;
   logger?: Pick<Console, "info" | "warn">;
 }): Promise<void> {
   const command = normalizeCommand(input.text);
@@ -51,7 +52,7 @@ export async function dispatchCommand(input: {
   });
 
   if (handler) {
-    await handler(input.bot, input.chatId);
+    await handler(input.bot, input.chatId, input.context);
     return;
   }
 

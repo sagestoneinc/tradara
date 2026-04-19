@@ -1,10 +1,26 @@
+import { createClerkClient } from "@clerk/backend";
 import type { BotApiEnv } from "@tradara/shared-config";
-import type { AuditLog, TelegramLinkState, UserSnapshot } from "@tradara/shared-types";
+import type {
+  AuditLog,
+  TelegramLinkSession,
+  TelegramLinkSessionResponse,
+  TelegramLinkState,
+  UserSnapshot
+} from "@tradara/shared-types";
 import { createId, isoNow } from "@tradara/shared-utils";
+import { createOpaqueToken, hashString } from "../../lib/security";
 
 import { DomainError } from "../../lib/domain-error";
 import { parseInput } from "../../lib/zod";
-import type { AuditLogRepository, UserRepository } from "../../repositories/types";
+import type {
+  AuditLogRepository,
+  ChannelAccessRepository,
+  SubscriptionRepository,
+  TelegramLinkSessionRepository,
+  UserRepository
+} from "../../repositories/types";
+import type { EntitlementService } from "../channel-access/entitlement.service";
+import type { ChannelAccessService } from "../channel-access/channel-access.service";
 import { authorizationHeaderSchema, clerkWebhookPayloadSchema } from "./auth.schemas";
 import type { ClerkVerifier } from "./clerk-verifier";
 
@@ -43,10 +59,19 @@ export class ClerkAuthService {
   constructor(
     private readonly env: BotApiEnv,
     private readonly userRepository: UserRepository,
+    private readonly telegramLinkSessionRepository: TelegramLinkSessionRepository,
+    private readonly subscriptionRepository: SubscriptionRepository,
+    private readonly channelAccessRepository: ChannelAccessRepository,
+    private readonly channelAccessService: ChannelAccessService,
+    private readonly entitlementService: EntitlementService,
     private readonly auditLogRepository: AuditLogRepository,
     private readonly verifier: ClerkVerifier,
     private readonly clock: () => Date = () => new Date()
   ) {}
+
+  isClerkConfigured(): boolean {
+    return Boolean(this.env.CLERK_SECRET_KEY);
+  }
 
   async handleWebhook(input: {
     rawBody: string;
@@ -161,6 +186,151 @@ export class ClerkAuthService {
     });
   }
 
+  async requireAdminUser(
+    headers: Record<string, string | string[] | undefined>
+  ): Promise<UserSnapshot> {
+    const { authorization } = parseInput(authorizationHeaderSchema, headers);
+    const token = this.extractBearerToken(authorization);
+    const claims = await this.verifier.verifySessionToken(token);
+    const user = await this.resolveOrCreateUser({
+      clerkUserId: claims.sub,
+      email: claims.email ?? null
+    });
+
+    const client = createClerkClient({
+      secretKey: this.env.CLERK_SECRET_KEY
+    });
+    const clerkUser = await client.users.getUser(claims.sub);
+    const role = this.resolveRole(clerkUser.publicMetadata);
+
+    if (role !== this.env.CLERK_ADMIN_ROLE) {
+      throw new DomainError(
+        "Admin access is not permitted for this Clerk account.",
+        403,
+        "admin_access_forbidden"
+      );
+    }
+
+    return user;
+  }
+
+  async createTelegramLinkSession(
+    headers: Record<string, string | string[] | undefined>
+  ): Promise<TelegramLinkSessionResponse> {
+    const user = await this.requireAuthenticatedUser(headers);
+    const token = createOpaqueToken();
+    const session: TelegramLinkSession = {
+      id: createId("tg_link"),
+      userId: user.id,
+      clerkUserId: user.clerkUserId ?? "",
+      tokenHash: hashString(token),
+      expiresAt: new Date(this.clock().getTime() + 15 * 60 * 1000).toISOString(),
+      consumedAt: null,
+      createdAt: isoNow(this.clock())
+    };
+    await this.telegramLinkSessionRepository.save(session);
+    await this.userRepository.save({
+      ...user,
+      telegramLinkState: user.telegramUserId ? "linked" : "pending",
+      updatedAt: isoNow(this.clock())
+    });
+    await this.appendAuditLog({
+      actorType: "system",
+      actorId: "clerk-account",
+      action: "identity.telegram_link_session_created",
+      entityType: "telegram_link_session",
+      entityId: session.id,
+      metadata: {
+        userId: user.id,
+        clerkUserId: user.clerkUserId,
+        expiresAt: session.expiresAt
+      }
+    });
+
+    return {
+      sessionId: session.id,
+      expiresAt: session.expiresAt,
+      deepLinkUrl: `https://t.me/${this.env.TELEGRAM_BOT_USERNAME}?start=link_${token}`
+    };
+  }
+
+  async completeTelegramLink(input: {
+    token: string;
+    telegramUserId: string;
+  }): Promise<{
+    outcome: "linked" | "already_linked" | "expired" | "invalid";
+    user: UserSnapshot | null;
+    premiumAccessReady: boolean;
+  }> {
+    const session = await this.telegramLinkSessionRepository.findByTokenHash(hashString(input.token));
+
+    if (!session) {
+      return { outcome: "invalid", user: null, premiumAccessReady: false };
+    }
+
+    if (session.consumedAt) {
+      const user = await this.userRepository.findById(session.userId);
+      return {
+        outcome: "already_linked",
+        user,
+        premiumAccessReady: Boolean(user?.telegramUserId)
+      };
+    }
+
+    if (new Date(session.expiresAt).getTime() < this.clock().getTime()) {
+      return { outcome: "expired", user: null, premiumAccessReady: false };
+    }
+
+    const user = await this.userRepository.findById(session.userId);
+    if (!user) {
+      return { outcome: "invalid", user: null, premiumAccessReady: false };
+    }
+
+    const updatedUser: UserSnapshot = {
+      ...user,
+      telegramUserId: input.telegramUserId,
+      telegramLinkState: "linked",
+      telegramLinkedAt: isoNow(this.clock()),
+      updatedAt: isoNow(this.clock())
+    };
+    await this.userRepository.save(updatedUser);
+    await this.telegramLinkSessionRepository.save({
+      ...session,
+      consumedAt: isoNow(this.clock())
+    });
+
+    const subscription = await this.subscriptionRepository.findByUserId(updatedUser.id);
+    const entitlement = this.entitlementService.resolve(subscription, updatedUser.id);
+
+    if (entitlement.premiumChannelEligible) {
+      await this.channelAccessService.stageDesiredState({
+        userId: updatedUser.id,
+        desiredState: "grant",
+        reason: "telegram_linked_with_active_entitlement",
+        telegramUserId: input.telegramUserId
+      });
+    }
+
+    await this.appendAuditLog({
+      actorType: "system",
+      actorId: "telegram-bot",
+      action: "identity.telegram_link_completed",
+      entityType: "user",
+      entityId: updatedUser.id,
+      metadata: {
+        userId: updatedUser.id,
+        telegramUserId: input.telegramUserId,
+        premiumAccessReady: entitlement.premiumChannelEligible
+      }
+    });
+
+    return {
+      outcome: "linked",
+      user: updatedUser,
+      premiumAccessReady: entitlement.premiumChannelEligible
+    };
+  }
+
   private extractBearerToken(authorization: string): string {
     if (!authorization.startsWith("Bearer ")) {
       throw new DomainError(
@@ -180,6 +350,15 @@ export class ClerkAuthService {
     }
 
     return token;
+  }
+
+  private resolveRole(metadata: Record<string, unknown> | null | undefined): string | null {
+    if (!metadata || typeof metadata !== "object") {
+      return null;
+    }
+
+    const role = metadata.role;
+    return typeof role === "string" ? role : null;
   }
 
   private async resolveOrCreateUser(input: {

@@ -47,11 +47,11 @@ export function buildApp(container: AppContainer): ReturnType<typeof fastify> {
   });
 
   registerHealthRoutes(app);
-  registerAdminRoutes(app, container.controllers.admin);
+  registerAdminRoutes(app, container.controllers.admin, container.controllers.auth);
   registerAuthRoutes(app, container.controllers.auth);
   registerBillingRoutes(app, container.controllers.billing);
   registerChannelAccessRoutes(app, container.controllers.channelAccess);
-  registerSignalsRoutes(app, container.controllers.signals);
+  registerSignalsRoutes(app, container.controllers.signals, container.controllers.auth);
   registerTelegramWebhookRoutes(app, container.controllers.telegramWebhook);
 
   return app;

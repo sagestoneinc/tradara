@@ -162,6 +162,13 @@ export const telegramLinkSessionSchema = z.object({
 });
 export type TelegramLinkSession = z.infer<typeof telegramLinkSessionSchema>;
 
+export const telegramLinkSessionResponseSchema = z.object({
+  sessionId: z.string(),
+  deepLinkUrl: z.string().url(),
+  expiresAt: z.string().datetime()
+});
+export type TelegramLinkSessionResponse = z.infer<typeof telegramLinkSessionResponseSchema>;
+
 export const subscriptionSnapshotSchema = z.object({
   id: z.string(),
   userId: z.string(),

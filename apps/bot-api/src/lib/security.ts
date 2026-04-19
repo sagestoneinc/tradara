@@ -1,4 +1,4 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 export function compareSecret(provided: string | undefined, expected: string): boolean {
   if (!provided) {
@@ -17,6 +17,14 @@ export function compareSecret(provided: string | undefined, expected: string): b
 
 export function hashPayload(payload: unknown): string {
   return createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+}
+
+export function hashString(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+export function createOpaqueToken(bytes = 24): string {
+  return randomBytes(bytes).toString("base64url");
 }
 
 export function createHmacSha256Hex(secret: string, payload: string): string {
