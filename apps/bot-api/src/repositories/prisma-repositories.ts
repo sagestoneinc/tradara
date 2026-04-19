@@ -169,16 +169,16 @@ function mapChannelAccess(record: {
   telegramUserId: string | null;
   status: PrismaChannelAccessStatus;
   desiredState: PrismaAccessDesiredState;
-  inviteId: string | null;
+  inviteId?: string | null;
   lastSyncedAt: Date | null;
   lastError: string | null;
-  lastErrorCode: string | null;
-  lastFailureKind: PrismaTelegramFailureKind | null;
-  executionStatus: PrismaTelegramExecutionStatus | null;
-  executionAttempts: number | null;
-  lastExecutionAttemptAt: Date | null;
-  lastExecutionOutcomeAt: Date | null;
-  lastCorrelationId: string | null;
+  lastErrorCode?: string | null;
+  lastFailureKind?: PrismaTelegramFailureKind | null;
+  executionStatus?: PrismaTelegramExecutionStatus | null;
+  executionAttempts?: number | null;
+  lastExecutionAttemptAt?: Date | null;
+  lastExecutionOutcomeAt?: Date | null;
+  lastCorrelationId?: string | null;
   updatedAt: Date;
 }): ChannelAccessRecord {
   return {
@@ -189,16 +189,16 @@ function mapChannelAccess(record: {
     telegramUserId: record.telegramUserId,
     status: record.status,
     desiredState: record.desiredState,
-    inviteId: record.inviteId,
+    inviteId: record.inviteId ?? null,
     lastSyncedAt: formatDate(record.lastSyncedAt),
     lastError: record.lastError,
-    lastErrorCode: record.lastErrorCode,
-    lastFailureKind: record.lastFailureKind,
-    executionStatus: record.executionStatus,
+    lastErrorCode: record.lastErrorCode ?? null,
+    lastFailureKind: record.lastFailureKind ?? null,
+    executionStatus: record.executionStatus ?? null,
     executionAttempts: record.executionAttempts ?? undefined,
-    lastExecutionAttemptAt: formatDate(record.lastExecutionAttemptAt),
-    lastExecutionOutcomeAt: formatDate(record.lastExecutionOutcomeAt),
-    lastCorrelationId: record.lastCorrelationId,
+    lastExecutionAttemptAt: formatDate(record.lastExecutionAttemptAt ?? null),
+    lastExecutionOutcomeAt: formatDate(record.lastExecutionOutcomeAt ?? null),
+    lastCorrelationId: record.lastCorrelationId ?? null,
     updatedAt: record.updatedAt.toISOString()
   };
 }
@@ -359,6 +359,18 @@ export class PrismaChannelAccessRepository implements ChannelAccessRepository {
   async findByUserId(userId: string): Promise<ChannelAccessRecord | null> {
     const record = await this.prisma.channelAccess.findFirst({
       where: { userId },
+      select: {
+        id: true,
+        userId: true,
+        subscriptionId: true,
+        channelId: true,
+        telegramUserId: true,
+        status: true,
+        desiredState: true,
+        lastSyncedAt: true,
+        lastError: true,
+        updatedAt: true
+      },
       orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }]
     });
 
@@ -368,6 +380,18 @@ export class PrismaChannelAccessRepository implements ChannelAccessRepository {
   async findByTelegramUserId(telegramUserId: string): Promise<ChannelAccessRecord | null> {
     const record = await this.prisma.channelAccess.findFirst({
       where: { telegramUserId },
+      select: {
+        id: true,
+        userId: true,
+        subscriptionId: true,
+        channelId: true,
+        telegramUserId: true,
+        status: true,
+        desiredState: true,
+        lastSyncedAt: true,
+        lastError: true,
+        updatedAt: true
+      },
       orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }]
     });
 
@@ -376,6 +400,18 @@ export class PrismaChannelAccessRepository implements ChannelAccessRepository {
 
   async listAll(): Promise<ChannelAccessRecord[]> {
     const records = await this.prisma.channelAccess.findMany({
+      select: {
+        id: true,
+        userId: true,
+        subscriptionId: true,
+        channelId: true,
+        telegramUserId: true,
+        status: true,
+        desiredState: true,
+        lastSyncedAt: true,
+        lastError: true,
+        updatedAt: true
+      },
       orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }]
     });
 
@@ -398,16 +434,8 @@ export class PrismaChannelAccessRepository implements ChannelAccessRepository {
         telegramUserId: record.telegramUserId ?? null,
         status: toPrismaChannelAccessStatus(record.status),
         desiredState: toPrismaDesiredState(record.desiredState),
-        inviteId: record.inviteId ?? null,
         lastSyncedAt: parseDate(record.lastSyncedAt),
         lastError: record.lastError ?? null,
-        lastErrorCode: record.lastErrorCode ?? null,
-        lastFailureKind: toPrismaFailureKind(record.lastFailureKind),
-        executionStatus: toPrismaExecutionStatus(record.executionStatus),
-        executionAttempts: record.executionAttempts ?? null,
-        lastExecutionAttemptAt: parseDate(record.lastExecutionAttemptAt),
-        lastExecutionOutcomeAt: parseDate(record.lastExecutionOutcomeAt),
-        lastCorrelationId: record.lastCorrelationId ?? null,
         updatedAt: new Date(record.updatedAt)
       },
       update: {
@@ -417,16 +445,8 @@ export class PrismaChannelAccessRepository implements ChannelAccessRepository {
         telegramUserId: record.telegramUserId ?? null,
         status: toPrismaChannelAccessStatus(record.status),
         desiredState: toPrismaDesiredState(record.desiredState),
-        inviteId: record.inviteId ?? null,
         lastSyncedAt: parseDate(record.lastSyncedAt),
         lastError: record.lastError ?? null,
-        lastErrorCode: record.lastErrorCode ?? null,
-        lastFailureKind: toPrismaFailureKind(record.lastFailureKind),
-        executionStatus: toPrismaExecutionStatus(record.executionStatus),
-        executionAttempts: record.executionAttempts ?? null,
-        lastExecutionAttemptAt: parseDate(record.lastExecutionAttemptAt),
-        lastExecutionOutcomeAt: parseDate(record.lastExecutionOutcomeAt),
-        lastCorrelationId: record.lastCorrelationId ?? null,
         updatedAt: new Date(record.updatedAt)
       }
     });
