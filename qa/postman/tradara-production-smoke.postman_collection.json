@@ -14,12 +14,64 @@
     { "key": "user_id", "value": "user_smoke_001" },
     { "key": "subscription_id", "value": "sub-smoke-001" }
   ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('api_base_url is configured', function () {",
+          "  pm.expect(pm.collectionVariables.get('api_base_url') || pm.environment.get('api_base_url')).to.be.a('string').and.not.empty;",
+          "});"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('response is not a server error', function () {",
+          "  pm.expect(pm.response.code).to.be.below(500);",
+          "});",
+          "",
+          "var contentType = pm.response.headers.get('Content-Type') || '';",
+          "if (contentType.indexOf('application/json') !== -1) {",
+          "  var body = pm.response.json();",
+          "  pm.test('json response parses', function () {",
+          "    pm.expect(body).to.be.an('object');",
+          "  });",
+          "",
+          "  if (Object.prototype.hasOwnProperty.call(body, 'success')) {",
+          "    pm.test('success envelope has a data payload', function () {",
+          "      pm.expect(body.success).to.be.a('boolean');",
+          "      pm.expect(body).to.have.property('data');",
+          "    });",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ],
   "item": [
     {
       "name": "Health",
       "item": [
         {
           "name": "GET /",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('root health is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "url": {
@@ -31,6 +83,19 @@
         },
         {
           "name": "GET /health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('/health is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "url": {
@@ -47,6 +112,19 @@
       "item": [
         {
           "name": "POST /v1/webhooks/telegram - /start",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('telegram webhook accepted', function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -135,6 +213,19 @@
         },
         {
           "name": "POST /v1/webhooks/telegram - invalid secret",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('telegram webhook invalid secret is rejected', function () {",
+                  "  pm.expect([400, 401, 403]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -162,6 +253,28 @@
       "item": [
         {
           "name": "POST /v1/webhooks/tradingview/signals - valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('tradingview webhook accepted', function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "var signalId = body && body.data && body.data.signal && body.data.signal.id;",
+                  "if (signalId) {",
+                  "  pm.collectionVariables.set('signal_id', signalId);",
+                  "  pm.test('signal_id captured for later requests', function () {",
+                  "    pm.expect(signalId).to.be.a('string').and.not.empty;",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -200,6 +313,19 @@
         },
         {
           "name": "POST /v1/webhooks/tradingview/signals - invalid secret",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('tradingview invalid secret is rejected', function () {",
+                  "  pm.expect([400, 401, 403]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -224,6 +350,19 @@
       "item": [
         {
           "name": "POST /v1/signals/:signalId/enrich",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('signal enrich accepted', function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "url": {
@@ -235,6 +374,19 @@
         },
         {
           "name": "POST /v1/signals/:signalId/reviews - approve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('signal review approve accepted', function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -299,6 +451,19 @@
         },
         {
           "name": "POST /v1/signals/:signalId/publish",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('signal publish returns a non-server response', function () {",
+                  "  pm.expect(pm.response.code).to.be.below(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -336,6 +501,19 @@
       "item": [
         {
           "name": "POST /v1/billing/checkout-sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout session accepted', function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -352,6 +530,19 @@
         },
         {
           "name": "POST /v1/webhooks/xendit - paid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('xendit paid webhook accepted', function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -409,6 +600,19 @@
         },
         {
           "name": "POST /v1/webhooks/xendit - invalid token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('xendit invalid token is rejected', function () {",
+                  "  pm.expect([400, 401, 403]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -514,6 +718,19 @@
       "item": [
         {
           "name": "GET /v1/admin/overview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin overview is readable', function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "url": {

@@ -1,0 +1,313 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-04-19T12:30:00.000Z",
+  "__export_source": "openai-codex",
+  "resources": [
+    {
+      "_id": "wrk_tradara_smoke",
+      "_type": "workspace",
+      "name": "Tradara Production Smoke",
+      "description": "Route-aligned Insomnia smoke workspace for Tradara bot-api."
+    },
+    {
+      "_id": "env_tradara_base",
+      "_type": "environment",
+      "parentId": "wrk_tradara_smoke",
+      "name": "Base Environment",
+      "data": {
+        "api_base_url": "https://tradaraapi.sagestonelab.tech",
+        "tg_webhook_secret": "",
+        "tv_webhook_secret": "",
+        "xendit_webhook_token": "",
+        "signal_id": "",
+        "user_id": "user_smoke_001",
+        "subscription_id": "sub-smoke-001"
+      }
+    },
+    {
+      "_id": "fld_health",
+      "_type": "request_group",
+      "parentId": "wrk_tradara_smoke",
+      "name": "Health"
+    },
+    {
+      "_id": "fld_telegram",
+      "_type": "request_group",
+      "parentId": "wrk_tradara_smoke",
+      "name": "Telegram Webhook"
+    },
+    {
+      "_id": "fld_tradingview",
+      "_type": "request_group",
+      "parentId": "wrk_tradara_smoke",
+      "name": "TradingView Signals"
+    },
+    {
+      "_id": "fld_signals",
+      "_type": "request_group",
+      "parentId": "wrk_tradara_smoke",
+      "name": "Signals Workflow"
+    },
+    {
+      "_id": "fld_billing",
+      "_type": "request_group",
+      "parentId": "wrk_tradara_smoke",
+      "name": "Billing"
+    },
+    {
+      "_id": "fld_admin",
+      "_type": "request_group",
+      "parentId": "wrk_tradara_smoke",
+      "name": "Admin"
+    },
+    {
+      "_id": "req_root",
+      "_type": "request",
+      "parentId": "fld_health",
+      "name": "GET /",
+      "method": "GET",
+      "url": "{{ api_base_url }}/",
+      "body": {},
+      "parameters": [],
+      "headers": []
+    },
+    {
+      "_id": "req_health",
+      "_type": "request",
+      "parentId": "fld_health",
+      "name": "GET /health",
+      "method": "GET",
+      "url": "{{ api_base_url }}/health",
+      "body": {},
+      "parameters": [],
+      "headers": []
+    },
+    {
+      "_id": "req_tg_start",
+      "_type": "request",
+      "parentId": "fld_telegram",
+      "name": "POST /v1/webhooks/telegram - /start",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/webhooks/telegram",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"update_id\": 1000001,\n  \"message\": {\n    \"chat\": { \"id\": 999001, \"type\": \"private\" },\n    \"text\": \"/start\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "x-telegram-bot-api-secret-token", "value": "{{ tg_webhook_secret }}" }
+      ]
+    },
+    {
+      "_id": "req_tg_bad_secret",
+      "_type": "request",
+      "parentId": "fld_telegram",
+      "name": "POST /v1/webhooks/telegram - invalid secret",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/webhooks/telegram",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"update_id\": 1000005,\n  \"message\": {\n    \"chat\": { \"id\": 999001, \"type\": \"private\" },\n    \"text\": \"/faq\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "x-telegram-bot-api-secret-token", "value": "wrong-secret" }
+      ]
+    },
+    {
+      "_id": "req_tv_valid",
+      "_type": "request",
+      "parentId": "fld_tradingview",
+      "name": "POST /v1/webhooks/tradingview/signals - valid",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/webhooks/tradingview/signals",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"alertId\": \"tv-btc-001\",\n  \"symbol\": \"BTCUSDT\",\n  \"timeframe\": \"1h\",\n  \"direction\": \"long\",\n  \"trigger\": \"breakout-retest\",\n  \"entryZoneLow\": 64000,\n  \"entryZoneHigh\": 64300,\n  \"stopLoss\": 63200,\n  \"takeProfit1\": 65000,\n  \"takeProfit2\": 65800,\n  \"takeProfit3\": 66600,\n  \"marketPrice\": 64210,\n  \"strategyName\": \"Trend Continuation\",\n  \"note\": \"Breakout retest candidate\",\n  \"detectedAt\": \"2026-04-19T14:00:00.000Z\",\n  \"metadata\": {\n    \"exchange\": \"BINANCE\",\n    \"triggerSource\": \"tv-alert\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "x-tradara-webhook-secret", "value": "{{ tv_webhook_secret }}" }
+      ]
+    },
+    {
+      "_id": "req_tv_bad_secret",
+      "_type": "request",
+      "parentId": "fld_tradingview",
+      "name": "POST /v1/webhooks/tradingview/signals - invalid secret",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/webhooks/tradingview/signals",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"alertId\": \"tv-btc-bad\",\n  \"symbol\": \"BTCUSDT\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "x-tradara-webhook-secret", "value": "wrong-secret" }
+      ]
+    },
+    {
+      "_id": "req_signal_enrich",
+      "_type": "request",
+      "parentId": "fld_signals",
+      "name": "POST /v1/signals/:signalId/enrich",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/signals/{{ signal_id }}/enrich",
+      "body": {},
+      "parameters": [],
+      "headers": []
+    },
+    {
+      "_id": "req_signal_approve",
+      "_type": "request",
+      "parentId": "fld_signals",
+      "name": "POST /v1/signals/:signalId/reviews - approve",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/signals/{{ signal_id }}/reviews",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"reviewerId\": \"admin-console\",\n  \"action\": \"approve\",\n  \"notes\": \"Setup is clean and aligned.\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ]
+    },
+    {
+      "_id": "req_signal_publish",
+      "_type": "request",
+      "parentId": "fld_signals",
+      "name": "POST /v1/signals/:signalId/publish",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/signals/{{ signal_id }}/publish",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"publisherId\": \"admin-console\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ]
+    },
+    {
+      "_id": "req_market_insight",
+      "_type": "request",
+      "parentId": "fld_signals",
+      "name": "POST /v1/market-insights",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/market-insights",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"symbol\": \"CRYPTO-MKT\",\n  \"timeframe\": \"4h\",\n  \"title\": \"Morning Market Audit\",\n  \"summary\": \"BTC stable, ETH neutral, altcoins selective.\",\n  \"body\": \"Conditions are mixed. Focus on cleaner continuation setups and avoid noisy overextended names.\",\n  \"metadata\": {\n    \"source\": \"manual-smoke-test\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ]
+    },
+    {
+      "_id": "req_checkout",
+      "_type": "request",
+      "parentId": "fld_billing",
+      "name": "POST /v1/billing/checkout-sessions",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/billing/checkout-sessions",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"userId\": \"{{ user_id }}\",\n  \"planId\": \"tradara-pro-monthly\",\n  \"provider\": \"paypal\",\n  \"email\": \"smoke@example.com\",\n  \"successUrl\": \"https://tradara.sagestonelab.tech/checkout/success\",\n  \"cancelUrl\": \"https://tradara.sagestonelab.tech/checkout/cancel\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ]
+    },
+    {
+      "_id": "req_xendit_paid",
+      "_type": "request",
+      "parentId": "fld_billing",
+      "name": "POST /v1/webhooks/xendit - paid",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/webhooks/xendit",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"event\": \"invoice.paid\",\n  \"data\": {\n    \"id\": \"xendit-event-001\",\n    \"external_id\": \"{{ subscription_id }}\",\n    \"metadata\": {\n      \"tradaraUserId\": \"{{ user_id }}\",\n      \"tradaraPlanId\": \"tradara-pro-monthly\",\n      \"tradaraSubscriptionId\": \"{{ subscription_id }}\"\n    }\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "x-callback-token", "value": "{{ xendit_webhook_token }}" }
+      ]
+    },
+    {
+      "_id": "req_xendit_invalid",
+      "_type": "request",
+      "parentId": "fld_billing",
+      "name": "POST /v1/webhooks/xendit - invalid token",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/webhooks/xendit",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"event\": \"invoice.paid\",\n  \"data\": {\n    \"id\": \"bad-001\",\n    \"external_id\": \"sub-bad\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "x-callback-token", "value": "wrong-token" }
+      ]
+    },
+    {
+      "_id": "req_paypal_completed",
+      "_type": "request",
+      "parentId": "fld_billing",
+      "name": "POST /v1/webhooks/paypal - completed",
+      "method": "POST",
+      "url": "{{ api_base_url }}/v1/webhooks/paypal",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"id\": \"WH-PAYPAL-001\",\n  \"event_type\": \"PAYMENT.CAPTURE.COMPLETED\",\n  \"resource\": {\n    \"status\": \"COMPLETED\",\n    \"custom_id\": \"{\\\"tradaraUserId\\\":\\\"{{ user_id }}\\\",\\\"tradaraPlanId\\\":\\\"tradara-pro-monthly\\\",\\\"tradaraSubscriptionId\\\":\\\"sub-smoke-002\\\"}\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ]
+    },
+    {
+      "_id": "req_admin_overview",
+      "_type": "request",
+      "parentId": "fld_admin",
+      "name": "GET /v1/admin/overview",
+      "method": "GET",
+      "url": "{{ api_base_url }}/v1/admin/overview",
+      "body": {},
+      "parameters": [],
+      "headers": []
+    },
+    {
+      "_id": "req_admin_signals_review_queue",
+      "_type": "request",
+      "parentId": "fld_admin",
+      "name": "GET /v1/admin/signals/review-queue",
+      "method": "GET",
+      "url": "{{ api_base_url }}/v1/admin/signals/review-queue",
+      "body": {},
+      "parameters": [],
+      "headers": []
+    },
+    {
+      "_id": "req_admin_signals_published",
+      "_type": "request",
+      "parentId": "fld_admin",
+      "name": "GET /v1/admin/signals/published",
+      "method": "GET",
+      "url": "{{ api_base_url }}/v1/admin/signals/published",
+      "body": {},
+      "parameters": [],
+      "headers": []
+    }
+  ]
+}
