@@ -1,5 +1,6 @@
 import { loadBotApiEnv } from "@tradara/shared-config";
 
+import { createHmacSha256Hex } from "../../src/lib/security";
 import { encodePayPalCustomId } from "../../src/modules/billing/providers/paypal-metadata";
 
 export const billingTestEnv = loadBotApiEnv({
@@ -74,11 +75,18 @@ export function createPayPalWebhookPayload(input: {
   };
 }
 
-export function paypalWebhookHeaders() {
+export function paypalWebhookHeaders(rawBody: string, webhookId = "paypal-webhook-id") {
+  const transmissionId = "transmission_001";
+  const transmissionTime = new Date(BILLING_UNIX_TS * 1000).toISOString();
+  const transmissionSig = createHmacSha256Hex(
+    webhookId,
+    `${transmissionId}.${transmissionTime}.${rawBody}`
+  );
+
   return {
     "content-type": "application/json",
-    "paypal-transmission-id": "transmission_001",
-    "paypal-transmission-time": new Date(BILLING_UNIX_TS * 1000).toISOString(),
-    "paypal-transmission-sig": "test-signature"
+    "paypal-transmission-id": transmissionId,
+    "paypal-transmission-time": transmissionTime,
+    "paypal-transmission-sig": transmissionSig
   };
 }

@@ -20,7 +20,7 @@ describe("paypal billing", () => {
         subscriptionId: "sub_pp_paid_001"
       })
     );
-    const headers = paypalWebhookHeaders();
+    const headers = paypalWebhookHeaders(rawBody);
 
     const firstResponse = await app.inject({
       method: "POST",
@@ -61,7 +61,7 @@ describe("paypal billing", () => {
     const response = await app.inject({
       method: "POST",
       url: "/v1/webhooks/paypal",
-      headers: paypalWebhookHeaders(),
+      headers: paypalWebhookHeaders(rawBody),
       payload: rawBody
     });
     const overviewResponse = await app.inject({
@@ -74,7 +74,35 @@ describe("paypal billing", () => {
     expect(overviewResponse.json().data.subscription.gracePeriodEndsAt).not.toBeNull();
   });
 
-  it.todo(
-    "rejects invalid PayPal transmission signatures once real webhook signature verification is wired"
-  );
+  it("rejects invalid PayPal transmission signatures", async () => {
+    const app = buildApp(createContainer(billingTestEnv, { persistence: "memory" }));
+    const rawBody = JSON.stringify(
+      createPayPalWebhookPayload({
+        eventType: "CHECKOUT.ORDER.COMPLETED",
+        eventId: "pp_evt_invalid_sig_001",
+        userId: "user_pp_invalid_sig",
+        planId: "tradara-pro-monthly",
+        subscriptionId: "sub_pp_invalid_sig_001"
+      })
+    );
+    const headers = {
+      ...paypalWebhookHeaders(rawBody),
+      "paypal-transmission-sig": "invalid-signature"
+    };
+
+    const webhookResponse = await app.inject({
+      method: "POST",
+      url: "/v1/webhooks/paypal",
+      headers,
+      payload: rawBody
+    });
+    const overviewResponse = await app.inject({
+      method: "GET",
+      url: "/v1/channel-access/user_pp_invalid_sig"
+    });
+
+    expect(webhookResponse.statusCode).toBe(401);
+    expect(webhookResponse.json().error.code).toBe("invalid_signature");
+    expect(overviewResponse.json().data.subscription).toBeNull();
+  });
 });

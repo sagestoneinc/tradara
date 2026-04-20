@@ -42,11 +42,12 @@ describe("billing multi-provider normalization", () => {
       planId: "tradara-pro-annual",
       subscriptionId: "sub_pp_norm_001"
     });
+    const rawBody = JSON.stringify(payload);
 
     const parsed = parser.parseAndVerify(
       "paypal",
-      paypalWebhookHeaders(),
-      JSON.stringify(payload),
+      paypalWebhookHeaders(rawBody),
+      rawBody,
       payload as Record<string, unknown>
     );
 

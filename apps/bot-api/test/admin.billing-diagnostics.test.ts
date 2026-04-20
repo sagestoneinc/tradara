@@ -13,6 +13,15 @@ import {
 describe("admin billing diagnostics", () => {
   it("surfaces provider-specific webhook traces for billing events", async () => {
     const app = buildApp(createContainer(billingTestEnv, { persistence: "memory" }));
+    const paypalPayload = JSON.stringify(
+      createPayPalWebhookPayload({
+        eventType: "CHECKOUT.ORDER.COMPLETED",
+        eventId: "pp_evt_admin_001",
+        userId: "user_pp_admin",
+        planId: "tradara-pro-monthly",
+        subscriptionId: "sub_pp_admin_001"
+      })
+    );
 
     await app.inject({
       method: "POST",
@@ -35,16 +44,8 @@ describe("admin billing diagnostics", () => {
     await app.inject({
       method: "POST",
       url: "/v1/webhooks/paypal",
-      headers: paypalWebhookHeaders(),
-      payload: JSON.stringify(
-        createPayPalWebhookPayload({
-          eventType: "CHECKOUT.ORDER.COMPLETED",
-          eventId: "pp_evt_admin_001",
-          userId: "user_pp_admin",
-          planId: "tradara-pro-monthly",
-          subscriptionId: "sub_pp_admin_001"
-        })
-      )
+      payload: paypalPayload,
+      headers: paypalWebhookHeaders(paypalPayload)
     });
 
     const webhookEventsResponse = await app.inject({

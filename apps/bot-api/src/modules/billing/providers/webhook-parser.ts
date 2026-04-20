@@ -39,12 +39,26 @@ export class WebhookParser {
     rawBody: string,
     body: Record<string, unknown>
   ): ParsedWebhookEvent {
-    // PayPal webhook verification
-    // In production, verify using PayPal's verification API
-    // For now, we'll trust the webhook ID from env
     const webhookId = this.env.PAYPAL_WEBHOOK_ID;
     if (!webhookId) {
       throw new DomainError("PayPal webhook verification not configured", 500, "config_error");
+    }
+
+    const transmissionId = headers["paypal-transmission-id"];
+    const transmissionTime = headers["paypal-transmission-time"];
+    const transmissionSig = headers["paypal-transmission-sig"];
+
+    if (!transmissionId || !transmissionTime || !transmissionSig) {
+      throw new DomainError("Missing PayPal webhook signature headers", 401, "invalid_signature");
+    }
+
+    const expectedSignature = createHmacSha256Hex(
+      webhookId,
+      `${transmissionId}.${transmissionTime}.${rawBody}`
+    );
+
+    if (!compareHexSignature(transmissionSig, expectedSignature)) {
+      throw new DomainError("Invalid PayPal webhook signature", 401, "invalid_signature");
     }
 
     const eventType = body.event_type as string;
