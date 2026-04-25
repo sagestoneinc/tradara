@@ -7,7 +7,7 @@
     "node": ">=20.11.0"
   },
   "scripts": {
-    "build": "turbo run build",
+    "build": "if [ ! -d node_modules ]; then corepack enable && pnpm install --frozen-lockfile; fi && turbo run build",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "test": "turbo run test",
