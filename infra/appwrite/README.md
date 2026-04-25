@@ -6,6 +6,12 @@ This workspace can be deployed to **Appwrite Sites** as three independent servic
 2. `@tradara/admin-web` (`apps/admin-web`)
 3. `@tradara/marketing-site` (`apps/marketing-site`)
 
+Production hostnames:
+
+- `https://tradara.sagestonelab.tech` → marketing site
+- `https://tradara-api.sagestonelab.tech` → bot-api
+- `https://tradara-admin.sagestonelab.tech` → admin-web
+
 > Tradara is Telegram-first guidance software (not an execution bot). Keep webhook verification and billing-derived entitlement logic enabled in production.
 
 ## Prerequisites
