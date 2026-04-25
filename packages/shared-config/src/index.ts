@@ -91,8 +91,8 @@ const botApiEnvSchema = z.object({
 
 const adminWebEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  ADMIN_WEB_BASE_URL: z.string().url(),
-  BOT_API_BASE_URL: z.string().url(),
+  ADMIN_WEB_BASE_URL: z.string().url().default("http://localhost:3002"),
+  BOT_API_BASE_URL: z.string().url().default("http://localhost:3001"),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().default(""),
   CLERK_SECRET_KEY: z.string().default(""),
   CLERK_ADMIN_ROLE: z.string().default("admin"),
