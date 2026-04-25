@@ -1,0 +1,13 @@
+.git
+.gitignore
+node_modules
+**/node_modules
+.pnpm-store
+.turbo
+**/.next/cache
+**/dist
+coverage
+artifacts
+.env
+.env.*
+!.env.example
