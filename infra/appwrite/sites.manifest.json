@@ -1,0 +1,22 @@
+{
+  "sites": [
+    {
+      "name": "bot-api",
+      "source": "/",
+      "dockerfile": "apps/bot-api/Dockerfile.appwrite",
+      "port": 3001
+    },
+    {
+      "name": "admin-web",
+      "source": "/",
+      "dockerfile": "apps/admin-web/Dockerfile.appwrite",
+      "port": 3002
+    },
+    {
+      "name": "marketing-site",
+      "source": "/",
+      "dockerfile": "apps/marketing-site/Dockerfile.appwrite",
+      "port": 3003
+    }
+  ]
+}

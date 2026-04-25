@@ -34,4 +34,7 @@ This foundation currently focuses on Telegram premium access control:
 - Telegram is delivery only.
 - All inbound external data must be validated and logged.
 - No fake production readiness claims for stubbed integrations.
+## Appwrite Deployment
+
+For Appwrite.io deployments, use the service-by-service playbook in `infra/appwrite/README.md` plus the environment templates in `infra/appwrite/*.env.example`.
 
