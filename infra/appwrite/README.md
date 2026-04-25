@@ -8,53 +8,59 @@ This workspace can be deployed to **Appwrite Sites** as three independent servic
 
 > Tradara is Telegram-first guidance software (not an execution bot). Keep webhook verification and billing-derived entitlement logic enabled in production.
 
-## Deployment Assets in this Repo
-
-- `apps/bot-api/Dockerfile.appwrite`
-- `apps/admin-web/Dockerfile.appwrite`
-- `apps/marketing-site/Dockerfile.appwrite`
-- `infra/appwrite/sites.manifest.json` (reference map for the three Sites)
-- `infra/appwrite/*.env.example` (per-service environment templates)
-
 ## Prerequisites
 
 - Appwrite project with three Sites (one per app).
 - Git provider connected to Appwrite.
 - Environment variables configured in each Site using the `*.env.example` files in this folder.
 
-## Site Configuration (Appwrite Console)
+## Shared Site Build Settings
 
-Create three Sites pointing to this repository and use **Dockerfile build mode**:
+Use these defaults for each Site deployment:
 
-- **Repository root:** `/`
-- **Build mode:** `Dockerfile`
-- **Dockerfile path:** service-specific `Dockerfile.appwrite`
-- **Runtime port env:** Appwrite injects `PORT`; Dockerfiles do not hardcode it for Next.js Sites.
+- **Install command:** `corepack enable && pnpm install --frozen-lockfile`
+- **Provider root directory:** repository root (`/`)
+- **Node version:** `20.11+` (or latest Node 20 LTS)
 
-### Site: bot-api
+## Site: bot-api
 
-- **Dockerfile:** `apps/bot-api/Dockerfile.appwrite`
-- **Exposed port:** `3001` (Appwrite forwards external traffic)
+- **Service root (monorepo filter target):** `@tradara/bot-api`
+- **Build command:** `pnpm --filter @tradara/bot-api build`
+- **Start command:** `pnpm --filter @tradara/bot-api start`
+- **Port:** Appwrite injects `PORT`; runtime already falls back from `PORT` to `BOT_API_PORT`.
 - **Env template:** `infra/appwrite/bot-api.env.example`
 
-### Site: admin-web
+### Required production notes
 
-- **Dockerfile:** `apps/admin-web/Dockerfile.appwrite`
-- **Exposed port:** `3002`
+- Set `BOT_API_BASE_URL` to your public bot-api HTTPS URL.
+- Set `MARKETING_SITE_BASE_URL` to your marketing site HTTPS URL.
+- Set secure values for Telegram and billing webhook secrets.
+- Use a production `DATABASE_URL` and run migrations before first live webhook traffic.
+
+## Site: admin-web
+
+- **Service root (monorepo filter target):** `@tradara/admin-web`
+- **Build command:** `pnpm --filter @tradara/admin-web build`
+- **Start command:** `pnpm --filter @tradara/admin-web start`
 - **Env template:** `infra/appwrite/admin-web.env.example`
 
-### Site: marketing-site
+### Required production notes
 
-- **Dockerfile:** `apps/marketing-site/Dockerfile.appwrite`
-- **Exposed port:** `3003`
+- Set `ADMIN_WEB_BASE_URL` to the deployed admin hostname.
+- Set `BOT_API_BASE_URL` to the deployed bot-api hostname.
+- If Clerk is enabled, configure both publishable and secret keys.
+
+## Site: marketing-site
+
+- **Service root (monorepo filter target):** `@tradara/marketing-site`
+- **Build command:** `pnpm --filter @tradara/marketing-site build`
+- **Start command:** `pnpm --filter @tradara/marketing-site start`
 - **Env template:** `infra/appwrite/marketing-site.env.example`
 
-## Required Production Notes
+### Required production notes
 
-- `BOT_API_BASE_URL`, `ADMIN_WEB_BASE_URL`, and `MARKETING_SITE_BASE_URL` must point to deployed HTTPS domains.
-- Set secure values for Telegram and billing webhook secrets.
-- Use a production `DATABASE_URL` and run migrations before live webhook traffic.
-- Clerk keys are optional in this foundation; configure them only if auth is enabled.
+- Set `MARKETING_SITE_BASE_URL` to the deployed public hostname.
+- Set `BOT_API_BASE_URL` so checkout/account links point to your live API.
 
 ## Suggested Deployment Order
 
