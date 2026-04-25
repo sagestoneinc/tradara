@@ -126,6 +126,9 @@ importers:
       '@tradara/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
+      '@tradara/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@tradara/ui':
         specifier: workspace:*
         version: link:../../packages/ui
