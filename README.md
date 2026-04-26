@@ -1,40 +1,107 @@
-# Tradara by SageStone Lab
+# TRADARA Monorepo (by SageStone Lab)
 
-Tradara is a Telegram-first crypto trading guidance platform with premium subscription access, AI-assisted signal workflows, analyst review, and revocable premium-channel delivery.
+Trade smarter. Grow faster.
 
-## This Repository
+TRADARA is a Telegram-first crypto trading guidance platform with a premium marketing web experience, an internal admin app, and a bot API for entitlement-aware delivery workflows.
 
-This foundation currently focuses on Telegram premium access control:
+## Product Overview
 
-- billing-derived entitlement checks
-- premium access grant and revoke scaffolding
-- Telegram webhook verification and idempotent event logging
-- reconciliation job design
-- admin visibility for access state
+- **Marketing site (`apps/marketing-site`)**: public website for acquisition, education, SEO, and conversion.
+- **Admin web (`apps/admin-web`)**: internal operations for diagnostics, signal workflows, and access visibility.
+- **Bot API (`apps/bot-api`)**: webhook intake, billing/entitlement orchestration, and Telegram delivery controls.
 
-## Workspace Layout
+## Tech Stack
 
-- `apps/bot-api`: Fastify API for webhook intake, entitlement checks, and access workflows
-- `apps/admin-web`: Next.js internal admin shell for access visibility
-- `apps/marketing-site`: Next.js public site placeholder
-- `packages/*`: shared types, config, utils, UI primitives, and prompts
-- `infra/supabase`: Prisma schema and migration foundation
-- `docs`: architecture, flow, and compliance notes
+- **Monorepo**: Turborepo + pnpm workspaces
+- **Frontend**: Next.js App Router + React + Tailwind CSS v4
+- **Backend**: Fastify + TypeScript + Zod
+- **Data**: Prisma schema under `infra/supabase/prisma`
+- **Testing**: Vitest
 
-## Quick Start
+## Folder Structure
 
-1. Copy `.env.example` to `.env` and fill in local values.
-2. Run `pnpm install`.
-3. Run `pnpm test` for the current access-control tests.
-4. Run `pnpm dev` to start the workspace apps.
+- `apps/marketing-site`: TRADARA branded public website
+- `apps/admin-web`: internal admin interface
+- `apps/bot-api`: API service and Telegram/billing integrations
+- `packages/*`: shared UI, types, config, and utilities
+- `infra/supabase`: Prisma schema + migrations
+- `infra/appwrite`: legacy Appwrite deployment references
+- `docs/`: architecture and compliance documentation
+- `qa/`: smoke plans and API collections
 
-## Guardrails
+## Scripts
 
-- Billing remains the source of truth for premium access.
-- Telegram is delivery only.
-- All inbound external data must be validated and logged.
-- No fake production readiness claims for stubbed integrations.
-## Appwrite Deployment
+From repository root:
 
-For Appwrite.io deployments, use the service-by-service playbook in `infra/appwrite/README.md` plus the environment templates in `infra/appwrite/*.env.example`.
+- `pnpm dev` – run workspace apps in development mode
+- `pnpm build` – run turbo build across workspaces
+- `pnpm lint` – run lint checks across workspaces
+- `pnpm typecheck` – run TypeScript checks across workspaces
+- `pnpm test` – run tests across workspaces
 
+## Local Development
+
+1. Copy `.env.example` to `.env` and populate values.
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+3. Start apps:
+   ```bash
+   pnpm dev
+   ```
+
+Marketing site default dev port is `3003`.
+
+## Environment Variables
+
+Use `.env.example` as the source of truth for required variables.
+
+Important variables for marketing deployment:
+
+- `MARKETING_SITE_BASE_URL`
+- `BOT_API_BASE_URL`
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+
+## Vercel Deployment (Recommended)
+
+Deploy each Next.js app as a separate Vercel project:
+
+1. Connect the monorepo to Vercel.
+2. Create one project per app (e.g. marketing site and admin app).
+3. Set root directory to the specific app folder (e.g. `apps/marketing-site`).
+4. Build command: `pnpm build`
+5. Install command: `pnpm install --frozen-lockfile`
+6. Configure required environment variables per project.
+
+Bot API can be deployed separately to your preferred runtime.
+
+## SEO Notes (Marketing Site)
+
+The marketing site includes:
+
+- route-level metadata per page
+- Open Graph and Twitter cards
+- canonical URLs
+- `robots.ts` and `sitemap.ts`
+- Organization/WebSite/SoftwareApplication/FAQ JSON-LD
+- semantic headings and accessible link/button labels
+
+## Brand System Summary
+
+TRADARA marketing UI follows a dark fintech aesthetic:
+
+- Primary: `#00E5A8`, `#1E90FF`
+- Secondary: `#0A0F1C`, `#101828`
+- Accent: `#00F0FF`, `#22C55E`
+- Typography: Inter + Poppins
+- Reusable UI patterns: gradient CTAs, glass cards, soft glow borders, high-contrast content
+
+## Compliance & Risk Language
+
+TRADARA messaging avoids guaranteed-return claims.
+
+Required disclaimer pattern:
+
+> Crypto trading involves risk. TRADARA does not guarantee profits or eliminate losses. Users are responsible for their own trading decisions and should only trade what they can afford to lose.

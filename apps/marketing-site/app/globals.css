@@ -1,16 +1,20 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600&display=swap");
 @import "tailwindcss";
 
 :root {
   color-scheme: dark;
-  --tradara-navy-900: #041120;
-  --tradara-navy-950: #020a16;
-  --tradara-navy-980: #01050d;
-  --tradara-cyan-500: #07a8f8;
-  --tradara-cyan-400: #29c4ff;
-  --tradara-cyan-300: #8be6ff;
-  --tradara-teal-300: #56f0d0;
-  --tradara-text: #eff5ff;
-  --tradara-muted: #a7b6c9;
+}
+
+@theme {
+  --color-brand-teal: #00e5a8;
+  --color-brand-blue: #1e90ff;
+  --color-brand-cyan: #00f0ff;
+  --color-brand-navy: #0a0f1c;
+  --color-brand-midnight: #101828;
+  --color-brand-soft: #94a3b8;
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-cta: "Poppins", sans-serif;
 }
 
 * {
@@ -21,53 +25,77 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(
-      circle at 10% 10%,
-      color-mix(in oklab, var(--tradara-cyan-400) 24%, transparent),
-      transparent 34%
-    ),
-    radial-gradient(
-      circle at 84% 12%,
-      color-mix(in oklab, var(--tradara-teal-300) 16%, transparent),
-      transparent 36%
-    ),
-    radial-gradient(
-      circle at 50% 70%,
-      color-mix(in oklab, var(--tradara-cyan-500) 12%, transparent),
-      transparent 34%
-    ),
-    linear-gradient(
-      180deg,
-      var(--tradara-navy-900) 0%,
-      var(--tradara-navy-950) 42%,
-      var(--tradara-navy-980) 100%
-    );
-  color: var(--tradara-text);
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+    radial-gradient(circle at 16% 10%, rgba(0, 240, 255, 0.14), transparent 36%),
+    radial-gradient(circle at 82% 8%, rgba(30, 144, 255, 0.14), transparent 35%),
+    radial-gradient(circle at 60% 70%, rgba(0, 229, 168, 0.1), transparent 38%),
+    linear-gradient(180deg, #0a0f1c 0%, #101828 55%, #060b16 100%);
+  color: #fff;
+  font-family: var(--font-body);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
 }
 
-svg {
-  display: block;
+.glass-card {
+  border: 1px solid rgba(0, 240, 255, 0.18);
+  background: rgba(16, 24, 40, 0.72);
+  box-shadow: 0 20px 60px rgba(0, 229, 168, 0.08);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
 }
 
-::selection {
-  background: rgba(34, 211, 238, 0.35);
-  color: #f8fafc;
+.glass-card:hover {
+  border-color: rgba(0, 229, 168, 0.55);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  font-family: var(--font-cta);
+  font-weight: 600;
+  color: #031222;
+  background: linear-gradient(90deg, #00e5a8, #1e90ff);
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0, 229, 168, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(30, 144, 255, 0.4);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  font-family: var(--font-cta);
+  font-weight: 600;
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  background: rgba(16, 24, 40, 0.48);
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: #00e5a8;
+  box-shadow: 0 8px 24px rgba(0, 240, 255, 0.2);
 }
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

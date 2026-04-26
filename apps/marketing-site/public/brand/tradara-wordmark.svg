@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" role="img" aria-label="TRADARA by SageStone Lab">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="640" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00E5A8"/>
+      <stop offset="1" stop-color="#1E90FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="160" rx="20" fill="transparent"/>
+  <g transform="translate(20 20)">
+    <rect width="110" height="110" rx="20" fill="#0A0F1C"/>
+    <path d="M20 26h70l-8 14H55L40 52H28z" fill="url(#g)"/>
+    <path d="M20 50h27v36L33 100V64H20z" fill="url(#g)"/>
+    <path d="M53 50h38l-8 14H69v36L53 86z" fill="url(#g)"/>
+  </g>
+  <text x="160" y="82" fill="#fff" style="font: 800 56px Inter, Arial, sans-serif; letter-spacing: 4px;">TRADARA</text>
+  <text x="162" y="118" fill="url(#g)" style="font: 500 22px Poppins, Arial, sans-serif; letter-spacing: 5px;">BY SAGESTONE LAB</text>
+</svg>
