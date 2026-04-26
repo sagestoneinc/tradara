@@ -15,7 +15,7 @@ Use this for staging or production smoke tests after deploys, migrations, or pro
 Set these first in your shell:
 
 ```bash
-export API_BASE_URL="https://tradaraapi.sagestonelab.tech"
+export API_BASE_URL="https://tradara-api.sagestonelab.tech"
 export TG_WEBHOOK_SECRET="your-telegram-webhook-secret"
 export TV_WEBHOOK_SECRET="your-tradingview-webhook-secret"
 export XENDIT_WEBHOOK_TOKEN="your-xendit-webhook-token"
