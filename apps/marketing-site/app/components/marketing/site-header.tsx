@@ -7,14 +7,14 @@ import { TrackedCtaLink } from "./tracked-cta-link";
 
 const navItems = [
   { label: "Why Tradara", href: "/#why-tradara" },
-  { label: "Features", href: "/#features" },
+  { label: "Structure", href: "/#appwrite" },
   { label: "Pricing", href: "/#pricing" },
   { label: "FAQ", href: "/#faq" }
 ] as const;
 
 export function SiteHeader(): React.JSX.Element {
   return (
-    <header className="sticky top-0 z-30 border-b border-amber-300/15 bg-slate-950/78 backdrop-blur-2xl">
+    <header className="sticky top-0 z-30 border-b border-cyan-300/20 bg-slate-950/78 backdrop-blur-2xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-3 lg:px-8">
         <Link href="/" className="group inline-flex items-center">
           <BrandMark className="transition-transform duration-300 group-hover:-translate-y-0.5 [&_svg]:w-[8.4rem] sm:[&_svg]:w-[9.2rem]" />

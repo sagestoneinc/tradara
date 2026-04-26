@@ -5,7 +5,7 @@ import { BrandMark } from "@tradara/ui";
 
 const productLinks = [
   { label: "Why Tradara", href: "/#why-tradara" },
-  { label: "Features", href: "/#features" },
+  { label: "Structure", href: "/#appwrite" },
   { label: "Pricing", href: "/pricing" },
   { label: "FAQ", href: "/#faq" },
   { label: "Telegram", href: "https://t.me/tradara_bot" }
@@ -20,7 +20,7 @@ const legalLinks = [
 
 export function SiteFooter(): React.JSX.Element {
   return (
-    <footer className="border-t border-amber-300/15 bg-slate-950/88">
+    <footer className="border-t border-cyan-300/20 bg-slate-950/88">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div className="space-y-3">
           <BrandMark className="[&_svg]:w-[10rem]" />
