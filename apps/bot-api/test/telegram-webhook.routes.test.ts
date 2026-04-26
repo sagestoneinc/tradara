@@ -108,7 +108,14 @@ describe("telegram webhook route", () => {
     });
 
     expect(response.statusCode).toBe(202);
-    expect(sendMessage).toHaveBeenCalledWith("12345", BOT_MESSAGES.plans);
+    expect(sendMessage).toHaveBeenCalledWith(
+      "12345",
+      BOT_MESSAGES.plans,
+      expect.objectContaining({
+        parse_mode: "Markdown",
+        disable_web_page_preview: true
+      })
+    );
   });
 
   it("handles edited messages and falls back for unknown commands", async () => {
@@ -139,6 +146,9 @@ describe("telegram webhook route", () => {
     });
 
     expect(response.statusCode).toBe(202);
-    expect(sendMessage).toHaveBeenCalledWith("chat-9", FALLBACK_MESSAGE);
+    expect(sendMessage).toHaveBeenCalledWith(
+      "chat-9",
+      FALLBACK_MESSAGE
+    );
   });
 });

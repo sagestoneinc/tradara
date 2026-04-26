@@ -6,13 +6,17 @@ import {
   InMemoryAuditLogRepository,
   InMemoryChannelAccessRepository,
   InMemorySubscriptionRepository,
+  InMemoryTelegramInviteRepository,
+  InMemoryTelegramLinkSessionRepository,
   InMemoryUserRepository
 } from "../src/repositories/in-memory-repositories";
 import { AccountService } from "../src/modules/auth/account.service";
 import { ClerkAuthService } from "../src/modules/auth/clerk-auth.service";
 import type { ClerkVerifier } from "../src/modules/auth/clerk-verifier";
+import { ChannelAccessService } from "../src/modules/channel-access/channel-access.service";
 import { EntitlementService } from "../src/modules/channel-access/entitlement.service";
 import { DomainError } from "../src/lib/domain-error";
+import type { TelegramAccessAdapter } from "../src/modules/channel-access/telegram-access.adapter";
 
 const env = loadBotApiEnv({
   NODE_ENV: "test",
@@ -57,16 +61,56 @@ function createFakeClerkVerifier(): ClerkVerifier {
 }
 
 describe("Clerk identity foundation services", () => {
-  it("syncs a Clerk user from a verified webhook and stores an audit trail", async () => {
-    const userRepository = new InMemoryUserRepository();
-    const auditLogRepository = new InMemoryAuditLogRepository();
-    const service = new ClerkAuthService(
+  function createAuthService(input?: {
+    userRepository?: InMemoryUserRepository;
+    subscriptionRepository?: InMemorySubscriptionRepository;
+    channelAccessRepository?: InMemoryChannelAccessRepository;
+    auditLogRepository?: InMemoryAuditLogRepository;
+  }): ClerkAuthService {
+    const userRepository = input?.userRepository ?? new InMemoryUserRepository();
+    const subscriptionRepository =
+      input?.subscriptionRepository ?? new InMemorySubscriptionRepository();
+    const channelAccessRepository =
+      input?.channelAccessRepository ?? new InMemoryChannelAccessRepository();
+    const auditLogRepository = input?.auditLogRepository ?? new InMemoryAuditLogRepository();
+    const entitlementService = new EntitlementService(() => new Date("2026-04-19T12:00:00.000Z"));
+    const telegramAccessAdapter: TelegramAccessAdapter = {
+      async grantAccess() {
+        return undefined;
+      },
+      async revokeAccess() {
+        return undefined;
+      }
+    };
+    const channelAccessService = new ChannelAccessService(
+      env,
+      subscriptionRepository,
+      channelAccessRepository,
+      new InMemoryTelegramInviteRepository(),
+      auditLogRepository,
+      entitlementService,
+      telegramAccessAdapter,
+      () => new Date("2026-04-19T12:00:00.000Z")
+    );
+
+    return new ClerkAuthService(
       env,
       userRepository,
+      new InMemoryTelegramLinkSessionRepository(),
+      subscriptionRepository,
+      channelAccessRepository,
+      channelAccessService,
+      entitlementService,
       auditLogRepository,
       createFakeClerkVerifier(),
       () => new Date("2026-04-19T12:00:00.000Z")
     );
+  }
+
+  it("syncs a Clerk user from a verified webhook and stores an audit trail", async () => {
+    const userRepository = new InMemoryUserRepository();
+    const auditLogRepository = new InMemoryAuditLogRepository();
+    const service = createAuthService({ userRepository, auditLogRepository });
 
     const result = await service.handleWebhook({
       rawBody: JSON.stringify({ ignored: true }),
@@ -88,6 +132,16 @@ describe("Clerk identity foundation services", () => {
   });
 
   it("returns an account access snapshot backed by internal billing truth", async () => {
+    const subscriptions: SubscriptionSnapshot[] = [
+      {
+        id: "sub_clerk_001",
+        userId: "clerk_user_clerk_123",
+        planId: "tradara-pro-monthly",
+        status: "active",
+        currentPeriodEndsAt: "2026-05-01T00:00:00.000Z",
+        gracePeriodEndsAt: null
+      }
+    ];
     const userRepository = new InMemoryUserRepository([
       {
         id: "clerk_user_clerk_123",
@@ -104,27 +158,18 @@ describe("Clerk identity foundation services", () => {
       }
     ]);
     const auditLogRepository = new InMemoryAuditLogRepository();
-    const authService = new ClerkAuthService(
-      env,
+    const subscriptionsRepo = new InMemorySubscriptionRepository(subscriptions);
+    const channelAccessRepository = new InMemoryChannelAccessRepository();
+    const authService = createAuthService({
       userRepository,
-      auditLogRepository,
-      createFakeClerkVerifier(),
-      () => new Date("2026-04-19T12:00:00.000Z")
-    );
-    const subscriptions: SubscriptionSnapshot[] = [
-      {
-        id: "sub_clerk_001",
-        userId: "clerk_user_clerk_123",
-        planId: "tradara-pro-monthly",
-        status: "active",
-        currentPeriodEndsAt: "2026-05-01T00:00:00.000Z",
-        gracePeriodEndsAt: null
-      }
-    ];
+      subscriptionRepository: subscriptionsRepo,
+      channelAccessRepository,
+      auditLogRepository
+    });
     const accountService = new AccountService(
       authService,
-      new InMemorySubscriptionRepository(subscriptions),
-      new InMemoryChannelAccessRepository(),
+      subscriptionsRepo,
+      channelAccessRepository,
       new EntitlementService(() => new Date("2026-04-19T12:00:00.000Z"))
     );
 
@@ -141,13 +186,7 @@ describe("Clerk identity foundation services", () => {
   });
 
   it("rejects account resolution when the bearer token is invalid", async () => {
-    const service = new ClerkAuthService(
-      env,
-      new InMemoryUserRepository(),
-      new InMemoryAuditLogRepository(),
-      createFakeClerkVerifier(),
-      () => new Date("2026-04-19T12:00:00.000Z")
-    );
+    const service = createAuthService();
 
     await expect(
       service.requireAuthenticatedUser({

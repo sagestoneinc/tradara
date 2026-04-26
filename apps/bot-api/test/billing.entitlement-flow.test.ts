@@ -40,6 +40,6 @@ describe("billing entitlement flow", () => {
 
     expect(overviewResponse.json().data.subscription.status).toBe("active");
     expect(overviewResponse.json().data.entitlement.premiumChannelEligible).toBe(true);
-    expect(overviewResponse.json().data.accessRecord.status).toBe("granted");
+    expect(overviewResponse.json().data.accessRecord.status).toBe("pending_grant");
   });
 });
