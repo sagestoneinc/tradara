@@ -135,6 +135,71 @@ enum ExecutionPosture {
   stand_down
 }
 
+enum ExperienceLevel {
+  beginner
+  intermediate
+  advanced
+}
+
+enum UserMode {
+  lite
+  pro
+}
+
+enum LearningProgressStatus {
+  not_started
+  in_progress
+  completed
+}
+
+enum TradeIdeaSetupType {
+  breakout
+  pullback
+  range
+  reversal
+  continuation
+  other
+}
+
+enum BeginnerSuitability {
+  beginner
+  intermediate
+  advanced
+}
+
+enum AnalystReviewStatus {
+  draft
+  pending_review
+  approved
+  rejected
+  published
+  archived
+}
+
+enum TradeIdeaOutcomeStatus {
+  open
+  hit_target
+  invalidated
+  canceled
+  timed_out
+}
+
+enum TradeLifecycleStatus {
+  open
+  closed
+  canceled
+}
+
+enum UserEmotion {
+  calm
+  confident
+  anxious
+  fearful
+  greedy
+  frustrated
+  uncertain
+}
+
 model User {
   id                 String                @id
   email              String?               @unique
@@ -151,6 +216,15 @@ model User {
   auditLogs          AuditLog[]
   invites            TelegramInvite[]
   telegramLinkSessions TelegramLinkSession[]
+  profile            UserProfile?
+  lessonProgress     UserLessonProgress[]
+  practiceAccounts   PracticeAccount[]
+  practiceTrades     PracticeTrade[]
+  tradeJournalEntries TradeJournalEntry[]
+  personalTradingRules PersonalTradingRule[]
+  riskDisclosureAcceptances RiskDisclosureAcceptance[]
+  watchlistAssets    WatchlistAsset[]
+  tradeIdeaBookmarks TradeIdeaBookmark[]
 }
 
 model TelegramLinkSession {
@@ -358,4 +432,220 @@ model MarketInsight {
   updatedAt           DateTime            @updatedAt
 
   @@index([status, createdAt])
+}
+
+model UserProfile {
+  id                    String          @id
+  userId                String          @unique
+  experienceLevel       ExperienceLevel?
+  riskProfile           Json
+  mode                  UserMode        @default(lite)
+  onboardingCompleted   Boolean         @default(false)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LearningPath {
+  id               String          @id
+  title            String
+  level            ExperienceLevel
+  description      String
+  sortOrder        Int             @default(0)
+  published        Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  lessons          Lesson[]
+}
+
+model Lesson {
+  id               String          @id
+  pathId           String
+  title            String
+  slug             String          @unique
+  content          String
+  level            ExperienceLevel
+  sortOrder        Int             @default(0)
+  estimatedMinutes Int             @default(5)
+  published        Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  path             LearningPath    @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  quiz             Quiz?
+  progress         UserLessonProgress[]
+}
+
+model Quiz {
+  id               String          @id
+  lessonId         String          @unique
+  questions        Json
+  passingScore     Int             @default(70)
+  published        Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  lesson           Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model UserLessonProgress {
+  id               String                  @id
+  userId           String
+  lessonId         String
+  status           LearningProgressStatus  @default(not_started)
+  score            Int?
+  completedAt      DateTime?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  user             User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson           Lesson                  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId, status])
+}
+
+model GlossaryTerm {
+  id                 String          @id
+  term               String          @unique
+  simpleDefinition   String
+  advancedDefinition String?
+  examples           Json
+  relatedTerms       Json
+  published          Boolean         @default(false)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+}
+
+model PracticeAccount {
+  id               String          @id
+  userId           String
+  virtualBalance   Decimal         @default(0)
+  currency         String          @default("USD")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades           PracticeTrade[]
+
+  @@index([userId, createdAt])
+}
+
+model TradeIdea {
+  id                       String               @id
+  sourceSignalId           String?              @unique
+  asset                    String
+  pair                     String
+  bias                     MarketBias
+  setupType                TradeIdeaSetupType
+  timeframe                String
+  entryZoneLow             Decimal
+  entryZoneHigh            Decimal
+  invalidationLevel        Decimal
+  riskLevel                RiskLabel
+  beginnerSuitability      BeginnerSuitability
+  explanation              String
+  whatCouldGoWrong         String
+  aiConfidence             Int?
+  analystStatus            AnalystReviewStatus  @default(draft)
+  analystNotes             String?
+  publishedAt              DateTime?
+  outcomeStatus            TradeIdeaOutcomeStatus?
+  outcomeSummary           String?
+  publishedTelegramChatId  String?
+  publishedTelegramMessageId String?
+  metadata                 Json
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  practiceTrades           PracticeTrade[]
+  journalEntries           TradeJournalEntry[]
+  bookmarks                TradeIdeaBookmark[]
+}
+
+model TradeIdeaBookmark {
+  id                String        @id
+  userId            String
+  tradeIdeaId       String
+  createdAt         DateTime      @default(now())
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tradeIdea         TradeIdea     @relation(fields: [tradeIdeaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tradeIdeaId])
+}
+
+model PracticeTrade {
+  id               String              @id
+  userId           String
+  practiceAccountId String
+  tradeIdeaId      String?
+  asset            String
+  pair             String
+  direction        TradeDirection
+  entryPrice       Decimal
+  exitPrice        Decimal?
+  size             Decimal
+  stopLoss         Decimal?
+  takeProfit       Decimal?
+  status           TradeLifecycleStatus @default(open)
+  pnl              Decimal?
+  notes            String?
+  openedAt         DateTime
+  closedAt         DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  practiceAccount  PracticeAccount     @relation(fields: [practiceAccountId], references: [id], onDelete: Cascade)
+  tradeIdea        TradeIdea?          @relation(fields: [tradeIdeaId], references: [id], onDelete: SetNull)
+  journalEntries   TradeJournalEntry[]
+
+  @@index([userId, openedAt])
+}
+
+model TradeJournalEntry {
+  id               String          @id
+  userId           String
+  tradeIdeaId      String?
+  practiceTradeId  String?
+  title            String
+  notes            String
+  emotion          UserEmotion?
+  mistakeTags      Json
+  ruleFollowed     Boolean?
+  lessonsLearned   String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tradeIdea        TradeIdea?      @relation(fields: [tradeIdeaId], references: [id], onDelete: SetNull)
+  practiceTrade    PracticeTrade?  @relation(fields: [practiceTradeId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+model PersonalTradingRule {
+  id               String          @id
+  userId           String
+  rule             String
+  active           Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RiskDisclosureAcceptance {
+  id               String          @id
+  userId           String
+  disclosureVersion String
+  acceptedAt       DateTime
+  createdAt        DateTime        @default(now())
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, acceptedAt])
+}
+
+model WatchlistAsset {
+  id               String          @id
+  userId           String
+  asset            String
+  pair             String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pair])
 }

@@ -1,10 +1,17 @@
 import { FALLBACK_MESSAGE } from "../content/bot-messages";
 import type { BotCommandContext, BotCommandHandler, TelegramBotLike, TelegramChatId } from "../types/bot";
 import { handleAlerts } from "./alerts";
+import { handleAccount } from "./account";
+import { handleExplain } from "./explain";
 import { handleFaq } from "./faq";
 import { handleHelp } from "./help";
+import { handleJournal } from "./journal";
+import { handleLearn } from "./learn";
 import { handlePlans } from "./plans";
+import { handlePractice } from "./practice";
+import { handlePulse } from "./pulse";
 import { handleRisk } from "./risk";
+import { handleSignals } from "./signals";
 import { handleStart } from "./start";
 import { handleStatus } from "./status";
 import { handleUpgrade } from "./upgrade";
@@ -17,7 +24,14 @@ export const EXPECTED_COMMANDS = [
   "/help",
   "/risk",
   "/alerts",
-  "/status"
+  "/status",
+  "/learn",
+  "/pulse",
+  "/signals",
+  "/explain",
+  "/practice",
+  "/journal",
+  "/account"
 ] as const;
 
 export type SupportedCommand = (typeof EXPECTED_COMMANDS)[number];
@@ -30,7 +44,14 @@ export const commandRegistry = {
   "/help": handleHelp,
   "/risk": handleRisk,
   "/alerts": handleAlerts,
-  "/status": handleStatus
+  "/status": handleStatus,
+  "/learn": handleLearn,
+  "/pulse": handlePulse,
+  "/signals": handleSignals,
+  "/explain": handleExplain,
+  "/practice": handlePractice,
+  "/journal": handleJournal,
+  "/account": handleAccount
 } as const satisfies Record<SupportedCommand, BotCommandHandler>;
 
 export async function dispatchCommand(input: {
