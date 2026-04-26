@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsup",
+    "build": "tsc --project tsconfig.build.json",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint src test --max-warnings=0",
     "start": "node dist/server.js",
@@ -21,8 +21,5 @@
     "fastify": "^5.8.5",
     "tsx": "^4.21.0",
     "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "tsup": "^8.5.0"
   }
 }
