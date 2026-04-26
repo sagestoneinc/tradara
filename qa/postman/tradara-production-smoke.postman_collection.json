@@ -6,7 +6,7 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "api_base_url", "value": "https://tradaraapi.sagestonelab.tech" },
+    { "key": "api_base_url", "value": "https://tradara-api.sagestonelab.tech" },
     { "key": "tg_webhook_secret", "value": "" },
     { "key": "tv_webhook_secret", "value": "" },
     { "key": "xendit_webhook_token", "value": "" },
