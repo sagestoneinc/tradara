@@ -1,4 +1,3 @@
-import type { SubscriptionPlanId } from "@tradara/shared-types";
 import { z } from "zod";
 
 export const brand = {
@@ -31,16 +30,7 @@ export const subscriptionPlans = {
     amountPhp: 14999,
     premiumChannelEligible: true
   }
-} satisfies Record<
-  SubscriptionPlanId,
-  {
-    id: SubscriptionPlanId;
-    label: string;
-    billingInterval: "month" | "quarter" | "year";
-    amountPhp: number;
-    premiumChannelEligible: boolean;
-  }
->;
+} as const;
 
 export const accessPolicy = {
   defaultGracePeriodHours: 72
