@@ -9,6 +9,7 @@ import type {
 } from "@tradara/shared-types";
 import { addHours, isoNow } from "@tradara/shared-utils";
 import type { PrismaClient } from "@prisma/client";
+import type { Databases } from "node-appwrite";
 
 import { TelegramBotApiAdapter } from "./bot/telegram-bot.adapter";
 import type { TelegramBotLike } from "./bot/types/bot";
@@ -42,6 +43,21 @@ import {
   PrismaSignalRepository,
   PrismaSignalReviewRepository
 } from "./repositories/prisma-signal-repositories";
+import {
+  AppwriteAuditLogRepository,
+  AppwriteChannelAccessRepository,
+  AppwriteSubscriptionRepository,
+  AppwriteTelegramInviteRepository,
+  AppwriteTelegramLinkSessionRepository,
+  AppwriteUserRepository,
+  AppwriteWebhookEventRepository
+} from "./repositories/appwrite-repositories";
+import {
+  AppwriteMarketInsightRepository,
+  AppwriteSignalInputRepository,
+  AppwriteSignalRepository,
+  AppwriteSignalReviewRepository
+} from "./repositories/appwrite-signal-repositories";
 import { ChannelAccessReconciliationJob } from "./jobs/channel-access-reconciliation.job";
 import { AdminController } from "./modules/admin/admin.controller";
 import { AdminService } from "./modules/admin/admin.service";
@@ -90,8 +106,10 @@ export interface AppContainer {
 }
 
 export interface CreateContainerOptions {
-  persistence?: "memory" | "prisma";
+  persistence?: "memory" | "prisma" | "appwrite";
   prisma?: PrismaClient;
+  appwriteDatabases?: Databases;
+  appwriteDatabaseId?: string;
   seed?: RepositorySeed;
   telegramAccessAdapter?: TelegramAccessAdapter;
   telegramBot?: TelegramBotLike;
@@ -125,7 +143,12 @@ export function createContainer(
   } =
     persistence === "memory"
       ? createInMemoryRepositories(options.seed ?? createDefaultSeed(env, now))
-      : createPrismaRepositories(options.prisma ?? getPrismaClient(env.DATABASE_URL));
+      : persistence === "appwrite"
+        ? createAppwriteRepositories(
+            options.appwriteDatabases!,
+            options.appwriteDatabaseId ?? env.APPWRITE_DATABASE_ID
+          )
+        : createPrismaRepositories(options.prisma ?? getPrismaClient(env.DATABASE_URL));
 
   const entitlementService = new EntitlementService(clock);
   const channelAccessService = new ChannelAccessService(
@@ -287,6 +310,22 @@ function createPrismaRepositories(prisma: PrismaClient) {
     signalRepository: new PrismaSignalRepository(prisma),
     signalReviewRepository: new PrismaSignalReviewRepository(prisma),
     marketInsightRepository: new PrismaMarketInsightRepository(prisma)
+  };
+}
+
+function createAppwriteRepositories(databases: Databases, databaseId: string) {
+  return {
+    subscriptionRepository: new AppwriteSubscriptionRepository(databases, databaseId),
+    channelAccessRepository: new AppwriteChannelAccessRepository(databases, databaseId),
+    inviteRepository: new AppwriteTelegramInviteRepository(databases, databaseId),
+    auditLogRepository: new AppwriteAuditLogRepository(databases, databaseId),
+    webhookEventRepository: new AppwriteWebhookEventRepository(databases, databaseId),
+    userRepository: new AppwriteUserRepository(databases, databaseId),
+    telegramLinkSessionRepository: new AppwriteTelegramLinkSessionRepository(databases, databaseId),
+    signalInputRepository: new AppwriteSignalInputRepository(databases, databaseId),
+    signalRepository: new AppwriteSignalRepository(databases, databaseId),
+    signalReviewRepository: new AppwriteSignalReviewRepository(databases, databaseId),
+    marketInsightRepository: new AppwriteMarketInsightRepository(databases, databaseId)
   };
 }
 

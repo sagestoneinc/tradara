@@ -1,0 +1,21 @@
+{
+  "projectId": "${APPWRITE_PROJECT_ID}",
+  "projectName": "tradara",
+  "functions": [
+    {
+      "name": "channel-access-reconciliation",
+      "$id": "reconciliation",
+      "runtime": "node-22.0",
+      "path": "infra/appwrite/functions/reconciliation",
+      "entrypoint": "src/main.ts",
+      "ignore": ["node_modules"],
+      "execute": [],
+      "events": [],
+      "schedule": "0 * * * *",
+      "timeout": 30,
+      "enabled": true,
+      "logging": true,
+      "scopes": []
+    }
+  ]
+}
