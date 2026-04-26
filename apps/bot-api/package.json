@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsup",
+    "build": "mkdir -p dist && ../../node_modules/.pnpm/node_modules/.bin/esbuild src/server.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/server.js --external:@prisma/client --external:@prisma/adapter-pg --banner:js=\"import { createRequire as __createRequire } from 'node:module';const require = __createRequire(import.meta.url);\"",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint src test --max-warnings=0",
     "start": "node dist/server.js",
