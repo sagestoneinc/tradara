@@ -29,9 +29,8 @@ Production hostnames:
 - **Output directory:** `apps/bot-api/dist`
 - **Fallback file:** _(blank)_
 - **Runtime entry:** compiled server artifact at `apps/bot-api/dist/server.js`
+- **Start command (if configured):** `pnpm --filter @tradara/bot-api start`
 - **Env template:** `infra/appwrite/bot-api.env.example`
-
-> Appwrite Sites does not expose a separate **Start command** field in the UI. Runtime startup is managed by the selected framework/rendering mode and build output.
 
 ## Site: admin-web (Next.js)
 
@@ -40,6 +39,7 @@ Production hostnames:
 - **Build command:** `cp apps/admin-web/next.config.ts ./next.config.ts && pnpm --filter @tradara/admin-web build`
 - **Output directory:** `apps/admin-web/.next`
 - **Fallback file:** _(blank)_
+- **Start command:** `pnpm --filter @tradara/admin-web start`
 - **Env template:** `infra/appwrite/admin-web.env.example`
 
 ## Site: marketing-site (Next.js)
@@ -49,6 +49,7 @@ Production hostnames:
 - **Build command:** `cp apps/marketing-site/next.config.ts ./next.config.ts && pnpm --filter @tradara/marketing-site build`
 - **Output directory:** `apps/marketing-site/.next`
 - **Fallback file:** _(blank)_
+- **Start command:** `pnpm --filter @tradara/marketing-site start`
 - **Env template:** `infra/appwrite/marketing-site.env.example`
 
 ## Production URLs to Keep Consistent
