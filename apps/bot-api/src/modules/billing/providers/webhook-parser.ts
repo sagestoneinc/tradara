@@ -185,11 +185,27 @@ export class WebhookParser {
       status = "failed";
     }
 
-    const resourceMetadata = (resource.attributes as Record<string, unknown>)?.metadata as Record<string, unknown>;
-    if (resourceMetadata) {
-      subscriptionId = (resourceMetadata.tradaraSubscriptionId as string) || 
-                      (resourceMetadata.subscriptionId as string) || "";
-      metadata = resourceMetadata;
+    const resourceAttributes = resource.attributes as Record<string, unknown> | undefined;
+    const resourceMetadata = resourceAttributes?.metadata as Record<string, unknown> | undefined;
+    const checkoutPayments = resourceAttributes?.payments as
+      | Array<Record<string, unknown>>
+      | undefined;
+    const checkoutPaymentMetadata = checkoutPayments
+      ?.map(
+        (payment) =>
+          (payment.attributes as Record<string, unknown> | undefined)?.metadata as
+            | Record<string, unknown>
+            | undefined
+      )
+      .find(Boolean);
+    const effectiveMetadata = resourceMetadata ?? checkoutPaymentMetadata;
+
+    if (effectiveMetadata) {
+      subscriptionId =
+        (effectiveMetadata.tradaraSubscriptionId as string) ||
+        (effectiveMetadata.subscriptionId as string) ||
+        "";
+      metadata = effectiveMetadata;
     }
 
     return {
