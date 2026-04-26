@@ -1,5 +1,16 @@
 # Appwrite Deployment Playbook
 
+Use this runbook when creating or updating the three Appwrite Sites for Tradara.
+
+## 10-Minute Setup Checklist
+
+1. Confirm production DNS points to the three production hostnames listed below.
+2. Copy each `infra/appwrite/*.env.example` file into the matching Appwrite Site environment settings.
+3. For each Site, set **provider root directory** to repo root (`/`) and use the exact build/start commands in this file.
+4. Deploy in order: `bot-api` → `marketing-site` → `admin-web`.
+5. After each deploy, run smoke checks (health, login, checkout redirect, admin pages).
+6. Re-register external webhooks after API changes.
+
 This workspace deploys to **Appwrite Sites** as three independent services:
 
 1. `@tradara/bot-api` (`apps/bot-api`)
@@ -20,6 +31,15 @@ Production hostnames:
 - **Provider root directory:** repository root (`/`)
 - **Node version:** `20.11+` (or latest Node 20 LTS)
 - Use package-scoped build commands only (never monorepo-wide build commands for a single Site).
+
+## Appwrite Site Creation (repeat for each service)
+
+1. In Appwrite Console, create a **Site**.
+2. Connect this Git repository and select the deployment branch.
+3. Set the provider root directory to `/`.
+4. Configure framework/runtime, build command, output directory, and start command exactly as listed below.
+5. Add environment variables from the corresponding template.
+6. Trigger first deploy and validate logs before enabling traffic.
 
 ## Site: bot-api (Fastify / Node)
 
@@ -73,3 +93,11 @@ Webhook URLs:
 2. Deploy `bot-api` and confirm `/health` responds.
 3. Deploy `marketing-site` and smoke test auth + checkout redirects.
 4. Deploy `admin-web` and verify admin auth and signal pages.
+
+## Post-Deploy Verification
+
+- API health check returns `200`: `GET /health`
+- Telegram webhook endpoint is reachable and verification remains enabled.
+- Marketing checkout success/cancel routes resolve correctly.
+- Admin can sign in and view premium access state.
+- Recent billing events still reconcile to entitlement state.
