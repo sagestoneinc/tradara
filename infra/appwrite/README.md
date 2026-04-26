@@ -101,3 +101,54 @@ Webhook URLs:
 - Marketing checkout success/cancel routes resolve correctly.
 - Admin can sign in and view premium access state.
 - Recent billing events still reconcile to entitlement state.
+
+## Appwrite Database Setup
+
+Set the four env vars, then run the one-time schema provisioning script:
+
+```bash
+export APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+export APPWRITE_PROJECT_ID=your-project-id
+export APPWRITE_API_KEY=your-api-key
+export APPWRITE_DATABASE_ID=your-database-id
+
+npx tsx infra/appwrite/setup-database.ts
+```
+
+The script is idempotent — existing collections and attributes are skipped.
+
+## Persistence Mode
+
+Set `PERSISTENCE=appwrite` in the bot-api environment to route all repository calls through
+Appwrite Database instead of PostgreSQL. When using Appwrite persistence, `DATABASE_URL` is not
+required.
+
+## Collection IDs
+
+| Collection | ID |
+|---|---|
+| Users | `users` |
+| Subscriptions | `subscriptions` |
+| Channel Access | `channel_access` |
+| Telegram Invites | `telegram_invites` |
+| Telegram Link Sessions | `telegram_link_sessions` |
+| Audit Logs | `audit_logs` |
+| Webhook Events | `webhook_events` |
+| Signal Inputs | `signal_inputs` |
+| Signals | `signals` |
+| Signal Reviews | `signal_reviews` |
+| Market Insights | `market_insights` |
+
+## Appwrite Functions
+
+Deploy the channel-access reconciliation function (runs hourly via cron):
+
+```bash
+appwrite deploy function --function-id reconciliation
+```
+
+The function calls `POST /v1/admin/reconcile` on the bot-api. Configure these env vars on the
+function in the Appwrite Console:
+
+- `BOT_API_BASE_URL` — e.g. `https://tradara-api.sagestonelab.tech`
+- `ADMIN_API_SECRET` — must match the `x-admin-secret` header expected by bot-api
