@@ -2,45 +2,27 @@ import type { MetadataRoute } from "next";
 
 import { siteUrl } from "./lib/site";
 
+const routes = [
+  "/",
+  "/features",
+  "/how-it-works",
+  "/security",
+  "/pricing",
+  "/faq",
+  "/contact",
+  "/blog",
+  "/legal/risk-disclaimer",
+  "/legal/privacy-policy",
+  "/legal/terms"
+] as const;
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
-  return [
-    {
-      url: siteUrl,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 1
-    },
-    {
-      url: `${siteUrl}/pricing`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8
-    },
-    {
-      url: `${siteUrl}/terms`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5
-    },
-    {
-      url: `${siteUrl}/privacy`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5
-    },
-    {
-      url: `${siteUrl}/risk-disclosure`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5
-    },
-    {
-      url: `${siteUrl}/contact`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5
-    }
-  ];
+  return routes.map((route, idx) => ({
+    url: route === "/" ? siteUrl : `${siteUrl}${route}`,
+    lastModified: now,
+    changeFrequency: idx < 6 ? "weekly" : "monthly",
+    priority: route === "/" ? 1 : 0.7
+  }));
 }
