@@ -83,6 +83,8 @@ import {
 import { MarketInsightsService } from "./modules/signals/market-insights.service";
 import { SignalAdminReadService } from "./modules/signals/signal-admin-read.service";
 import { SignalsController } from "./modules/signals/signals.controller";
+import { PlatformController } from "./modules/platform/platform.controller";
+import { PlatformService } from "./modules/platform/platform.service";
 import { SignalIngestionService } from "./modules/signals/signal-ingestion.service";
 import { SignalPublishingService } from "./modules/signals/signal-publishing.service";
 import { SignalReviewService } from "./modules/signals/signal-review.service";
@@ -98,6 +100,7 @@ export interface AppContainer {
     billing: BillingController;
     channelAccess: ChannelAccessController;
     signals: SignalsController;
+    platform: PlatformController;
     telegramWebhook: TelegramWebhookController;
   };
   jobs: {
@@ -254,6 +257,8 @@ export function createContainer(
     signalAdminReadService,
     clock
   );
+  const platformService = new PlatformService();
+  const platformController = new PlatformController(platformService);
 
   return {
     env,
@@ -271,6 +276,7 @@ export function createContainer(
         marketInsightsService,
         signalAdminReadService
       ),
+      platform: platformController,
       telegramWebhook: new TelegramWebhookController(telegramWebhookService)
     },
     jobs: {

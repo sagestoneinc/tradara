@@ -10,9 +10,9 @@ import { featureStrip, howItWorksSteps } from "./lib/content";
 import { ctaLinks, site } from "./lib/site";
 
 export const metadata = buildMetadata({
-  title: "Trade Smarter. Grow Faster.",
+  title: "Trade Crypto With More Clarity — Not More Noise",
   description:
-    "Automated crypto trading designed to help you trade with structure, consistency, and confidence.",
+    "Tradara helps crypto traders learn, practice safely, understand analyst-reviewed setups, and improve discipline with risk-first guidance.",
   path: "/"
 });
 
@@ -34,21 +34,21 @@ export default function HomePage(): React.JSX.Element {
           <div className="space-y-5">
             <p className="text-xs uppercase tracking-[0.22em] text-brand-cyan">TRADARA by SageStone Lab</p>
             <h1 className="font-display text-4xl font-extrabold leading-tight text-white md:text-6xl">
-              Trade <span className="bg-gradient-to-r from-brand-teal to-brand-cyan bg-clip-text text-transparent">Smarter</span>. Grow <span className="bg-gradient-to-r from-brand-cyan to-brand-blue bg-clip-text text-transparent">Faster</span>.
+              Trade Crypto With More <span className="bg-gradient-to-r from-brand-teal to-brand-cyan bg-clip-text text-transparent">Clarity</span> — Not More <span className="bg-gradient-to-r from-brand-cyan to-brand-blue bg-clip-text text-transparent">Noise</span>.
             </h1>
             <p className="max-w-xl text-base leading-7 text-brand-soft md:text-lg">
-              Automated crypto trading designed to help you trade with structure, consistency, and confidence.
+              Tradara helps new crypto traders learn the market, practice safely, understand analyst-reviewed setups, and build disciplined habits.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href={ctaLinks.getStarted} target="_blank" rel="noreferrer" className="btn-primary">
-                Get Started
+                Start Learning
               </Link>
               <Link href={ctaLinks.seeHowItWorks} className="btn-secondary">
-                See How It Works
+                Try Practice Mode
               </Link>
             </div>
             <p className="text-xs leading-6 text-slate-400">
-              Market conditions vary. Trading involves risk. TRADARA is designed to support disciplined, data-driven decision-making.
+              Educational guidance. Analyst-reviewed setups. Practice-first trading. No guaranteed profits.
             </p>
           </div>
           <div className="glass-card p-6">

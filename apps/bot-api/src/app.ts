@@ -10,6 +10,7 @@ import { registerBillingRoutes } from "./modules/billing/billing.routes";
 import { registerChannelAccessRoutes } from "./modules/channel-access/channel-access.routes";
 import { registerHealthRoutes } from "./modules/health/health.routes";
 import { registerSignalsRoutes } from "./modules/signals/signals.routes";
+import { registerPlatformRoutes } from "./modules/platform/platform.routes";
 import { registerTelegramWebhookRoutes } from "./modules/webhooks/telegram/telegram-webhook.routes";
 
 export function buildApp(container: AppContainer): ReturnType<typeof fastify> {
@@ -52,6 +53,7 @@ export function buildApp(container: AppContainer): ReturnType<typeof fastify> {
   registerBillingRoutes(app, container.controllers.billing);
   registerChannelAccessRoutes(app, container.controllers.channelAccess);
   registerSignalsRoutes(app, container.controllers.signals, container.controllers.auth);
+  registerPlatformRoutes(app, container.controllers.platform);
   registerTelegramWebhookRoutes(app, container.controllers.telegramWebhook);
 
   return app;

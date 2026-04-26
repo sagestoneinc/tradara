@@ -15,7 +15,7 @@ export const site = {
   parentBrand: "SageStone Lab",
   title: "Trade Smarter. Grow Faster.",
   description:
-    "Automated crypto trading designed to support structure, consistency, and data-driven decision-making. Trading involves risk.",
+    "Telegram-first crypto learning, practice trading, analyst-reviewed ideas, and risk-first guidance for disciplined decision-making.",
   baseUrl: normalizeBaseUrl(process.env.MARKETING_SITE_BASE_URL),
   social: {
     telegram: "https://t.me/tradara_bot",
@@ -30,6 +30,7 @@ export const siteUrl = site.baseUrl.toString().replace(/\/$/, "");
 export const navLinks = [
   { label: "Features", href: "/features" },
   { label: "How It Works", href: "/how-it-works" },
+  { label: "Trust & Safety", href: "/trust-safety" },
   { label: "Security", href: "/security" },
   { label: "Pricing", href: "/pricing" },
   { label: "FAQ", href: "/faq" }
