@@ -1,21 +1,37 @@
 # Appwrite Deployment Playbook
 
-Use this runbook when creating or updating the three Appwrite Sites for Tradara.
+Use this runbook when creating or updating Tradara on Appwrite Sites.
 
-## 10-Minute Setup Checklist
+## Quick Start (recommended)
 
-1. Confirm production DNS points to the three production hostnames listed below.
-2. Copy each `infra/appwrite/*.env.example` file into the matching Appwrite Site environment settings.
-3. For each Site, set **provider root directory** to repo root (`/`) and use the exact build/start commands in this file.
+Tradara deploys as three independent services from one monorepo:
+
+| Service | Workspace package | App path | Port |
+|---|---|---|---|
+| bot-api | `@tradara/bot-api` | `apps/bot-api` | `3001` |
+| marketing-site | `@tradara/marketing-site` | `apps/marketing-site` | `3003` |
+| admin-web | `@tradara/admin-web` | `apps/admin-web` | `3002` |
+
+1. Confirm production DNS points to the hostnames listed below.
+2. Copy `infra/appwrite/<service>.env.example` into each Site environment.
+3. Set **provider root directory** to `/` for every Site.
 4. Deploy in order: `bot-api` → `marketing-site` → `admin-web`.
-5. After each deploy, run smoke checks (health, login, checkout redirect, admin pages).
-6. Re-register external webhooks after API changes.
+5. Run smoke checks immediately after each deploy.
 
-This workspace deploys to **Appwrite Sites** as three independent services:
+## Local Pre-Deploy Validation
 
-1. `@tradara/bot-api` (`apps/bot-api`)
-2. `@tradara/admin-web` (`apps/admin-web`)
-3. `@tradara/marketing-site` (`apps/marketing-site`)
+Run these from repo root before pushing deployment changes:
+
+```bash
+corepack enable
+pnpm install --frozen-lockfile
+
+pnpm --filter @tradara/bot-api build
+pnpm --filter @tradara/marketing-site build
+pnpm --filter @tradara/admin-web build
+```
+
+> Keep service builds isolated (use `--filter`) so Appwrite failures are easier to diagnose.
 
 Production hostnames:
 
@@ -25,12 +41,12 @@ Production hostnames:
 
 > Tradara is Telegram-first guidance software (not an execution bot). Keep webhook verification and billing-derived entitlement logic enabled in production.
 
-## Shared Site Build Settings
+## Shared Appwrite Site Settings
 
 - **Install command:** `corepack enable && pnpm install --frozen-lockfile`
 - **Provider root directory:** repository root (`/`)
 - **Node version:** `20.11+` (or latest Node 20 LTS)
-- Use package-scoped build commands only (never monorepo-wide build commands for a single Site).
+- Use package-scoped build commands only.
 
 ## Appwrite Site Creation (repeat for each service)
 

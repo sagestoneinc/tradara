@@ -2,14 +2,13 @@
 
 :root {
   color-scheme: dark;
-  --tradara-navy-900: #07111f;
-  --tradara-navy-950: #020610;
-  --tradara-navy-980: #01030b;
-  --tradara-gold-500: #d59b12;
-  --tradara-gold-400: #f5c53d;
-  --tradara-gold-300: #f8dd78;
-  --tradara-cyan-400: #42bff2;
-  --tradara-cyan-300: #8be0ff;
+  --tradara-navy-900: #041120;
+  --tradara-navy-950: #020a16;
+  --tradara-navy-980: #01050d;
+  --tradara-cyan-500: #07a8f8;
+  --tradara-cyan-400: #29c4ff;
+  --tradara-cyan-300: #8be6ff;
+  --tradara-teal-300: #56f0d0;
   --tradara-text: #eff5ff;
   --tradara-muted: #a7b6c9;
 }
@@ -24,17 +23,17 @@ body {
   background:
     radial-gradient(
       circle at 10% 10%,
-      color-mix(in oklab, var(--tradara-gold-400) 18%, transparent),
+      color-mix(in oklab, var(--tradara-cyan-400) 24%, transparent),
       transparent 34%
     ),
     radial-gradient(
       circle at 84% 12%,
-      color-mix(in oklab, var(--tradara-cyan-400) 18%, transparent),
+      color-mix(in oklab, var(--tradara-teal-300) 16%, transparent),
       transparent 36%
     ),
     radial-gradient(
       circle at 50% 70%,
-      color-mix(in oklab, var(--tradara-cyan-300) 8%, transparent),
+      color-mix(in oklab, var(--tradara-cyan-500) 12%, transparent),
       transparent 34%
     ),
     linear-gradient(
