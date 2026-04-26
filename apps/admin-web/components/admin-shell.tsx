@@ -10,8 +10,12 @@ const navItems = [
   { href: "/channel-access", label: "Channel Access", helper: "Delivery layer", count: "12" },
   { href: "/diagnostics", label: "Diagnostics", helper: "Ops health", count: "07" },
   { href: "/signals/review-queue", label: "Signals", helper: "Review queue", count: "05" },
+  { href: "/analyst-desk", label: "Analyst Desk", helper: "Trade idea QA", count: "08" },
   { href: "/signals/approved", label: "Approved", helper: "Ready to publish", count: "04" },
   { href: "/signals/market-insights", label: "Insights", helper: "Market drafts", count: "03" },
+  { href: "/education", label: "Education CMS", helper: "Lessons & glossary", count: "10" },
+  { href: "/risk-flags", label: "Risk Flags", helper: "Disclosure checks", count: "06" },
+  { href: "/compliance", label: "Compliance", helper: "Disclosures", count: "03" },
   { href: "/users", label: "Users", helper: "Identity map", count: "36" },
   { href: "/subscriptions", label: "Subscriptions", helper: "Billing truth", count: "09" },
   { href: "/settings", label: "Settings", helper: "Config", count: "02" }

@@ -44,7 +44,14 @@ describe("bot command foundation", () => {
       "/help": BOT_MESSAGES.help,
       "/risk": BOT_MESSAGES.risk,
       "/alerts": BOT_MESSAGES.alerts,
-      "/status": BOT_MESSAGES.status
+      "/status": BOT_MESSAGES.status,
+      "/learn": BOT_MESSAGES.learn,
+      "/pulse": BOT_MESSAGES.pulse,
+      "/signals": BOT_MESSAGES.signals,
+      "/explain": BOT_MESSAGES.explain,
+      "/practice": BOT_MESSAGES.practice,
+      "/journal": BOT_MESSAGES.journal,
+      "/account": BOT_MESSAGES.account
     };
 
     for (const command of EXPECTED_COMMANDS) {
