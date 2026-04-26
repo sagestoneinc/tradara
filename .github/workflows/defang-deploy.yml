@@ -34,12 +34,16 @@ jobs:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
       - name: Defang ${{ github.event.inputs.action || 'up' }} ${{ github.event.inputs.stack || 'production' }}
         uses: DefangLabs/defang-github-action@v1
+        env:
+          DEFANG_ACCESS_TOKEN: ${{ secrets.DEFANG_ACCESS_TOKEN }}
         with:
           command: ${{ github.event.inputs.action || 'up' }}
           project: tradara
           stack: ${{ github.event.inputs.stack || 'production' }}
       - name: Deployment Summary
         uses: DefangLabs/defang-github-action@v1
+        env:
+          DEFANG_ACCESS_TOKEN: ${{ secrets.DEFANG_ACCESS_TOKEN }}
         with:
           command: services
           project: tradara

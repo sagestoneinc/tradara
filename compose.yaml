@@ -1,0 +1,60 @@
+services:
+  bot-api:
+    build:
+      context: .
+      dockerfile: apps/bot-api/Dockerfile.appwrite
+    ports:
+      - mode: ingress
+        target: 3001
+    environment:
+      - NODE_ENV=production
+      - BOT_API_PORT=3001
+      - BOT_API_BASE_URL
+      - DATABASE_URL
+      - SUPABASE_URL
+      - SUPABASE_ANON_KEY
+      # Inject via `defang secret set` — never commit values to source control
+      - TELEGRAM_BOT_TOKEN
+      - TELEGRAM_WEBHOOK_SECRET
+      - TELEGRAM_PREMIUM_CHANNEL_ID
+      - TELEGRAM_BOT_USERNAME
+      - PAYMONGO_WEBHOOK_SECRET
+      # Grace period for premium access after billing failure (integer, hours, e.g. 72)
+      - ACCESS_GRACE_PERIOD_HOURS
+    deploy:
+      resources:
+        reservations:
+          memory: 512M
+
+  admin-web:
+    build:
+      context: .
+      dockerfile: apps/admin-web/Dockerfile.appwrite
+    ports:
+      - mode: ingress
+        target: 3002
+    environment:
+      - NODE_ENV=production
+      - ADMIN_WEB_PORT=3002
+      - ADMIN_WEB_BASE_URL
+      - BOT_API_BASE_URL
+    deploy:
+      resources:
+        reservations:
+          memory: 512M
+
+  marketing-site:
+    build:
+      context: .
+      dockerfile: apps/marketing-site/Dockerfile.appwrite
+    ports:
+      - mode: ingress
+        target: 3003
+    environment:
+      - NODE_ENV=production
+      - MARKETING_SITE_PORT=3003
+      - MARKETING_SITE_BASE_URL
+    deploy:
+      resources:
+        reservations:
+          memory: 512M
