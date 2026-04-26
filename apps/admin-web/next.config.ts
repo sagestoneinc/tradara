@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     "@tradara/shared-config",
     "@tradara/shared-types",
-    "@tradara/shared-utils",
     "@tradara/ui"
   ],
   turbopack: {

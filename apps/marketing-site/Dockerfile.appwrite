@@ -18,9 +18,10 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
 COPY --from=deps /workspace/apps/marketing-site/.next/standalone ./
 COPY --from=deps /workspace/apps/marketing-site/.next/static ./apps/marketing-site/.next/static
 
 EXPOSE 3003
 
-CMD ["node", "server.js"]
+CMD ["node", "apps/marketing-site/server.js"]
