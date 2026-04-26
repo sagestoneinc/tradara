@@ -1,6 +1,7 @@
 import type * as React from "react";
 import type { Metadata } from "next";
 import { brand } from "@tradara/shared-config";
+import { Analytics } from "@vercel/analytics/next";
 
 import "./globals.css";
 import { OptionalClerkProvider } from "./components/providers/optional-clerk-provider";
@@ -33,6 +34,7 @@ export default function RootLayout({
         <OptionalClerkProvider>
           <AdminShell>{children}</AdminShell>
         </OptionalClerkProvider>
+        <Analytics />
       </body>
     </html>
   );
