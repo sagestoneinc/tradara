@@ -16,7 +16,7 @@
       "parentId": "wrk_tradara_smoke",
       "name": "Base Environment",
       "data": {
-        "api_base_url": "https://tradaraapi.sagestonelab.tech",
+        "api_base_url": "https://tradara-api.sagestonelab.tech",
         "tg_webhook_secret": "",
         "tv_webhook_secret": "",
         "xendit_webhook_token": "",

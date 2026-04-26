@@ -94,6 +94,48 @@ Webhook URLs:
 3. Deploy `marketing-site` and smoke test auth + checkout redirects.
 4. Deploy `admin-web` and verify admin auth and signal pages.
 
+## CLI Deployment Instructions (per service)
+
+Use these commands from repo root when validating builds locally before Appwrite deploys:
+
+```bash
+corepack enable
+pnpm install --frozen-lockfile
+
+# 1) API
+pnpm --filter @tradara/bot-api build
+pnpm --filter @tradara/bot-api start
+
+# 2) Marketing site
+pnpm --filter @tradara/marketing-site build
+pnpm --filter @tradara/marketing-site start
+
+# 3) Admin web
+pnpm --filter @tradara/admin-web build
+pnpm --filter @tradara/admin-web start
+```
+
+## Production Availability Checks
+
+Run these checks after each production deploy:
+
+```bash
+# DNS
+getent hosts tradara-api.sagestonelab.tech
+getent hosts tradara.sagestonelab.tech
+getent hosts tradara-adm.sagestonelab.tech
+
+# API health
+curl -i https://tradara-api.sagestonelab.tech/health
+
+# Frontends
+curl -I https://tradara.sagestonelab.tech
+curl -I https://tradara-adm.sagestonelab.tech
+```
+
+If smoke checks fail, first confirm the API domain uses the hyphenated hostname:
+`tradara-api.sagestonelab.tech` (not `tradaraapi.sagestonelab.tech`).
+
 ## Post-Deploy Verification
 
 - API health check returns `200`: `GET /health`
