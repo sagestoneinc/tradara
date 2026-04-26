@@ -13,6 +13,7 @@ COPY packages ./packages
 COPY infra ./infra
 
 RUN pnpm install --frozen-lockfile --filter @tradara/bot-api...
+RUN pnpm --filter @tradara/bot-api build
 
 ENV NODE_ENV=production
 EXPOSE 3001
