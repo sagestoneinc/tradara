@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.build.json",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint src test --max-warnings=0",
     "start": "tsx src/server.ts",

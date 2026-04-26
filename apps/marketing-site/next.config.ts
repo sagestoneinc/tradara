@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  transpilePackages: ["@tradara/shared-config", "@tradara/ui"],
+  transpilePackages: ["@tradara/shared-config", "@tradara/shared-types", "@tradara/ui"],
   turbopack: {
     root: path.resolve(process.cwd(), "../..")
   }

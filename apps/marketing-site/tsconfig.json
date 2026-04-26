@@ -1,9 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@tradara/shared-config": ["../../packages/shared-config/src/index.ts"],
+      "@tradara/shared-config/*": ["../../packages/shared-config/src/*"],
+      "@tradara/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@tradara/shared-types/*": ["../../packages/shared-types/src/*"],
+      "@tradara/ui": ["../../packages/ui/src/index.ts"],
+      "@tradara/ui/*": ["../../packages/ui/src/*"]
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
-
