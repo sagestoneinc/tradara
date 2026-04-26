@@ -107,8 +107,8 @@ const adminWebEnvSchema = z.object({
 
 const marketingSiteEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  MARKETING_SITE_BASE_URL: z.string().url(),
-  BOT_API_BASE_URL: z.string().url().default("http://localhost:3001"),
+  MARKETING_SITE_BASE_URL: z.string().url().default("https://tradara.sagestonelab.tech"),
+  BOT_API_BASE_URL: z.string().url().default("https://tradara-api.sagestonelab.tech"),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().default(""),
   CLERK_SECRET_KEY: z.string().default("")
 });
